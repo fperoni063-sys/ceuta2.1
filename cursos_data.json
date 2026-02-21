@@ -1,0 +1,267 @@
+[
+  {
+    "id": 81,
+    "nombre": "Construcción Natural: Biopiscinas y Humedales Construidos",
+    "descripcion": "Aprende a diseñar y construir biopiscinas y sistemas de tratamiento de agua con técnicas de construcción natural. Un curso práctico para quienes buscan soluciones sustentables y autosuficientes para su hogar o emprendimiento.",
+    "precio": 5000,
+    "fecha_inicio": "2026-02-03",
+    "duracion": "4 semanas (4 teóricos + 2 prácticos)",
+    "modalidad": "hibrido",
+    "slug": "construccion-natural-biopiscinas-y-humedales-construidos",
+    "imagen": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766363165/ceuta/cursos/portadas/1766363160828-593ym2.jpg",
+    "info_adicional": {
+      "dia_teorico": "Martes",
+      "horario_teorico": "18:30 hs por Zoom (quedan grabadas)",
+      "dia_practico": "Sábados",
+      "horario_practico": "08:30 hs presencial (4 horas)",
+      "lugar": "Montevideo (prácticos presenciales) + Zoom (teóricos)"
+    },
+    "docente": {
+      "nombre": "Santiago Ruedi",
+      "bio": "Bioconstructor con 15 años de experiencia, emprendedor y diseñador en permacultura. Ha tomado cursos de Energías renovables y de quinchado en UTU Arrayanes, de bioconstrucción con Luciano Davyt, de arquitectura bioclimática y de gestión de proyectos sustentables en CURE Maldonado. Comenzó a dictar talleres teórico-prácticos sobre construcción natural en 2017. Co-creador de Nido Churrinche Barrio Naturaleza, comunidad guiada por la ética y los principios de la permacultura. Docente del programa de CEUTA tutorado por Luciano Davyt desde 2021.",
+      "foto": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766364898/ceuta/docentes/1766364896154-czvxzh.jpg"
+    },
+    "clases": [
+      {
+        "titulo": "Principios de construcción natural y conceptos de arquitectura bioclimática",
+        "tipo": "teorico",
+        "numero": 1
+      },
+      {
+        "titulo": "Materiales naturales y ciclos del agua",
+        "tipo": "teorico",
+        "numero": 2
+      },
+      {
+        "titulo": "Mezclas básicas - Aplicación en obra",
+        "tipo": "practico",
+        "numero": 3
+      },
+      {
+        "titulo": "Diseño y construcción de humedales artificiales",
+        "tipo": "teorico",
+        "numero": 4
+      },
+      {
+        "titulo": "Biopiscinas: diseño, funcionamiento y mantenimiento",
+        "tipo": "teorico",
+        "numero": 5
+      },
+      {
+        "titulo": "Construcción de biopiscina - Visita a proyecto real",
+        "tipo": "practico",
+        "numero": 6
+      }
+    ]
+  },
+  {
+    "id": 86,
+    "nombre": "Introducción al Cultivo doméstico de Hongos",
+    "descripcion": "Descubre el fascinante mundo del reino Fungi y aprende a cultivar tus propios alimentos y medicina en casa. Este curso teórico-práctico intensivo de verano te guiará paso a paso, desde la comprensión de la biología de los hongos hasta la preparación del sustrato, inoculación y mantenimiento del cultivo.\n\nCombinando encuentros virtuales por Zoom con prácticas presenciales intensivas en Montevideo y Solymar, obtendrás todas las herramientas necesarias para iniciar tu propio cultivo.",
+    "precio": 5000,
+    "fecha_inicio": "2026-02-05",
+    "duracion": "1 Mes (14 horas totales)",
+    "modalidad": "hibrido",
+    "slug": "introduccion-cultivo-hongos-verano-2026",
+    "imagen": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766361298/ceuta/cursos/portadas/1766361290419-qzzrm4.jpg",
+    "info_adicional": {
+      "dia_teorico": "Jueves",
+      "horario_teorico": "18:30 h (1.5 horas)",
+      "dia_practico": "Sábados",
+      "horario_practico": "08:30 h (4 horas)",
+      "lugar": "Solymar y Montevideo / Zoom"
+    },
+    "docente": {
+      "nombre": "Lautaro Moreno",
+      "bio": "Lautaro Moreno (37) es Diseñador Gráfico, Creativo y Técnico en Cultivo de Hongos. Desde su infancia, ha sido un apasionado de la naturaleza, lo que lo llevó a explorar el fascinante mundo del reino fungi. Su formación técnica fue realizada bajo la guía de Susana González y Verónica Gunther, complementada con un enfoque autodidacta y colaborativo. Con el propósito de compartir sus conocimientos y ofrecer productos de calidad, Lautaro fundó Solar Fungi.",
+      "foto": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766350362/ceuta/docentes/1766350355421-tz1qcf.jpg"
+    },
+    "clases": [
+      {
+        "titulo": "Introducción a los hongos (2 hs)",
+        "tipo": "teorico",
+        "numero": 1
+      },
+      {
+        "titulo": "Sustrato (2 hs)",
+        "tipo": "teorico",
+        "numero": 2
+      },
+      {
+        "titulo": "Micelio (2 hs)",
+        "tipo": "teorico",
+        "numero": 3
+      },
+      {
+        "titulo": "Práctico en Ceuta - Montevideo (3 hs)",
+        "tipo": "practico",
+        "numero": 4
+      },
+      {
+        "titulo": "Práctico Solymar (3 hs)",
+        "tipo": "practico",
+        "numero": 5
+      },
+      {
+        "titulo": "Clase de cierre y consultas (3 hs)",
+        "tipo": "teorico",
+        "numero": 6
+      }
+    ]
+  },
+  {
+    "id": 88,
+    "nombre": "Test Descuento",
+    "descripcion": "",
+    "precio": 1000,
+    "fecha_inicio": null,
+    "duracion": "",
+    "modalidad": "presencial",
+    "slug": "test-descuento",
+    "imagen": null,
+    "info_adicional": {
+      "dia_teorico": "",
+      "horario_teorico": "",
+      "dia_practico": "",
+      "horario_practico": "",
+      "lugar": ""
+    },
+    "docente": null,
+    "clases": null
+  },
+  {
+    "id": 80,
+    "nombre": "Huerta orgánica full",
+    "descripcion": "Del cantero a tu mesa: descubrí la inmensa satisfacción de producir tu propia comida. Un curso ideal para desconectar de la rutina y aprender, paso a paso, los secretos de la agroecología para tener una huerta abundante, sana y sostenible en tu propio hogar.",
+    "precio": 11700,
+    "fecha_inicio": "2026-03-01",
+    "duracion": "3 meses (24 horas)",
+    "modalidad": "hibrido",
+    "slug": "huerta-organica-full",
+    "imagen": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766224241/ceuta/cursos/portadas/1766224240176-ph4dva.jpg",
+    "info_adicional": {
+      "dia_teorico": "Jueves",
+      "horario_teorico": "18:00 a 20:00",
+      "dia_practico": "Sábados (a definir)",
+      "horario_practico": "10:00 a 13:00",
+      "lugar": "Teóricos por Zoom / Prácticos presenciales"
+    },
+    "docente": {
+      "nombre": "Federico Bizzozero",
+      "bio": "Para tener una huerta sana y productiva, necesitas un guía que conozca los secretos de la tierra. Tu instructor cuenta con más de 20 años de experiencia enseñando a personas como tú a cultivar sus propios alimentos.\n\nHa escrito 8 libros sobre el tema y ha asesorado a organismos internacionales, pero su verdadera pasión es meter las manos en la tierra y enseñar. En este curso, traduce su vasta experiencia técnica en pasos sencillos, prácticos y probados para que tu huerta sea un éxito desde el primer día.",
+      "foto": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766225479/ceuta/docentes/1766225478779-iye2la.jpg"
+    },
+    "clases": [
+      {
+        "titulo": "Problemas de la agricultura convencional e introducción a la huerta orgánica",
+        "tipo": "teorico",
+        "numero": 1
+      },
+      {
+        "titulo": " El suelo: composición, biología, materia orgánica",
+        "tipo": "teorico",
+        "numero": 2
+      },
+      {
+        "titulo": "3 Manejo de materia orgánica: abonos verdes, humus, bio-fertilizantes, compost",
+        "tipo": "teorico",
+        "numero": 3
+      },
+      {
+        "titulo": "Planificación de la huerta: elección del terreno, orientación, canteros",
+        "tipo": "teorico",
+        "numero": 4
+      },
+      {
+        "titulo": " Familias de hortalizas y calendario de siembra para Uruguay",
+        "tipo": "teorico",
+        "numero": 5
+      },
+      {
+        "titulo": " Métodos de siembra: almácigo, trasplante, siembra directa",
+        "tipo": "teorico",
+        "numero": 6
+      },
+      {
+        "titulo": "Huerto Urbano Comunitario",
+        "tipo": "practico",
+        "numero": 7
+      },
+      {
+        "titulo": "Semillas ecológicas: cultivo, cosecha y conservació",
+        "tipo": "teorico",
+        "numero": 8
+      },
+      {
+        "titulo": " Plagas y enfermedades: identificación y control natural",
+        "tipo": "teorico",
+        "numero": 9
+      },
+      {
+        "titulo": "Granja Agroecológica Productiva",
+        "tipo": "practico",
+        "numero": 10
+      },
+      {
+        "titulo": "Cultivos específicos: tomate, lechuga, zapallo, zanahoria, y más",
+        "tipo": "teorico",
+        "numero": 11
+      }
+    ]
+  },
+  {
+    "id": 87,
+    "nombre": "Plantas medicinales: Botiquín natural",
+    "descripcion": "BOTIQUÍN NATURAL, un espacio para compartir los saberes de curarnos naturalmente. Aprenderemos cómo armar un botiquín natural y que elementos poner en el, con énfasis en el VERANO.\n\nAprenderemos en profundidad la medicina del aloe y la arcilla.\nElaboraremos crema corporal como humectante y post solar. Y una bruma refrescante para acompañar el calor (y la vida).\nAprenderemos a hacer cataplasmas y a aplicarnos arcilla. También a elaborar tintura madres y cómo usarlas adecuadamente.\n\nTe esperamos.",
+    "precio": 5000,
+    "fecha_inicio": "2026-02-04",
+    "duracion": "1 Mes. 14h En total",
+    "modalidad": "hibrido",
+    "slug": "plantas-medicinales-botiquin-natural",
+    "imagen": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766352955/ceuta/cursos/portadas/1766352954133-076j2k.jpg",
+    "info_adicional": {
+      "dia_teorico": "Miércoles",
+      "horario_teorico": "18:30 hs por Zoom (en vivo y grabadas)",
+      "dia_practico": "Sábados",
+      "horario_practico": "10:00 hs Presencial (4 horas)",
+      "lugar": "Tierra Pura, Km90 de la interbalnearia. Maldonado"
+    },
+    "docente": {
+      "nombre": "Vera García",
+      "bio": "Crecí en el balneario La Paloma y sus alrededores, teniendo como pilar en mi crianza la relación y conservación de la naturaleza y su medicina. Me formé como médica china y siempre estoy complementando y aprendiendo nuevas terapias alternativas. Desde el 2012 participo de la red de mujeres yuyeras. Hace 10 años vivo en las Sierras de los Rocha practicando la Permacultura, siendo madre y co- creando varios proyectos comunitarios. Desde el año 2014 soy parte de un emprendimiento de Botica popular con plantas medicinales, el cual nació a partir de querer compartir la medicina de las plantas luego de realizar nuestros propios preparados y vivenciarlas.",
+      "foto": "https://res.cloudinary.com/dgey83xqy/image/upload/v1766364853/ceuta/docentes/1766364850158-ro6zy9.jpg"
+    },
+    "clases": [
+      {
+        "titulo": "Botiquín natural: qué es y cómo mirarlo. Qué usar en un botiquín natural.",
+        "tipo": "teorico",
+        "numero": 1
+      },
+      {
+        "titulo": "Aloe: gran aliada del verano y de la vida.",
+        "tipo": "teorico",
+        "numero": 2
+      },
+      {
+        "titulo": "La medicina de la arcilla y cómo aplicarla.",
+        "tipo": "teorico",
+        "numero": 3
+      },
+      {
+        "titulo": "Cómo armo mi botiquín natural. Acciones y hábitos aliados en la salud.",
+        "tipo": "teorico",
+        "numero": 4
+      },
+      {
+        "titulo": "Elaboración de crema corporal de aloe y pepino. Bruma refrescante.",
+        "tipo": "practico",
+        "numero": 5
+      },
+      {
+        "titulo": "Aplicación de arcilla y cataplasmas. Elaboración de una tintura madre.",
+        "tipo": "practico",
+        "numero": 6
+      }
+    ]
+  }
+]

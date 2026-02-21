@@ -1,0 +1,171 @@
+[
+    {
+        "nombre": "Construcción Natural: Biopiscinas y Humedales Construidos",
+        "descripcion": "Aprende a diseñar y construir biopiscinas y sistemas de tratamiento de agua con técnicas de construcción natural. Un curso práctico para quienes buscan soluciones sustentables y autosuficientes para su hogar o emprendimiento.",
+        "precio_lista": 5000,
+        "precio_con_descuento_hoy": 3000,
+        "fecha_inicio": "2026-02-03",
+        "duracion": "4 semanas (4 teóricos + 2 prácticos)",
+        "modalidad": "hibrido",
+        "info_adicional": {
+            "dia_teorico": "Martes",
+            "horario_teorico": "18:30 hs por Zoom (quedan grabadas)",
+            "dia_practico": "Sábados",
+            "horario_practico": "08:30 hs presencial (4 horas)",
+            "lugar": "Montevideo (prácticos presenciales) + Zoom (teóricos)"
+        },
+        "docente": {
+            "nombre": "Santiago Ruedi",
+            "bio": "Bioconstructor con 15 años de experiencia, emprendedor y diseñador en permacultura. Ha tomado cursos de Energías renovables y de quinchado en UTU Arrayanes, de bioconstrucción con Luciano Davyt, de arquitectura bioclimática y de gestión de proyectos sustentables en CURE Maldonado. Comenzó a dictar talleres teórico-prácticos sobre construcción natural en 2017. Co-creador de Nido Churrinche Barrio Naturaleza, comunidad guiada por la ética y los principios de la permacultura. Docente del programa de CEUTA tutorado por Luciano Davyt desde 2021."
+        },
+        "temario": [
+            "1. Principios de construcción natural y conceptos de arquitectura bioclimática (Teórico)",
+            "2. Materiales naturales y ciclos del agua (Teórico)",
+            "3. Mezclas básicas - Aplicación en obra (Práctico)",
+            "4. Diseño y construcción de humedales artificiales (Teórico)",
+            "5. Biopiscinas: diseño, funcionamiento y mantenimiento (Teórico)",
+            "6. Construcción de biopiscina - Visita a proyecto real (Práctico)"
+        ]
+    },
+    {
+        "nombre": "Introducción al Cultivo doméstico de Hongos",
+        "descripcion": "Descubre el fascinante mundo del reino Fungi y aprende a cultivar tus propios alimentos y medicina en casa. Este curso teórico-práctico intensivo de verano te guiará paso a paso, desde la comprensión de la biología de los hongos hasta la preparación del sustrato, inoculación y mantenimiento del cultivo.\n\nCombinando encuentros virtuales por Zoom con prácticas presenciales intensivas en Montevideo y Solymar, obtendrás todas las herramientas necesarias para iniciar tu propio cultivo.",
+        "precio_lista": 5000,
+        "precio_con_descuento_hoy": 3000,
+        "fecha_inicio": "2026-02-05",
+        "duracion": "1 Mes (14 horas totales)",
+        "modalidad": "hibrido",
+        "info_adicional": {
+            "dia_teorico": "Jueves",
+            "horario_teorico": "18:30 h (1.5 horas)",
+            "dia_practico": "Sábados",
+            "horario_practico": "08:30 h (4 horas)",
+            "lugar": "Solymar y Montevideo / Zoom"
+        },
+        "docente": {
+            "nombre": "Lautaro Moreno",
+            "bio": "Lautaro Moreno (37) es Diseñador Gráfico, Creativo y Técnico en Cultivo de Hongos. Desde su infancia, ha sido un apasionado de la naturaleza, lo que lo llevó a explorar el fascinante mundo del reino fungi. Su formación técnica fue realizada bajo la guía de Susana González y Verónica Gunther, complementada con un enfoque autodidacta y colaborativo. Con el propósito de compartir sus conocimientos y ofrecer productos de calidad, Lautaro fundó Solar Fungi."
+        },
+        "temario": [
+            "1. Introducción a los hongos (2 hs) (Teórico)",
+            "2. Sustrato (2 hs) (Teórico)",
+            "3. Micelio (2 hs) (Teórico)",
+            "4. Práctico en Ceuta - Montevideo (3 hs) (Práctico)",
+            "5. Práctico Solymar (3 hs) (Práctico)",
+            "6. Clase de cierre y consultas (3 hs) (Teórico)"
+        ]
+    },
+    {
+        "nombre": "Huerta orgánica full",
+        "descripcion": "Del cantero a tu mesa: descubrí la inmensa satisfacción de producir tu propia comida. Un curso ideal para desconectar de la rutina y aprender, paso a paso, los secretos de la agroecología para tener una huerta abundante, sana y sostenible en tu propio hogar.",
+        "precio_lista": 11700,
+        "precio_con_descuento_hoy": 10530,
+        "fecha_inicio": "2026-03-01",
+        "duracion": "3 meses (24 horas)",
+        "modalidad": "hibrido",
+        "info_adicional": {
+            "dia_teorico": "Jueves",
+            "horario_teorico": "18:00 a 20:00",
+            "dia_practico": "Sábados (a definir)",
+            "horario_practico": "10:00 a 13:00",
+            "lugar": "Teóricos por Zoom / Prácticos presenciales"
+        },
+        "docente": {
+            "nombre": "Federico Bizzozero",
+            "bio": "Para tener una huerta sana y productiva, necesitas un guía que conozca los secretos de la tierra. Tu instructor cuenta con más de 20 años de experiencia enseñando a personas como tú a cultivar sus propios alimentos.\n\nHa escrito 8 libros sobre el tema y ha asesorado a organismos internacionales, pero su verdadera pasión es meter las manos en la tierra y enseñar. En este curso, traduce su vasta experiencia técnica en pasos sencillos, prácticos y probados para que tu huerta sea un éxito desde el primer día."
+        },
+        "temario": [
+            "1. Problemas de la agricultura convencional e introducción a la huerta orgánica (Teórico)",
+            "2.  El suelo: composición, biología, materia orgánica (Teórico)",
+            "3. 3 Manejo de materia orgánica: abonos verdes, humus, bio-fertilizantes, compost (Teórico)",
+            "4. Planificación de la huerta: elección del terreno, orientación, canteros (Teórico)",
+            "5.  Familias de hortalizas y calendario de siembra para Uruguay (Teórico)",
+            "6.  Métodos de siembra: almácigo, trasplante, siembra directa (Teórico)",
+            "7. Huerto Urbano Comunitario (Práctico)",
+            "8. Semillas ecológicas: cultivo, cosecha y conservació (Teórico)",
+            "9.  Plagas y enfermedades: identificación y control natural (Teórico)",
+            "10. Granja Agroecológica Productiva (Práctico)",
+            "11. Cultivos específicos: tomate, lechuga, zapallo, zanahoria, y más (Teórico)"
+        ]
+    },
+    {
+        "nombre": "Plantas medicinales: Botiquín natural",
+        "descripcion": "BOTIQUÍN NATURAL, un espacio para compartir los saberes de curarnos naturalmente. Aprenderemos cómo armar un botiquín natural y que elementos poner en el, con énfasis en el VERANO.\n\nAprenderemos en profundidad la medicina del aloe y la arcilla.\nElaboraremos crema corporal como humectante y post solar. Y una bruma refrescante para acompañar el calor (y la vida).\nAprenderemos a hacer cataplasmas y a aplicarnos arcilla. También a elaborar tintura madres y cómo usarlas adecuadamente.\n\nTe esperamos.",
+        "precio_lista": 5000,
+        "precio_con_descuento_hoy": 3000,
+        "fecha_inicio": "2026-02-04",
+        "duracion": "1 Mes. 14h En total",
+        "modalidad": "hibrido",
+        "info_adicional": {
+            "dia_teorico": "Miércoles",
+            "horario_teorico": "18:30 hs por Zoom (en vivo y grabadas)",
+            "dia_practico": "Sábados",
+            "horario_practico": "10:00 hs Presencial (4 horas)",
+            "lugar": "Tierra Pura, Km90 de la interbalnearia. Maldonado"
+        },
+        "docente": {
+            "nombre": "Vera García",
+            "bio": "Crecí en el balneario La Paloma y sus alrededores, teniendo como pilar en mi crianza la relación y conservación de la naturaleza y su medicina. Me formé como médica china y siempre estoy complementando y aprendiendo nuevas terapias alternativas. Desde el 2012 participo de la red de mujeres yuyeras. Hace 10 años vivo en las Sierras de los Rocha practicando la Permacultura, siendo madre y co- creando varios proyectos comunitarios. Desde el año 2014 soy parte de un emprendimiento de Botica popular con plantas medicinales, el cual nació a partir de querer compartir la medicina de las plantas luego de realizar nuestros propios preparados y vivenciarlas."
+        },
+        "temario": [
+            "1. Botiquín natural: qué es y cómo mirarlo. Qué usar en un botiquín natural. (Teórico)",
+            "2. Aloe: gran aliada del verano y de la vida. (Teórico)",
+            "3. La medicina de la arcilla y cómo aplicarla. (Teórico)",
+            "4. Cómo armo mi botiquín natural. Acciones y hábitos aliados en la salud. (Teórico)",
+            "5. Elaboración de crema corporal de aloe y pepino. Bruma refrescante. (Práctico)",
+            "6. Aplicación de arcilla y cataplasmas. Elaboración de una tintura madre. (Práctico)"
+        ]
+    },
+    {
+        "nombre": "Energía Solar Fotovoltaica: De la Teoría al Techo",
+        "descripcion": "El costo de la energía sube y el sol sigue siendo gratis. Este curso te da el poder de elegir: convertirte en un instalador buscado en el mercado o ser el dueño de tu propia energía.\n\nA diferencia de otros cursos que son solo teoría, acá vas a aprender haciendo: tocando los equipos, realizando conexiones y montajes reales. Aprenderás a dimensionar sistemas para bajar la factura de luz (On-Grid) y sistemas con baterías para lugares sin luz (Off-Grid).\n\n¿Para quién es esto?\n• Electricistas y Constructores: Sumen el servicio más demandado a su oferta.\n• Dueños de Casa: Ahorren la mano de obra instalando ustedes mismos.\n• Emprendedores: Entiendan el negocio de la energía renovable desde adentro.",
+        "precio_lista": 11700,
+        "precio_con_descuento_hoy": 7020,
+        "fecha_inicio": "2026-03-09",
+        "duracion": "3 meses (24 horas)",
+        "modalidad": "hibrido",
+        "info_adicional": {
+            "dia_teorico": "Lunes",
+            "horario_teorico": "18:00 a 20:00 hs (Zoom, quedan grabadas)",
+            "dia_practico": "Sábados (a definir)",
+            "horario_practico": "10:30 a 12:30 hs (aprox)",
+            "lugar": "Teóricos por Zoom / Prácticos presenciales o virtuales"
+        },
+        "docente": {
+            "nombre": "Xavier Piccardo",
+            "bio": "Arquitecto egresado de la Universidad de la República de Montevideo en 2014. Desde 2010, se dedica a la dirección de obra en viviendas construidas con tecnología eficiente.\nEn 2016, completó su capacitación en Bioarquitectura, Bioconstrucción y Energías Renovables. Desde 2017, se desempeña como Profesor del Laboratorio de Energía Solar Térmica y del Laboratorio de Energía Fotovoltaica en EMT de Energías Renovables.\nActualmente, Xavier desarrolla su trabajo en la Dirección de Proyectos de Solar Térmico y Proyectos Eléctricos Fotovoltaicos en EMT de Energías Renovables.\nSe especializa en crear emprendedores capaces de llevar a cabo proyectos en Energías Renovables y Eficiencia Energética."
+        },
+        "temario": [
+            "1. Introducción a la fotovoltaica (Teórico)",
+            "2. El recurso solar y la hora solar pico (Teórico)",
+            "3. Celdas y módulos fotovoltaicos (Teórico)",
+            "4. Aplicaciones de los sistemas fotovoltaicos (Teórico)",
+            "5. Tarifas y consumo (Teórico)",
+            "6. Práctico 1: Instalaciones a la red (Práctico)",
+            "7. Componentes sistemas FV conectados a la red (Teórico)",
+            "8. Componentes sistemas FV aislados (Teórico)",
+            "9. Dimensionado de la instalación (Teórico)",
+            "10. Práctico 2: Instalaciones aisladas (Práctico)",
+            "11. Requisitos previos a la instalación (Teórico)",
+            "12. Evaluación Final (Teórico)"
+        ],
+        "faqs": [
+            {
+                "pregunta": "¿A quién está dirigido?",
+                "respuesta": "A todo aquel que quiera meter mano. Desde electricistas y arquitectos que buscan ampliar sus servicios, hasta dueños de casa que quieren instalar sus propios paneles para ahorrar o tener autonomía en el campo. No necesitás conocimientos previos avanzados."
+            },
+            {
+                "pregunta": "¿Qué certificación obtengo?",
+                "respuesta": "Al finalizar el curso, se otorgará un certificado de aprobación o participación, emitido por el Centro Uruguayo de Tecnologías Apropiadas (CEUTA), entidad capacitadora registrada en el Ministerio de Educación y Cultura (MEC) y en el Instituto Nacional de Empleo y Formación Profesional (INEFOP)."
+            },
+            {
+                "pregunta": "¿Cuáles son los requisitos de evaluación?",
+                "respuesta": "1) Asistencia al 75% de clases. 2) Trabajo final propuesto por docente."
+            },
+            {
+                "pregunta": "¿Puedo firmar mi propia instalación ante UTE?",
+                "respuesta": "Para el trámite de conexión a red (Microgeneración), UTE exige la firma de un técnico registrado (Firma Instaladora). Este curso te enseña a PROYECTAR Y EJECUTAR la obra, que representa el 80% del trabajo y del costo. Podés realizar toda la instalación vos mismo y contratar solo la firma/revisión final de un técnico autorizado. En sistemas aislados (campo/off-grid), ¡no necesitás trámite y sos 100% libre de hacerlo todo vos!"
+            }
+        ]
+    }
+]

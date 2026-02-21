@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 3a79be960f50d70b72bcd7fd3bb3d570fdb731c4 Franco Peroni <franpeperoni196@gmail.com> 1765917737 -0300	commit (initial): Initial commit from Create Next App
+3a79be960f50d70b72bcd7fd3bb3d570fdb731c4 3a79be960f50d70b72bcd7fd3bb3d570fdb731c4 Franco Peroni <franpeperoni196@gmail.com> 1766451737 -0300	Branch: renamed refs/heads/master to refs/heads/main
+3a79be960f50d70b72bcd7fd3bb3d570fdb731c4 8efe013157901ee67bd8c4d98462bc07049ea815 Franco Peroni <franpeperoni196@gmail.com> 1766451738 -0300	commit: Deploy inicial
+8efe013157901ee67bd8c4d98462bc07049ea815 b910919af2df0cf7619e802d31a4c057f164c9f4 Franco Peroni <franpeperoni196@gmail.com> 1766454113 -0300	commit: refactor: simplify vercel config and add cron workflow

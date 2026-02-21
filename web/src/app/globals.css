@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+:root {
+  /* CEUTA Design System Colors */
+  --color-earth-900: #3d2914;
+  --color-green-700: #2d6a4f;
+  --color-accent: #c75b39;
+  --color-cream: #faf6f1;
+  --color-walnut: #3d2914;
+  --color-sage: #2d6a4f;
+
+  /* Base colors */
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #2d6a4f;
+  --primary-foreground: #faf6f1;
+  --secondary: #faf6f1;
+  --secondary-foreground: #3d2914;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #faf6f1;
+  --accent-foreground: #3d2914;
+  --destructive: #ef4444;
+  --destructive-foreground: #faf6f1;
+  --border: #e2e2e2;
+  --input: #e2e2e2;
+  --ring: #2d6a4f;
+
+  /* Border radius */
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-lora);
+
+  /* Custom colors linked to variables for dynamic dark mode */
+  --color-earth-900: var(--color-earth-900);
+  --color-green-700: var(--color-green-700);
+  --color-accent: var(--color-accent);
+  --color-cream: var(--color-cream);
+  --color-walnut: var(--color-walnut);
+  --color-sage: var(--color-sage);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0a09;
+    --foreground: #f5f5f4;
+    --card: #0c0a09;
+    --card-foreground: #f5f5f4;
+    --popover: #0c0a09;
+    --popover-foreground: #f5f5f4;
+    --primary: #4db385;
+    --primary-foreground: #0c0a09;
+    --secondary: #26211d;
+    --secondary-foreground: #e6ded3;
+    --muted: #262626;
+    --muted-foreground: #a3a3a3;
+    --accent: #26211d;
+    --accent-foreground: #e6ded3;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #f5f5f4;
+    --border: #262626;
+    --input: #262626;
+    --ring: #4db385;
+
+    /* Dark mode overrides for brand colors */
+    --color-earth-900: #e6ded3;
+    /* Lighter text for dark mode */
+    --color-cream: #26211d;
+    /* Darker background for dark mode */
+    --color-green-700: #4db385;
+    /* More vibrant green */
+    --color-accent: #ff8c69;
+    /* More vibrant accent */
+    --color-walnut: #e6ded3;
+    --color-sage: #4db385;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-source-sans), Arial, Helvetica, sans-serif;
+  font-size: 18px;
+}
+
+/* Utility class for headings */
+.font-heading {
+  font-family: var(--font-lora), Georgia, serif;
+}

@@ -1,0 +1,149 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "CEUTA Logo CEUTA" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "CEUTA Logo" [ref=e6]
+        - generic [ref=e7]: CEUTA
+      - navigation [ref=e8]:
+        - link "Cursos" [ref=e9] [cursor=pointer]:
+          - /url: /cursos
+        - link "Qué es Ceuta?" [ref=e10] [cursor=pointer]:
+          - /url: https://www.ceuta.org.uy/que-es-ceuta
+        - link "Calendario" [ref=e11] [cursor=pointer]:
+          - /url: /calendario
+        - link "Contacto" [ref=e12] [cursor=pointer]:
+          - /url: /contacto
+      - button "Ver Cursos" [ref=e14]:
+        - link "Ver Cursos" [ref=e15] [cursor=pointer]:
+          - /url: /cursos
+  - main [ref=e16]:
+    - generic [ref=e17]:
+      - img "Hero background - Jardín Agroecológico" [ref=e19]
+      - generic [ref=e21]:
+        - heading "Aprende a vivir en armonía con la naturaleza" [level=1] [ref=e22]
+        - paragraph [ref=e23]: Centro Uruguayo de Tecnologías Apropiadas. Más de 30 años formando comunidad en Agroecología, Energías Renovables y Vida Sustentable.
+        - generic [ref=e24]:
+          - link "Ver cursos" [ref=e25] [cursor=pointer]:
+            - /url: /cursos
+            - button "Ver cursos" [ref=e26]
+          - link "Conocé CEUTA" [ref=e27] [cursor=pointer]:
+            - /url: /nosotros
+            - button "Conocé CEUTA" [ref=e28]
+      - button "Scroll down" [ref=e29] [cursor=pointer]:
+        - img [ref=e30]
+    - generic [ref=e39]:
+      - generic [ref=e40]:
+        - heading "¿Por qué elegir CEUTA?" [level=2] [ref=e41]
+        - paragraph [ref=e42]: Somos el Centro Uruguayo de Tecnologías Apropiadas, referentes en educación para la sustentabilidad en el país.
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - img [ref=e46]
+          - heading "30+ años de experiencia" [level=3] [ref=e49]
+          - paragraph [ref=e50]: Pioneros en Tecnologías Apropiadas en Uruguay.
+        - generic [ref=e51]:
+          - img [ref=e53]
+          - heading "Comunidad activa" [level=3] [ref=e58]
+          - paragraph [ref=e59]: Miles de egresados aplicando soluciones prácticas en todo el país.
+        - generic [ref=e60]:
+          - img [ref=e62]
+          - heading "Formación integral" [level=3] [ref=e64]
+          - paragraph [ref=e65]: "Aprender haciendo: Enfoque teórico-práctico aplicable a tu realidad."
+        - generic [ref=e66]:
+          - img [ref=e68]
+          - heading "Certificación reconocida" [level=3] [ref=e71]
+          - paragraph [ref=e72]: Diplomas avalados por instituciones de referencia en el área.
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - heading "Lo que dicen nuestros egresados" [level=2] [ref=e76]
+        - paragraph [ref=e77]: Historias de transformación de quienes pasaron por nuestros cursos.
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - img [ref=e80]
+          - generic [ref=e84]: M
+          - blockquote [ref=e85]: "\"El curso de huerta orgánica cambió mi forma de ver la alimentación. Ahora tengo mi propia huerta en casa y es increíble cosechar mis propios alimentos.\""
+          - generic [ref=e86]:
+            - paragraph [ref=e87]: María García
+            - paragraph [ref=e88]: "Curso: Huerta Orgánica"
+        - button "Previous testimonial" [ref=e89]:
+          - img [ref=e90]
+        - button "Next testimonial" [ref=e92]:
+          - img [ref=e93]
+      - generic [ref=e95]:
+        - button "Go to testimonial 1" [ref=e96]
+        - button "Go to testimonial 2" [ref=e97]
+        - button "Go to testimonial 3" [ref=e98]
+    - generic [ref=e100]:
+      - heading "¿Querés transformar tu entorno?" [level=2] [ref=e101]
+      - paragraph [ref=e102]: Aprendé capacidades para la vida y construí un futuro mejor hoy.
+      - generic [ref=e103]:
+        - link "Explorar cursos" [ref=e104] [cursor=pointer]:
+          - /url: /cursos
+          - button "Explorar cursos" [ref=e105]:
+            - text: Explorar cursos
+            - img [ref=e106]
+        - link "Consultar por WhatsApp" [ref=e108] [cursor=pointer]:
+          - /url: https://wa.me/59898910715?text=Hola, me interesa recibir información sobre los cursos de CEUTA
+          - button "Consultar por WhatsApp" [ref=e109]:
+            - img [ref=e110]
+            - text: Consultar por WhatsApp
+  - generic [ref=e112]:
+    - generic:
+      - generic: ¿Tenés dudas? ¡Escribinos!
+    - link "Contactar por WhatsApp" [ref=e114] [cursor=pointer]:
+      - /url: https://wa.me/59898910715?text=Hola!%20Estoy%20visitando%20la%20web%20de%20CEUTA%20y%20me%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20sobre%20los%20cursos.
+      - img [ref=e115]
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - img "CEUTA Logo" [ref=e122]
+            - heading "CEUTA" [level=3] [ref=e123]
+          - paragraph [ref=e124]: Centro de Estudios Uruguayo de Tecnologías Apropiadas. Promoviendo la sustentabilidad y el cuidado de la tierra desde 1985.
+        - generic [ref=e125]:
+          - heading "Contacto" [level=4] [ref=e126]
+          - list [ref=e127]:
+            - listitem [ref=e128]:
+              - img [ref=e129]
+              - generic [ref=e132]: Canelones 1198, Montevideo, Uruguay
+            - listitem [ref=e133]:
+              - img [ref=e134]
+              - generic [ref=e136]: 091 431 577
+            - listitem [ref=e137]:
+              - img [ref=e138]
+              - generic [ref=e141]: secretaria@ceuta.org.uy
+        - generic [ref=e142]:
+          - heading "Enlaces" [level=4] [ref=e143]
+          - list [ref=e144]:
+            - listitem [ref=e145]:
+              - link "Cursos Disponibles" [ref=e146] [cursor=pointer]:
+                - /url: /cursos
+            - listitem [ref=e147]:
+              - link "Qué es Ceuta?" [ref=e148] [cursor=pointer]:
+                - /url: https://www.ceuta.org.uy/que-es-ceuta
+            - listitem [ref=e149]:
+              - link "Calendario Anual" [ref=e150] [cursor=pointer]:
+                - /url: /calendario
+            - listitem [ref=e151]:
+              - link "Política de Privacidad" [ref=e152] [cursor=pointer]:
+                - /url: /politica-privacidad
+        - generic [ref=e153]:
+          - heading "Síguenos" [level=4] [ref=e154]
+          - generic [ref=e155]:
+            - link "Facebook" [ref=e156] [cursor=pointer]:
+              - /url: https://facebook.com/ceuta
+              - img [ref=e157]
+              - generic [ref=e159]: Facebook
+            - link "Instagram" [ref=e160] [cursor=pointer]:
+              - /url: https://instagram.com/ceuta
+              - img [ref=e161]
+              - generic [ref=e164]: Instagram
+      - paragraph [ref=e166]: © 2026 CEUTA. Todos los derechos reservados.
+  - button "Open Next.js Dev Tools" [ref=e172] [cursor=pointer]:
+    - img [ref=e173]
+  - alert [ref=e176]
+```

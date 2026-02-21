@@ -1,0 +1,27 @@
+name: Trigger Cron Job
+# Force update workflow
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Ejecutar cada hora
+  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña Actions
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Secrets
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "Error: APP_URL secret is missing. Please add it to GitHub Repository Settings > Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: CRON_SECRET secret is missing. Please add it to GitHub Repository Settings > Secrets."
+            exit 1
+          fi
+
+      - name: Call Cron Endpoint
+        run: |
+          curl --fail --location -X GET ${{ secrets.APP_URL }}/api/cron/send-scheduled-emails \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
