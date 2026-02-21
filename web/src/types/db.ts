@@ -19,7 +19,6 @@ export interface Curso {
     duracion: string;
     fecha_inicio: string | null;
     lugar: string;
-    docente: string | null; // Legacy field
     docente_id: string | null; // New FK
     docentes?: Docente; // Joined relation
     dia_teorico: string;
@@ -29,7 +28,6 @@ export interface Curso {
     activo: boolean;
     orden: number;
     transformacion_hook: string;
-    beneficios: string;
     certificacion: string;
     link_mercado_pago: string;
     imagen_portada: string | null;

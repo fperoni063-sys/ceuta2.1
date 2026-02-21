@@ -30,7 +30,6 @@ interface CourseFormData {
     activo: boolean;
     orden: number;
     transformacion_hook: string;
-    beneficios: string;
     certificacion: string;
     link_mercado_pago: string;
 
@@ -75,7 +74,6 @@ const initialFormData: CourseFormData = {
     activo: true,
     orden: 0,
     transformacion_hook: '',
-    beneficios: '',
     certificacion: '',
     link_mercado_pago: '',
 
@@ -558,17 +556,6 @@ export default function NuevoCursoPage() {
                                 rows={2}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-green-700)] focus:border-transparent"
                                 placeholder="¿Qué transformación logrará el estudiante?"
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Beneficios</label>
-                            <textarea
-                                name="beneficios"
-                                value={formData.beneficios}
-                                onChange={handleChange}
-                                rows={3}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-green-700)] focus:border-transparent"
-                                placeholder="Lista de beneficios del curso..."
                             />
                         </div>
                         <div>

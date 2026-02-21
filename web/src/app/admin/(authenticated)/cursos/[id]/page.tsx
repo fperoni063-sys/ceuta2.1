@@ -26,7 +26,6 @@ interface CourseFormData {
     duracion: string;
     fecha_inicio: string;
     lugar: string;
-    // docente: string; // Removed legacy string input
     docente_id: string; // New FK
     dia_teorico: string;
     horario_teorico: string;
@@ -35,7 +34,6 @@ interface CourseFormData {
     activo: boolean;
     orden: number;
     transformacion_hook: string;
-    beneficios: string;
     certificacion: string;
     link_mercado_pago: string;
 
@@ -118,7 +116,6 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                     activo: data.activo ?? true,
                     orden: data.orden || 0,
                     transformacion_hook: data.transformacion_hook || '',
-                    beneficios: data.beneficios || '',
                     certificacion: data.certificacion || '',
                     link_mercado_pago: data.link_mercado_pago || '',
 
@@ -628,16 +625,6 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                                 value={formData.transformacion_hook}
                                 onChange={handleChange}
                                 rows={2}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-green-700)] focus:border-transparent"
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Beneficios</label>
-                            <textarea
-                                name="beneficios"
-                                value={formData.beneficios}
-                                onChange={handleChange}
-                                rows={3}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-green-700)] focus:border-transparent"
                             />
                         </div>

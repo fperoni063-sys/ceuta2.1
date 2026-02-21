@@ -42,7 +42,6 @@ interface CourseFullData {
     dia_practico: string | null;
     horario_practico: string | null;
     transformacion_hook: string | null;
-    beneficios: string | null;
     certificacion: string | null;
     link_mercado_pago: string | null;
 
