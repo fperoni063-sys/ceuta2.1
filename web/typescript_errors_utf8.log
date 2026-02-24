@@ -1,0 +1,2 @@
+﻿next.config.ts(4,3): error TS2353: Object literal may only specify known properties, and 'eslint' does not exist in type 'NextConfig'.
+src/__tests__/payment-flow.test.ts(2,42): error TS2307: Cannot find module '@/app/api/payments/mercadopago/preference/route' or its corresponding type declarations.

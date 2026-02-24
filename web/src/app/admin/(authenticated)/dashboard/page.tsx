@@ -1,9 +1,35 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { Card } from '@/components/ui/card';
-import { BookOpen, Users, DollarSign, TrendingUp } from 'lucide-react';
+import { BookOpen, Users, DollarSign, TrendingUp, Eye, MousePointerClick, Globe } from 'lucide-react';
+import { getFunnelStats } from '@/app/actions/analytics';
+
+async function getAnalyticsDataSafe() {
+    try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 30);
+
+        // Formatear YYYY-MM-DD
+        const yearS = startDate.getFullYear();
+        const monthS = String(startDate.getMonth() + 1).padStart(2, '0');
+        const dayS = String(startDate.getDate()).padStart(2, '0');
+
+        const yearE = endDate.getFullYear();
+        const monthE = String(endDate.getMonth() + 1).padStart(2, '0');
+        const dayE = String(endDate.getDate()).padStart(2, '0');
+
+        const startStr = `${yearS}-${monthS}-${dayS}`;
+        const endStr = `${yearE}-${monthE}-${dayE}`;
+
+        return await getFunnelStats(startStr, endStr);
+    } catch (e) {
+        console.error("Fallo no crítico cargando analíticas en el dashboard:", e);
+        return null;
+    }
+}
 
 async function getDashboardStats() {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     // Get course count
     const { count: cursosCount } = await supabase
@@ -11,10 +37,12 @@ async function getDashboardStats() {
         .select('*', { count: 'exact', head: true })
         .eq('activo', true);
 
-    // Get enrollees count
+    // Get enrollees count (Reservas Totales: not cancelado/rechazado)
     const { count: inscriptosCount } = await supabase
         .from('inscriptos')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .neq('estado', 'cancelado')
+        .neq('estado', 'rechazado');
 
     // Get pagos a verificar
     const { count: pagoAVerificarCount } = await supabase
@@ -37,7 +65,7 @@ async function getDashboardStats() {
 }
 
 async function getRecentEnrollees() {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     const { data } = await supabase
         .from('inscriptos')
@@ -58,6 +86,7 @@ async function getRecentEnrollees() {
 export default async function AdminDashboardPage() {
     const stats = await getDashboardStats();
     const recentEnrollees = await getRecentEnrollees();
+    const analytics = await getAnalyticsDataSafe();
 
     const statCards = [
         {
@@ -67,7 +96,7 @@ export default async function AdminDashboardPage() {
             color: 'bg-blue-500',
         },
         {
-            label: 'Total Inscriptos',
+            label: 'Reservas Totales',
             value: stats.inscriptos,
             icon: Users,
             color: 'bg-green-500',
@@ -79,7 +108,7 @@ export default async function AdminDashboardPage() {
             color: 'bg-yellow-500',
         },
         {
-            label: 'Verificados',
+            label: 'Confirmados',
             value: stats.verificados,
             icon: TrendingUp,
             color: 'bg-[var(--color-accent)]',
@@ -90,7 +119,41 @@ export default async function AdminDashboardPage() {
         <div className="space-y-6">
             <h1 className="text-2xl font-serif font-bold text-foreground">Dashboard</h1>
 
+            {/* Tráfico */}
+            {analytics && (
+                <div className="space-y-4 mb-8">
+                    <h2 className="text-lg font-medium text-foreground flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-green-700" /> Rendimiento de Tráfico <span className="text-sm font-normal text-muted-foreground">(Últimos 30 días)</span>
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="p-6 bg-slate-50/50 border-slate-200">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center`}>
+                                    <MousePointerClick className="w-6 h-6 text-slate-700" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-600">Solo Visitaron Landing</p>
+                                    <p className="text-2xl font-bold text-slate-900">{analytics.homeVisits}</p>
+                                </div>
+                            </div>
+                        </Card>
+                        <Card className="p-6 bg-blue-50/30 border-blue-100">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center`}>
+                                    <Eye className="w-6 h-6 text-blue-700" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-blue-800">Entraron a Fichas de Curso</p>
+                                    <p className="text-2xl font-bold text-blue-900">{analytics.courseVisits}</p>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+            )}
+
             {/* Stats Grid */}
+            <h2 className="text-lg font-medium text-foreground mb-4">Estado Operativo Actual</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat) => (
                     <Card key={stat.label} className="p-6">

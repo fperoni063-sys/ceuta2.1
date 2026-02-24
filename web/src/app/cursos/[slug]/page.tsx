@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { trackEvent } from '@/app/actions/analytics';
 import { Container } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { ProgramaSection } from '@/components/cursos/ProgramaSection';
 import { FAQ, ProgramaClase } from '@/types/db';
 import { PriceDisplay, DiscountBadge } from '@/components/cursos/PriceDisplay';
 import { CourseSidebarClient } from '@/components/cursos/CourseSidebarClient';
+import { CourseTracker } from '@/components/analytics/CourseTracker';
 
 interface Docente {
     nombre: string;
@@ -528,15 +528,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
     const faqs = await getFAQs(curso.id);
     const programa = await getPrograma(curso.id);
 
-    // Track View (Server Side) - Fire and forget
-    trackEvent('course_view', {
-        pagePath: `/cursos/${slug}`,
-        courseId: curso.id,
-        category: 'engagement'
-    });
-
     return (
         <main className="pb-16">
+            <CourseTracker courseId={curso.id} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{

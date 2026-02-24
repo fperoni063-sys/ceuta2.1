@@ -69,8 +69,21 @@ export function ImageUploader({
             });
 
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Error al subir imagen');
+                let errorMessage = 'Error al subir imagen';
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    errorMessage = data.error || errorMessage;
+                } else {
+                    const text = await response.text();
+                    if (response.status === 413 || text.includes('Request Entity Too Large')) {
+                        errorMessage = 'La imagen es demasiado grande. El límite real del servidor es ~4.5MB.';
+                    } else {
+                        errorMessage = text || errorMessage;
+                    }
+                }
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
