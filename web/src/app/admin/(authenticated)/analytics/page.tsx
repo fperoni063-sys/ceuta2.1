@@ -156,9 +156,10 @@ export default function AnalyticsPage() {
                     </div>
 
                     {dailyStats.map((day, idx) => {
-                        const courseH = Math.max((day.courseVisits / maxDailyViews) * 200, 0);
-                        const homeH = Math.max((day.homeVisits / maxDailyViews) * 200, 0);
-                        const convH = Math.max((day.conversions / maxDailyViews) * 200, 0);
+                        const minH = 4; // minimum pixel height for anything > 0 
+                        const courseH = day.courseVisits > 0 ? Math.max((day.courseVisits / maxDailyViews) * 200, minH) : 0;
+                        const homeH = day.homeVisits > 0 ? Math.max((day.homeVisits / maxDailyViews) * 200, minH) : 0;
+                        const convH = day.conversions > 0 ? Math.max((day.conversions / maxDailyViews) * 200, minH) : 0;
                         const dateLabel = new Date(day.date + 'T12:00:00Z').toLocaleDateString('es-UY', { month: 'short', day: 'numeric' });
 
                         return (

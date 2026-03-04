@@ -1,7 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 /**
  * Tracks a user event for internal analytics.
@@ -25,6 +25,14 @@ export async function trackEvent(
         const sessionId = cookieStore.get('ceuta_analytics_sid')?.value;
 
         if (!sessionId) {
+            return;
+        }
+
+        const reqHeaders = await headers();
+        const userAgent = reqHeaders.get('user-agent') || '';
+
+        // Comprehensive bot/crawler exclusion list
+        if (/bot|crawler|spider|crawling|headless|lighthouse|vercel|googlebot|bingbot|yandex|slurp|duckduckbot|baiduspider|twitterbot|facebookexternalhit|linkedinbot|embedly|slackbot|whatsapp/i.test(userAgent)) {
             return;
         }
 
@@ -82,9 +90,9 @@ export async function getFunnelStats(startDate?: string, endDate?: string) {
 
     // Process events
     const stats = {
-        totalVisits: 0,
-        homeVisits: 0,
-        courseVisits: 0,
+        totalVisits: new Set<string>(),
+        homeVisits: new Set<string>(),
+        courseVisits: new Set<string>(),
         funnel: {
             step0_open: new Set<string>(),
             step1_contact: new Set<string>(),
@@ -110,13 +118,13 @@ export async function getFunnelStats(startDate?: string, endDate?: string) {
         const sid = e.session_id;
 
         if (e.event_name === 'course_view') {
-            stats.totalVisits++;
-            stats.courseVisits++;
+            stats.totalVisits.add(sid);
+            stats.courseVisits.add(sid);
         }
 
         if (e.event_name === 'home_view') {
-            stats.totalVisits++;
-            stats.homeVisits++;
+            stats.totalVisits.add(sid);
+            stats.homeVisits.add(sid);
         }
 
         if (e.event_name === 'enrollment_modal_open') stats.funnel.step0_open.add(sid);
@@ -135,9 +143,9 @@ export async function getFunnelStats(startDate?: string, endDate?: string) {
     });
 
     return {
-        visits: stats.totalVisits,
-        homeVisits: stats.homeVisits,
-        courseVisits: stats.courseVisits,
+        visits: stats.totalVisits.size,
+        homeVisits: stats.homeVisits.size,
+        courseVisits: stats.courseVisits.size,
         funnel: {
             open: stats.funnel.step0_open.size,
             contact: stats.funnel.step1_contact.size,
@@ -245,23 +253,31 @@ export async function getDailyStats(startDateStr?: string, endDateStr?: string) 
     // Initialize map of days
     const dailyMap = new Map<string, {
         date: string;
-        home_views: number;
-        course_views: number;
+        home_views: Set<string>;
+        course_views: Set<string>;
         open_modals: Set<string>;
         uploads: Set<string>;
     }>();
 
-    // Pre-fill all days in the range with 0 to avoid gaps
-    const endD = new Date(`${endStr}T12:00:00Z`);
-    for (let d = new Date(`${startStr}T12:00:00Z`); d <= endD; d.setDate(d.getDate() + 1)) {
+    // Generate strict date array by iterating UTC midnight-to-midnight mathematically to prevent TZ skips
+    const startObj = new Date(startUtc);
+    const endObj = new Date(endUtc);
+
+    // Safety check max 365 days
+    let currentMs = startObj.getTime();
+    while (currentMs <= endObj.getTime()) {
+        const d = new Date(currentMs);
         const dateKey = d.toISOString().split('T')[0];
-        dailyMap.set(dateKey, {
-            date: dateKey,
-            home_views: 0,
-            course_views: 0,
-            open_modals: new Set(),
-            uploads: new Set()
-        });
+        if (!dailyMap.has(dateKey)) {
+            dailyMap.set(dateKey, {
+                date: dateKey,
+                home_views: new Set(),
+                course_views: new Set(),
+                open_modals: new Set(),
+                uploads: new Set()
+            });
+        }
+        currentMs += 86400000; // +1 exact strictly 24 hours UTC
     }
 
     events?.forEach((e: { created_at: string, event_name: string, session_id: string }) => {
@@ -272,16 +288,16 @@ export async function getDailyStats(startDateStr?: string, endDateStr?: string) 
 
         const dayStats = dailyMap.get(uytDateStr)!;
 
-        if (e.event_name === 'home_view') dayStats.home_views++;
-        if (e.event_name === 'course_view') dayStats.course_views++;
+        if (e.event_name === 'home_view') dayStats.home_views.add(e.session_id);
+        if (e.event_name === 'course_view') dayStats.course_views.add(e.session_id);
         if (e.event_name === 'enrollment_modal_open') dayStats.open_modals.add(e.session_id);
         if (e.event_name === 'enrollment_comprobante_upload') dayStats.uploads.add(e.session_id);
     });
 
     const result = Array.from(dailyMap.values()).map(d => ({
         date: d.date,
-        homeVisits: d.home_views,
-        courseVisits: d.course_views,
+        homeVisits: d.home_views.size,
+        courseVisits: d.course_views.size,
         modalOpens: d.open_modals.size,
         conversions: d.uploads.size,
     }));
