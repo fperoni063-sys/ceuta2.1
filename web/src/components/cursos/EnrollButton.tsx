@@ -39,7 +39,7 @@ export function EnrollButton({
                 className="w-full"
                 size="lg"
             >
-                Reservar mi Cupo
+                Reservar mi cupo - Gratis
             </Button>
             <EnrollmentModal
                 isOpen={isModalOpen}

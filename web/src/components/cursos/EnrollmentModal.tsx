@@ -260,7 +260,7 @@ function Step1ContactData({
                         Guardando...
                     </>
                 ) : (
-                    'Reservar mi Cupo'
+                    'Reservar mi cupo - Gratis'
                 )}
             </Button>
 
