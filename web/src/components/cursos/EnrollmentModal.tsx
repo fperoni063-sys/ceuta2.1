@@ -12,6 +12,7 @@ import { PriceDisplay } from '@/components/cursos/PriceDisplay';
 import { formatearPrecio } from '@/lib/utils/discountUtils';
 import { UploadComprobante } from '@/components/payment/UploadComprobante';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { CompleteProfileForm } from '@/components/cursos/CompleteProfileForm';
 import { CountdownTimer } from '@/components/ui/CountdownTimer';
 import { calcularDescuento } from '@/lib/utils/discountUtils';
 
@@ -36,11 +37,6 @@ interface FormData {
     nombre: string;
     email: string;
     telefono: string;
-    cedula: string;
-    edad: string;
-    departamento: string;
-    direccion: string;
-    comoSeEntero: string;
     recibirNovedades: boolean;
     metodoPago: 'transferencia' | 'mercadopago' | 'efectivo' | '';
     codigoDescuento: string;
@@ -64,7 +60,7 @@ const COMO_SE_ENTERO_OPTIONS = [
     'Otro'
 ];
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 // Tipo para la configuración de pagos desde la API
 interface PaymentConfig {
@@ -92,11 +88,6 @@ const INITIAL_FORM_DATA: FormData = {
     nombre: '',
     email: '',
     telefono: '',
-    cedula: '',
-    edad: '',
-    departamento: '',
-    direccion: '',
-    comoSeEntero: '',
     recibirNovedades: false,
     metodoPago: '',
     codigoDescuento: '',
@@ -105,17 +96,12 @@ const INITIAL_FORM_DATA: FormData = {
 function StepIndicator({ currentStep }: { currentStep: Step }) {
     const allSteps = [
         { number: 1, label: 'Contacto', icon: User },
-        { number: 2, label: 'Detalles', icon: ClipboardList },
-        { number: 3, label: 'Pago', icon: CreditCard },
-        { number: 4, label: 'Listo', icon: CheckCircle },
+        { number: 2, label: 'Pago', icon: CreditCard },
+        { number: 3, label: 'Listo', icon: CheckCircle },
     ];
 
     // Revelación progresiva: mostrar pasos hasta el actual + siempre "Listo" al final
-    // Paso 1: Contacto → Listo
-    // Paso 2: Contacto → Detalles → Listo
-    // Paso 3+: Contacto → Detalles → Pago → Listo
-    // Paso 3+: Contacto → Detalles → Pago → Listo
-    const visibleSteps = allSteps.filter(s => s.number <= currentStep || s.number === 4);
+    const visibleSteps = allSteps.filter(s => s.number <= currentStep || s.number === 3);
 
     return (
         <div className="flex items-center justify-center mb-4">
@@ -267,153 +253,6 @@ function Step1ContactData({
             <p className="text-xs text-earth-900/50 text-center">
                 Solo te contactaremos para temas del curso
             </p>
-        </form>
-    );
-}
-
-// PASO 2: Datos adicionales (opcionales)
-function Step2AdditionalData({
-    formData,
-    setFormData,
-    onNext,
-    onBack,
-    isSubmitting,
-}: {
-    formData: FormData;
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>;
-    onNext: () => void;
-    onBack: () => void;
-    isSubmitting: boolean;
-}) {
-    const { track } = useAnalytics();
-
-    // Track View Step 2
-    useEffect(() => {
-        track('enrollment_step_2_view');
-    }, []);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        track('enrollment_step_2_complete');
-        onNext();
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <p className="text-sm text-earth-900/70 text-center mb-4">
-                Estos datos son opcionales pero nos ayudan a brindarte un mejor servicio
-            </p>
-
-            {/* Row 1: Cédula + Edad */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label htmlFor="cedula" className="block text-sm font-medium text-earth-900 mb-1">
-                        Cédula <span className="text-xs text-earth-900/50 font-normal">(opcional)</span>
-                    </label>
-                    <Input
-                        id="cedula"
-                        type="text"
-                        value={formData.cedula}
-                        onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
-                        placeholder="1.234.567-8"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="edad" className="block text-sm font-medium text-earth-900 mb-1">
-                        Edad <span className="text-xs text-earth-900/50 font-normal">(opcional)</span>
-                    </label>
-                    <Input
-                        id="edad"
-                        type="number"
-                        min="1"
-                        max="120"
-                        value={formData.edad}
-                        onChange={(e) => setFormData({ ...formData, edad: e.target.value })}
-                        placeholder="Tu edad"
-                    />
-                </div>
-            </div>
-
-            {/* Row 2: Departamento + Dirección */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label htmlFor="departamento" className="block text-sm font-medium text-earth-900 mb-1">
-                        Departamento <span className="text-xs text-earth-900/50 font-normal">(opcional)</span>
-                    </label>
-                    <select
-                        id="departamento"
-                        value={formData.departamento}
-                        onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
-                        className="flex h-10 w-full rounded-md border border-input bg-background dark:bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                        <option value="">Seleccionar...</option>
-                        {DEPARTAMENTOS.map((dep) => (
-                            <option key={dep} value={dep}>{dep}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label htmlFor="direccion" className="block text-sm font-medium text-earth-900 mb-1">
-                        Dirección <span className="text-xs text-earth-900/50 font-normal">(opcional)</span>
-                    </label>
-                    <Input
-                        id="direccion"
-                        type="text"
-                        value={formData.direccion}
-                        onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-                        placeholder="Tu dirección"
-                    />
-                </div>
-            </div>
-
-            {/* Row 3: Cómo te enteraste */}
-            <div>
-                <label htmlFor="comoSeEntero" className="block text-sm font-medium text-earth-900 mb-1">
-                    ¿Cómo te enteraste? <span className="text-xs text-earth-900/50 font-normal">(opcional)</span>
-                </label>
-                <select
-                    id="comoSeEntero"
-                    value={formData.comoSeEntero}
-                    onChange={(e) => setFormData({ ...formData, comoSeEntero: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background dark:bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                    {COMO_SE_ENTERO_OPTIONS.map((opt, i) => (
-                        <option key={opt} value={i === 0 ? '' : opt} disabled={i === 0}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Checkbox: Recibir novedades */}
-            <div className="flex items-center space-x-2">
-                <input
-                    type="checkbox"
-                    id="recibirNovedades"
-                    checked={formData.recibirNovedades}
-                    onChange={(e) => setFormData({ ...formData, recibirNovedades: e.target.checked })}
-                    className="h-4 w-4 text-green-700 focus:ring-green-700 border-gray-300 rounded"
-                />
-                <label htmlFor="recibirNovedades" className="text-sm text-earth-900">
-                    Quiero recibir novedades sobre cursos
-                </label>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={onBack} className="flex-1">
-                    Volver
-                </Button>
-                <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Guardando...
-                        </>
-                    ) : (
-                        'Continuar al Pago'
-                    )}
-                </Button>
-            </div>
         </form>
     );
 }
@@ -869,6 +708,7 @@ function Step4Confirmation({
     const [loadingConfig, setLoadingConfig] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [profileCompleted, setProfileCompleted] = useState(false);
     const { track } = useAnalytics();
 
     // Helper para calcular qué mostrar según el tipo de pago
@@ -932,6 +772,17 @@ function Step4Confirmation({
 
     // Success State after Upload
     if (uploadSuccess) {
+        if (!profileCompleted) {
+            return (
+                <div className="py-4">
+                    <CompleteProfileForm
+                        token={token || ''}
+                        onSuccess={() => setProfileCompleted(true)}
+                    />
+                </div>
+            );
+        }
+
         return (
             <div className="py-8 text-center space-y-6">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto text-4xl animate-in zoom-in">
@@ -1371,50 +1222,8 @@ export function EnrollmentModal({
         }
     };
 
-    // Paso 2 -> Paso 3: Enviar pre-inscripción con datos de contacto + adicionales
-    const submitPreEnrollment = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch('/api/inscripcion', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    enrollment_id: enrollmentId, // Actualizar registro existente
-                    curso_id: courseId,
-                    nombre: formData.nombre || null,
-                    email: formData.email,
-                    telefono: formData.telefono,
-                    cedula: formData.cedula || null,
-                    edad: formData.edad ? parseInt(formData.edad) : null,
-                    departamento: formData.departamento || null,
-                    direccion: formData.direccion || null,
-                    como_se_entero: formData.comoSeEntero || null,
-                    recibir_novedades: formData.recibirNovedades,
-                    metodo_pago: null, // Will be selected in step 3
-                    codigo_descuento: formData.codigoDescuento || null,
-                }),
-            });
 
-            if (!response.ok) {
-                throw new Error('Error al registrar pre-inscripción');
-            }
-
-            const data = await response.json();
-            if (data.id) {
-                setEnrollmentId(data.id);
-            }
-            // Advance to payment method selection
-            setStep(3);
-        } catch (error) {
-            console.error('Pre-enrollment error:', error);
-            // Still proceed to step 3 for better UX
-            setStep(3);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    // Paso 3 -> Paso 4: Confirmar inscripción con método de pago
+    // Paso 2 -> Paso 3: Confirmar inscripción con método de pago
     const submitEnrollment = async (methodOverride?: 'transferencia' | 'mercadopago' | 'efectivo') => {
         setIsSubmitting(true);
         try {
@@ -1431,11 +1240,6 @@ export function EnrollmentModal({
                     nombre: formData.nombre || null,
                     email: formData.email,
                     telefono: formData.telefono,
-                    cedula: formData.cedula || null,
-                    edad: formData.edad ? parseInt(formData.edad) : null,
-                    departamento: formData.departamento || null,
-                    direccion: formData.direccion || null,
-                    como_se_entero: formData.comoSeEntero || null,
                     recibir_novedades: formData.recibirNovedades,
                     metodo_pago: selectedMethod,
                     codigo_descuento: formData.codigoDescuento || null,
@@ -1458,28 +1262,17 @@ export function EnrollmentModal({
                 setEnrollmentId(currentEnrollmentId);
             }
 
-            // MERCADO PAGO INTEGRATION
-            // [SMART BRIDGE UPDATE]
-            // We removed the automatic redirection logic to prioritize the "Guided Payment" UI.
-            // The user will see instructions to pay the exact amount using the static link.
-
-            // if (selectedMethod === 'mercadopago') { ... logic removed ... }
-
-            // Si la inscripción fue exitosa, NO removemos el banner de pendiente
-            // Queremos que siga apareciendo hasta que suba el comprobante o se verifique
-            // removeInscripcionCookie(courseId);
-
-            setStep(4);
-            setIsSubmitting(false); // Only stop submitting if we reached here (not redirected)
+            setStep(3);
+            setIsSubmitting(false);
         } catch (error) {
             console.error('Enrollment error:', error);
             // Mostrar error al usuario si es necesario, por ahora log
-            setStep(4);
+            setStep(3);
             setIsSubmitting(false);
         }
     };
 
-    const handleStep3Next = (method?: 'transferencia' | 'mercadopago' | 'efectivo') => {
+    const handleStep2Next = (method?: 'transferencia' | 'mercadopago' | 'efectivo') => {
         submitEnrollment(method);
     };
 
@@ -1488,11 +1281,11 @@ export function EnrollmentModal({
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="font-heading text-xl text-center">
-                        {step < 4 ? `Inscripción: ${courseName}` : ''}
+                        {step < 3 ? `Inscripción: ${courseName}` : ''}
                     </DialogTitle>
                 </DialogHeader>
 
-                {step < 4 && <StepIndicator currentStep={step} />}
+                {step < 3 && <StepIndicator currentStep={step} />}
 
                 {step === 1 && (
                     <Step1ContactData
@@ -1504,23 +1297,13 @@ export function EnrollmentModal({
                 )}
 
                 {step === 2 && (
-                    <Step2AdditionalData
-                        formData={formData}
-                        setFormData={setFormData}
-                        onNext={submitPreEnrollment}
-                        onBack={() => setStep(1)}
-                        isSubmitting={isSubmitting}
-                    />
-                )}
-
-                {step === 3 && (
                     <Step3PaymentMethod
                         formData={formData}
                         setFormData={setFormData}
                         coursePrice={coursePrice}
                         courseName={courseName}
-                        onNext={handleStep3Next}
-                        onBack={() => setStep(2)}
+                        onNext={handleStep2Next}
+                        onBack={() => setStep(1)}
                         cantidadCuotas={cantidadCuotas}
                         descuento_porcentaje={descuento_porcentaje}
                         descuento_cupos_totales={descuento_cupos_totales}
@@ -1534,7 +1317,7 @@ export function EnrollmentModal({
                     />
                 )}
 
-                {step === 4 && (
+                {step === 3 && (
                     <Step4Confirmation
                         formData={formData}
                         courseName={courseName}

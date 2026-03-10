@@ -17,6 +17,7 @@ interface ApiResponse {
         id: number;
         nombre: string;
         email: string;
+        cedula?: string | null;
         estado: 'contacto' | 'pago_pendiente' | 'pago_a_verificar' | 'verificado' | 'cancelado' | 'primer_contacto' | 'segundo_contacto';
         metodo_pago: string;
         fecha_inscripcion: string;

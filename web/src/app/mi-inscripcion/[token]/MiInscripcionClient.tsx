@@ -7,11 +7,13 @@ import { calculateFrozenPrice } from '@/lib/utils/priceLogic';
 import { CheckCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import { CompleteProfileForm } from '@/components/cursos/CompleteProfileForm';
 
 interface InscripcionData {
     id: number;
     nombre: string;
     email: string;
+    cedula?: string | null;
     estado: 'contacto' | 'pago_pendiente' | 'pago_a_verificar' | 'verificado' | 'rechazado' | 'cancelado' | 'primer_contacto' | 'segundo_contacto';
     motivo_rechazo?: string | null;
     metodo_pago: string;
@@ -82,6 +84,7 @@ type PaymentStep = 'select' | 'show-details' | 'upload' | 'success';
 export function MiInscripcionClient({ data, token }: Props) {
     const { removeInscripcion, updateEstadoInscripcion } = useInscripciones();
     const { track } = useAnalytics();
+    const [profileCompleted, setProfileCompleted] = useState(false);
     const [selectedMethod, setSelectedMethod] = useState<MetodoPago>('');
     const [paymentStep, setPaymentStep] = useState<PaymentStep>('select');
     const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
@@ -200,6 +203,32 @@ export function MiInscripcionClient({ data, token }: Props) {
         // Track analytics event for funnel statistics
         track('enrollment_comprobante_upload', { courseId: data.curso.id });
     }, [data.curso.id, updateEstadoInscripcion, track]);
+
+    const needsProfileCompletion = !data.cedula && !profileCompleted;
+    const shouldAskForProfile = needsProfileCompletion && (isPagado || isAVerificar || paymentStep === 'success');
+
+    if (shouldAskForProfile) {
+        return (
+            <main className="min-h-screen bg-background py-12 px-4 flex items-start sm:items-center justify-center">
+                <div className="max-w-2xl w-full">
+                    <div className="text-center space-y-4 mb-8">
+                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto text-3xl">
+                            📋
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-serif text-earth-900 dark:text-white">
+                            Último paso antes de terminar
+                        </h1>
+                    </div>
+                    <div className="bg-background rounded-2xl shadow-sm border border-earth-900/10 dark:border-white/10 p-6 md:p-8">
+                        <CompleteProfileForm
+                            token={token}
+                            onSuccess={() => setProfileCompleted(true)}
+                        />
+                    </div>
+                </div>
+            </main>
+        );
+    }
 
     // ----------------------------------------------------------------------
     // View: Cancelado
