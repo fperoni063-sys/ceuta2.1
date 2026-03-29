@@ -32,6 +32,8 @@ export interface Curso {
     link_mercado_pago: string;
     imagen_portada: string | null;
     imagen_hero: string | null;
+    galeria: string[];
+    video_url: string | null;
 
     // New fields
     fecha_a_confirmar: boolean;

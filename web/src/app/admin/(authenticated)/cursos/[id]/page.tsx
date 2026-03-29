@@ -10,6 +10,7 @@ import Link from 'next/link';
 
 import { Docente } from '@/types/db';
 import { ImageUploader } from '@/components/admin/ImageUploader';
+import { ImageGalleryUploader } from '@/components/admin/ImageGalleryUploader';
 import { FAQManager } from '@/components/admin/FAQManager';
 import { ProgramaManager } from '@/components/admin/ProgramaManager';
 
@@ -58,6 +59,8 @@ interface CourseFormData {
     // Images
     imagen_portada: string | null;
     imagen_hero: string | null;
+    galeria: string[];
+    video_url: string | null;
 }
 
 const DEPARTAMENTOS_URUGUAY = [
@@ -140,6 +143,8 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                     // Images
                     imagen_portada: data.imagen_portada || null,
                     imagen_hero: data.imagen_hero || null,
+                    galeria: Array.isArray(data.galeria) ? data.galeria : [],
+                    video_url: data.video_url || null,
                 });
             } catch (err: any) {
                 setError(err.message || 'Error al cargar datos');
@@ -195,6 +200,9 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                     descuento_fecha_fin: formData.descuento_fecha_fin || null,
                     descuento_online_porcentaje: formData.descuento_online_porcentaje ? Number(formData.descuento_online_porcentaje) : null,
                     descuento_online_etiqueta: formData.descuento_online_etiqueta || null,
+
+                    galeria: formData.galeria,
+                    video_url: formData.video_url || null,
 
                     updated_at: new Date().toISOString(),
                 }),
@@ -344,6 +352,33 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                             helpText="Para página de detalle. Ratio 21:9 recomendado (1920×823px)"
                             aspectRatio="21:9"
                         />
+                        <div className="md:col-span-2 mt-4">
+                            <ImageGalleryUploader
+                                value={formData.galeria}
+                                onChange={(urls) => setFormData(prev => prev ? { ...prev, galeria: urls } : prev)}
+                                folder="cursos/galeria"
+                                label="Galería de Imágenes (Opcional)"
+                                helpText="Las fotos aparecerán en un carrusel interactivo en la descripción del curso."
+                            />
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Video Info */}
+                <Card className="p-6">
+                    <h2 className="text-lg font-medium text-gray-800 mb-4">Multimedia (Video)</h2>
+                    
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">URL del Video (Opcional)</label>
+                        <Input
+                            name="video_url"
+                            value={formData.video_url || ''}
+                            onChange={handleChange}
+                            placeholder="Ej: https://www.youtube.com/watch?v=..."
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                            Pega un link de YouTube o Vimeo. Se mostrará un reproductor destacado en la página pública del curso.
+                        </p>
                     </div>
                 </Card>
 

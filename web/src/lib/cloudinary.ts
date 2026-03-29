@@ -35,6 +35,7 @@ function getCloudinaryConfig() {
 export const UPLOAD_FOLDERS = {
     'cursos/portadas': 'ceuta/cursos/portadas',
     'cursos/heroes': 'ceuta/cursos/heroes',
+    'cursos/galeria': 'ceuta/cursos/galeria',
     'docentes': 'ceuta/docentes',
     'testimonios': 'ceuta/testimonios',
     'comprobantes': 'ceuta/comprobantes',

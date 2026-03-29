@@ -13,6 +13,8 @@ import { FAQ, ProgramaClase } from '@/types/db';
 import { PriceDisplay, DiscountBadge } from '@/components/cursos/PriceDisplay';
 import { CourseSidebarClient } from '@/components/cursos/CourseSidebarClient';
 import { CourseTracker } from '@/components/analytics/CourseTracker';
+import { ImageCarousel } from '@/components/cursos/ImageCarousel';
+import { CourseVideo } from '@/components/cursos/CourseVideo';
 
 interface Docente {
     nombre: string;
@@ -36,6 +38,8 @@ interface CourseFullData {
     categoria: string | null;
     imagen_portada: string | null;
     imagen_hero: string | null;
+    galeria: string[] | null;
+    video_url: string | null;
     docentes: Docente | null; // Joined relation
     dia_teorico: string | null;
     horario_teorico: string | null;
@@ -340,6 +344,13 @@ function CourseSidebar({ curso }: { curso: CourseFullData }) {
 function CourseContent({ curso, programa }: { curso: CourseFullData; programa: ProgramaClase[] }) {
     return (
         <div className="space-y-8">
+            {/* Promo Video */}
+            {curso.video_url && (
+                <section>
+                    <CourseVideo videoUrl={curso.video_url} />
+                </section>
+            )}
+
             {/* Transformation Hook */}
             {curso.transformacion_hook && (
                 <div className="bg-cream/20 rounded-lg p-6 border-l-4 border-green-700">
@@ -360,6 +371,13 @@ function CourseContent({ curso, programa }: { curso: CourseFullData; programa: P
                             <p key={idx}>{paragraph}</p>
                         ))}
                     </div>
+                </section>
+            )}
+
+            {/* Gallery / Carousel */}
+            {curso.galeria && curso.galeria.length > 0 && (
+                <section>
+                    <ImageCarousel images={curso.galeria} />
                 </section>
             )}
 
