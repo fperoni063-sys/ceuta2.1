@@ -4,6 +4,7 @@ import { generateAccessToken, getTokenExpiry } from '@/lib/utils/tokens';
 import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
 import { calcularDescuento, extraerConfigDescuento, formatearPrecio } from '@/lib/utils/discountUtils';
+import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
 
 /**
  * Pre-inscripción: Guarda solo los datos de contacto iniciales (Paso 1)
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         // Get course data for email template
         const { data: curso } = await supabase
             .from('cursos')
-            .select('nombre, precio, fecha_inicio, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin')
+            .select('nombre, precio, fecha_inicio, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin, url_web_vieja')
             .eq('id', curso_id)
             .single();
 
@@ -157,6 +158,14 @@ export async function POST(request: NextRequest) {
         } catch (emailError) {
             // No bloqueamos el flujo si falla el email
             console.error('⚠️ Error enviando email de confirmación:', emailError);
+        }
+
+        // ============================================================
+        // SINCRONIZACIÓN CON WEB VIEJA (Modo Hacker)
+        // ============================================================
+        if (curso?.url_web_vieja) {
+            // Hacemos await pero es seguro porque tiene un AbortController de 4s
+            await sincronizarPreinscripcion({ nombre, email, telefono }, curso.url_web_vieja);
         }
 
         return NextResponse.json({

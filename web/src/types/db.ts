@@ -34,6 +34,7 @@ export interface Curso {
     imagen_hero: string | null;
     galeria: string[];
     video_url: string | null;
+    url_web_vieja?: string | null;
 
     // New fields
     fecha_a_confirmar: boolean;

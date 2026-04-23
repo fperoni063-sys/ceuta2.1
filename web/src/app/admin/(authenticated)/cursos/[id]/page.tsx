@@ -61,6 +61,9 @@ interface CourseFormData {
     imagen_hero: string | null;
     galeria: string[];
     video_url: string | null;
+    
+    // Integración
+    url_web_vieja: string | null;
 }
 
 const DEPARTAMENTOS_URUGUAY = [
@@ -145,6 +148,9 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                     imagen_hero: data.imagen_hero || null,
                     galeria: Array.isArray(data.galeria) ? data.galeria : [],
                     video_url: data.video_url || null,
+                    
+                    // Integración
+                    url_web_vieja: data.url_web_vieja || null,
                 });
             } catch (err: any) {
                 setError(err.message || 'Error al cargar datos');
@@ -203,6 +209,7 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
 
                     galeria: formData.galeria,
                     video_url: formData.video_url || null,
+                    url_web_vieja: formData.url_web_vieja || null,
 
                     updated_at: new Date().toISOString(),
                 }),
@@ -830,6 +837,23 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                 {/* Programa del Curso */}
                 <Card className="p-6">
                     <ProgramaManager cursoId={parseInt(resolvedParams.id)} />
+                </Card>
+
+                {/* Integración Web Vieja */}
+                <Card className="p-6">
+                    <h2 className="text-lg font-medium text-gray-800 mb-4">Integración con Web Vieja</h2>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">URL del curso en la web vieja (Opcional)</label>
+                        <Input
+                            name="url_web_vieja"
+                            value={formData.url_web_vieja || ''}
+                            onChange={handleChange}
+                            placeholder="Ej: https://www.ceuta.org.uy/cursos/calendario/200/..."
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                            Si pegas el link del curso de la web vieja, las preinscripciones se enviarán automáticamente a ese sistema.
+                        </p>
+                    </div>
                 </Card>
 
                 {/* FAQs */}

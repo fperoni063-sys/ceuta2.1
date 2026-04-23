@@ -55,6 +55,9 @@ interface CourseFormData {
     imagen_hero: string | null;
     galeria: string[];
     video_url: string | null;
+    
+    // Integración
+    url_web_vieja: string | null;
 }
 
 const initialFormData: CourseFormData = {
@@ -101,6 +104,9 @@ const initialFormData: CourseFormData = {
     imagen_hero: null,
     galeria: [],
     video_url: null,
+
+    // Integración
+    url_web_vieja: null,
 };
 
 const DEPARTAMENTOS_URUGUAY = [
@@ -192,6 +198,7 @@ export default function NuevoCursoPage() {
 
                     galeria: formData.galeria,
                     video_url: formData.video_url || null,
+                    url_web_vieja: formData.url_web_vieja || null,
                 }),
             });
 
@@ -267,6 +274,23 @@ export default function NuevoCursoPage() {
                             />
                         </div>
                         {/* Campo contenido eliminado - se usa ProgramaManager después de crear el curso */}
+                    </div>
+                </Card>
+
+                {/* Integración Web Vieja */}
+                <Card className="p-6">
+                    <h2 className="text-lg font-medium text-gray-800 mb-4">Integración con Web Vieja</h2>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">URL del curso en la web vieja (Opcional)</label>
+                        <Input
+                            name="url_web_vieja"
+                            value={formData.url_web_vieja || ''}
+                            onChange={handleChange}
+                            placeholder="Ej: https://www.ceuta.org.uy/cursos/calendario/200/..."
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                            Si pegas el link del curso de la web vieja, las preinscripciones se enviarán automáticamente a ese sistema.
+                        </p>
                     </div>
                 </Card>
 
