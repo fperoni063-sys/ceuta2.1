@@ -40,7 +40,7 @@ export default function AdminTestimoniosPage() {
     async function fetchTestimonios() {
         setLoading(true);
         try {
-            const response = await fetch('/api/admin/testimonios');
+            const response = await fetch('/api/admin/testimonios?t=' + Date.now());
             if (response.ok) {
                 const data = await response.json();
                 setTestimonios(data || []);
@@ -58,18 +58,26 @@ export default function AdminTestimoniosPage() {
         setSaving(true);
 
         try {
+            let res;
             if (editingId) {
-                await fetch(`/api/admin/testimonios/${editingId}`, {
+                res = await fetch(`/api/admin/testimonios/${editingId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),
                 });
             } else {
-                await fetch('/api/admin/testimonios', {
+                res = await fetch('/api/admin/testimonios', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),
                 });
+            }
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                alert('Error al guardar: ' + (errData.error || res.statusText));
+                setSaving(false);
+                return;
             }
 
             setFormData({ nombre: '', curso: '', texto: '', foto_url: '', orden: 0, activo: true });
@@ -77,6 +85,7 @@ export default function AdminTestimoniosPage() {
             await fetchTestimonios();
         } catch (error) {
             console.error('Error saving:', error);
+            alert('Error de red al guardar.');
         } finally {
             setSaving(false);
         }

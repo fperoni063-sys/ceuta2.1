@@ -80,9 +80,12 @@ export function TestimoniosManager({ cursoId }: TestimoniosManagerProps) {
                     setTestimonios([...testimonios, data.data]);
                 }
                 resetForm();
+            } else {
+                alert('Error al guardar: ' + (data.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error saving testimonio:', error);
+            alert('Error de red al guardar el testimonio.');
         } finally {
             setSaving(false);
         }
