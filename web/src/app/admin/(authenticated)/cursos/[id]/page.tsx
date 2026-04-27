@@ -13,6 +13,7 @@ import { ImageUploader } from '@/components/admin/ImageUploader';
 import { ImageGalleryUploader } from '@/components/admin/ImageGalleryUploader';
 import { FAQManager } from '@/components/admin/FAQManager';
 import { ProgramaManager } from '@/components/admin/ProgramaManager';
+import { TestimoniosManager } from '@/components/admin/TestimoniosManager';
 
 interface CourseFormData {
     nombre: string;
@@ -36,6 +37,8 @@ interface CourseFormData {
     orden: number;
     transformacion_hook: string;
     certificacion: string;
+    publico_objetivo: string[];
+    que_vas_a_lograr: string[];
     link_mercado_pago: string;
 
     // New fields
@@ -124,6 +127,8 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                     transformacion_hook: data.transformacion_hook || '',
                     certificacion: data.certificacion || '',
                     link_mercado_pago: data.link_mercado_pago || '',
+                    publico_objetivo: Array.isArray(data.publico_objetivo) ? data.publico_objetivo : [],
+                    que_vas_a_lograr: Array.isArray(data.que_vas_a_lograr) ? data.que_vas_a_lograr : [],
 
                     // New fields defaults
                     fecha_a_confirmar: data.fecha_a_confirmar ?? false,
@@ -210,6 +215,8 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                     galeria: formData.galeria,
                     video_url: formData.video_url || null,
                     url_web_vieja: formData.url_web_vieja || null,
+                    publico_objetivo: formData.publico_objetivo.filter(i => i.trim() !== ''),
+                    que_vas_a_lograr: formData.que_vas_a_lograr.filter(i => i.trim() !== ''),
 
                     updated_at: new Date().toISOString(),
                 }),
@@ -688,6 +695,117 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                         </div>
                     </div>
                 </Card>
+
+                {/* Marketing de Conversión */}
+                <Card className="p-6 border-purple-100 bg-purple-50/30">
+                    <h2 className="text-lg font-medium text-purple-900 mb-2 flex items-center gap-2">
+                        🚀 Marketing de Conversión
+                    </h2>
+                    <p className="text-xs text-purple-700/70 mb-6">
+                        Estos campos construyen automáticamente una landing page persuasiva. Pensá en viñetas cortas y directas.
+                    </p>
+
+                    {/* Público Objetivo */}
+                    <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            🎯 ¿Para quién es este curso? (Público objetivo)
+                        </label>
+                        <p className="text-xs text-gray-500 mb-3">
+                            Escribí frases que identifiquen al alumno ideal. Ej: &quot;Querés construir tu propia casa ecológica&quot;
+                        </p>
+                        {formData.publico_objetivo.map((item, idx) => (
+                            <div key={idx} className="flex gap-2 mb-2">
+                                <Input
+                                    value={item}
+                                    onChange={(e) => {
+                                        setFormData(prev => {
+                                            if (!prev) return prev;
+                                            const updated = [...prev.publico_objetivo];
+                                            updated[idx] = e.target.value;
+                                            return { ...prev, publico_objetivo: updated };
+                                        });
+                                    }}
+                                    placeholder={`Viñeta ${idx + 1}...`}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setFormData(prev => {
+                                            if (!prev) return prev;
+                                            return { ...prev, publico_objetivo: prev.publico_objetivo.filter((_, i) => i !== idx) };
+                                        });
+                                    }}
+                                    className="text-red-500 hover:text-red-700 px-2"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ))}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData(prev => prev ? { ...prev, publico_objetivo: [...prev.publico_objetivo, ''] } : prev)}
+                            className="mt-1"
+                        >
+                            <Plus className="w-4 h-4 mr-1" /> Agregar viñeta
+                        </Button>
+                    </div>
+
+                    {/* Qué vas a lograr */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            ✅ ¿Qué vas a lograr? (Resultados tangibles)
+                        </label>
+                        <p className="text-xs text-gray-500 mb-3">
+                            Describí resultados concretos. Ej: &quot;Construirás muros de adobe con tus propias manos&quot;
+                        </p>
+                        {formData.que_vas_a_lograr.map((item, idx) => (
+                            <div key={idx} className="flex gap-2 mb-2">
+                                <Input
+                                    value={item}
+                                    onChange={(e) => {
+                                        setFormData(prev => {
+                                            if (!prev) return prev;
+                                            const updated = [...prev.que_vas_a_lograr];
+                                            updated[idx] = e.target.value;
+                                            return { ...prev, que_vas_a_lograr: updated };
+                                        });
+                                    }}
+                                    placeholder={`Resultado ${idx + 1}...`}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setFormData(prev => {
+                                            if (!prev) return prev;
+                                            return { ...prev, que_vas_a_lograr: prev.que_vas_a_lograr.filter((_, i) => i !== idx) };
+                                        });
+                                    }}
+                                    className="text-red-500 hover:text-red-700 px-2"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ))}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData(prev => prev ? { ...prev, que_vas_a_lograr: [...prev.que_vas_a_lograr, ''] } : prev)}
+                            className="mt-1"
+                        >
+                            <Plus className="w-4 h-4 mr-1" /> Agregar resultado
+                        </Button>
+                    </div>
+                </Card>
+
+                {/* Testimonios */}
+                <TestimoniosManager cursoId={parseInt(resolvedParams.id)} />
 
                 {/* Visibility */}
                 <Card className="p-6">

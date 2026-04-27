@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Container } from '@/components/layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, User, Phone, BookOpen, Award, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Phone, BookOpen, Award, Users, CheckCircle, Quote } from 'lucide-react';
 import { FAQSection } from '@/components/cursos/FAQSection';
 import { ProgramaSection } from '@/components/cursos/ProgramaSection';
 import { FAQ, ProgramaClase } from '@/types/db';
@@ -46,6 +46,9 @@ interface CourseFullData {
     dia_practico: string | null;
     horario_practico: string | null;
     transformacion_hook: string | null;
+    publico_objetivo: string[] | null;
+    que_vas_a_lograr: string[] | null;
+    testimonios: { id: number; nombre: string; texto: string; foto_url: string | null }[] | null;
     certificacion: string | null;
     link_mercado_pago: string | null;
 
@@ -85,6 +88,12 @@ async function getCourse(slug: string): Promise<CourseFullData | null> {
                 nombre,
                 descripcion,
                 foto_url
+            ),
+            testimonios:testimonios_cursos (
+                id,
+                nombre,
+                texto,
+                foto_url
             )
         `)
         .eq('slug', slug)
@@ -102,6 +111,12 @@ async function getCourse(slug: string): Promise<CourseFullData | null> {
                     docentes:docente_id (
                         nombre,
                         descripcion,
+                        foto_url
+                    ),
+                    testimonios:testimonios_cursos (
+                        id,
+                        nombre,
+                        texto,
                         foto_url
                     )
                 `)
@@ -360,8 +375,41 @@ function CourseContent({ curso, programa }: { curso: CourseFullData; programa: P
                 </div>
             )}
 
-            {/* Description */}
-            {curso.descripcion && (
+            {/* Publico Objetivo */}
+            {curso.publico_objetivo && curso.publico_objetivo.length > 0 && (
+                <section>
+                    <h2 className="font-heading text-2xl font-bold text-earth-900 mb-4">
+                        ¿Para quién es este curso?
+                    </h2>
+                    <ul className="space-y-3">
+                        {curso.publico_objetivo.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-3">
+                                <span className="text-xl">🎯</span>
+                                <span className="text-lg text-foreground/80">{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {/* Que vas a lograr / Description */}
+            {(curso.que_vas_a_lograr && curso.que_vas_a_lograr.length > 0) ? (
+                <section>
+                    <h2 className="font-heading text-2xl font-bold text-earth-900 mb-4">
+                        ¿Qué vas a lograr?
+                    </h2>
+                    <ul className="space-y-4">
+                        {curso.que_vas_a_lograr.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-3 bg-white/50 dark:bg-white/5 p-4 rounded-lg border border-earth-900/10">
+                                <span className="text-green-600 mt-1">
+                                    <CheckCircle className="w-6 h-6" />
+                                </span>
+                                <span className="text-lg text-foreground/80 leading-relaxed">{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            ) : curso.descripcion && (
                 <section>
                     <h2 className="font-heading text-2xl font-bold text-earth-900 mb-4">
                         Descripción del Curso
@@ -420,6 +468,35 @@ function CourseContent({ curso, programa }: { curso: CourseFullData; programa: P
                     horarioPractico={curso.horario_practico}
                     teoricasPresenciales={curso.teoricas_presenciales}
                 />
+            )}
+
+            {/* Testimonios Section */}
+            {curso.testimonios && curso.testimonios.length > 0 && (
+                <section className="bg-accent/5 rounded-2xl p-8 border border-accent/10">
+                    <h2 className="font-heading text-2xl font-bold text-earth-900 mb-6 flex items-center gap-2">
+                        <Quote className="w-6 h-6 text-green-700" />
+                        Lo que dicen nuestros alumnos
+                    </h2>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {curso.testimonios.map((testimonio) => (
+                            <div key={testimonio.id} className="bg-white dark:bg-card p-6 rounded-xl shadow-sm border border-earth-900/5">
+                                <p className="italic text-foreground/80 mb-4">"{testimonio.texto}"</p>
+                                <div className="flex items-center gap-3">
+                                    {testimonio.foto_url ? (
+                                        <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                                            <Image src={testimonio.foto_url} alt={testimonio.nombre} fill className="object-cover" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold">
+                                            {testimonio.nombre.charAt(0)}
+                                        </div>
+                                    )}
+                                    <span className="font-bold text-earth-900">{testimonio.nombre}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
             )}
 
             {/* Certification */}

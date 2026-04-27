@@ -187,16 +187,6 @@ export function CourseSidebarClient({ curso }: CourseSidebarProps) {
                 </Button>
             </div>
 
-            {/* Mercado Pago Link */}
-            {curso.link_mercado_pago && (
-                <div className="mt-4 pt-4 border-t border-earth-900/10">
-                    <Button asChild variant="secondary" className="w-full">
-                        <a href={curso.link_mercado_pago} target="_blank" rel="noopener noreferrer">
-                            Pagar con Mercado Pago
-                        </a>
-                    </Button>
-                </div>
-            )}
         </div>
     );
 }

@@ -73,4 +73,4 @@ Ejemplo: `https://res.cloudinary.com/ceuta/image/upload/v123/cursos/huerta-hero.
 Cuando deploys a producción:
 1. Subir imágenes existentes a Cloudinary
 2. Actualizar URLs en la base de datos
-3. Configurar variables de entorno en Netlify
+3. Configurar variables de entorno en Vercel
