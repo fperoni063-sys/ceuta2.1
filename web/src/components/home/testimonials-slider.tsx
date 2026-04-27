@@ -83,7 +83,7 @@ export function TestimonialsSlider() {
     const current = testimonios[currentIndex];
 
     return (
-        <section className="py-20 bg-earth-900 dark:bg-card text-white dark:text-foreground">
+        <section className="py-20 bg-earth-900 dark:bg-card text-white dark:text-foreground overflow-hidden">
             <div className="container mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-12">
@@ -96,77 +96,99 @@ export function TestimonialsSlider() {
                 </div>
 
                 {/* Testimonial Card */}
-                <div className="max-w-3xl mx-auto relative">
-                    <div className="bg-white/10 dark:bg-muted/10 backdrop-blur-sm rounded-2xl p-8 md:p-12 text-center relative">
-                        <Quote className="absolute top-6 left-6 text-white/20 dark:text-foreground/20" size={48} />
+                <div className="max-w-4xl mx-auto relative px-0 md:px-12">
+                    <div className="bg-white/10 dark:bg-muted/10 backdrop-blur-md rounded-3xl p-8 pt-10 md:p-12 text-center relative border border-white/10 shadow-2xl">
+                        <Quote className="absolute top-6 left-6 text-white/10 dark:text-foreground/10 md:text-white/20" size={40} />
 
                         {/* Photo */}
-                        <div className="w-20 h-20 rounded-full bg-green-700 mx-auto mb-6 flex items-center justify-center overflow-hidden relative">
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-green-700/80 mx-auto mb-6 flex items-center justify-center overflow-hidden relative border-4 border-white/10 shadow-lg">
                             {current.foto_url ? (
                                 <Image
                                     src={current.foto_url}
                                     alt={current.nombre}
                                     fill
                                     className="object-cover"
-                                    sizes="80px"
+                                    sizes="(max-width: 768px) 80px, 96px"
                                 />
 
                             ) : (
-                                <span className="text-3xl text-white">
+                                <span className="text-3xl md:text-4xl text-white font-bold">
                                     {current.nombre.charAt(0)}
                                 </span>
                             )}
                         </div>
 
                         {/* Text */}
-                        <blockquote className="text-lg md:text-xl text-white/90 dark:text-foreground/90 mb-6 leading-relaxed">
-                            "{current.texto}"
-                        </blockquote>
+                        <div className="min-h-[140px] flex items-center justify-center mb-8">
+                            <blockquote className="text-base sm:text-lg md:text-2xl text-white/95 dark:text-foreground/90 leading-relaxed md:leading-relaxed font-medium italic">
+                                "{current.texto}"
+                            </blockquote>
+                        </div>
 
                         {/* Author */}
                         <div>
-                            <p className="font-semibold text-lg">{current.nombre}</p>
+                            <p className="font-bold text-lg md:text-xl text-white">{current.nombre}</p>
                             {current.curso && (
-                                <p className="text-white/70 dark:text-muted-foreground text-sm">Curso: {current.curso}</p>
+                                <p className="text-white/70 dark:text-muted-foreground text-sm md:text-base mt-1 font-medium tracking-wide uppercase text-xs">Curso: {current.curso}</p>
                             )}
                         </div>
                     </div>
 
-                    {/* Navigation Arrows */}
+                    {/* Navigation Arrows (Desktop) */}
                     {testimonios.length > 1 && (
                         <>
                             <button
                                 onClick={prev}
-                                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+                                className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full p-3 transition-all border border-white/10 text-white hover:scale-110"
                                 aria-label="Previous testimonial"
                             >
-                                <ChevronLeft size={24} />
+                                <ChevronLeft size={28} />
                             </button>
                             <button
                                 onClick={next}
-                                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+                                className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full p-3 transition-all border border-white/10 text-white hover:scale-110"
                                 aria-label="Next testimonial"
                             >
-                                <ChevronRight size={24} />
+                                <ChevronRight size={28} />
                             </button>
                         </>
                     )}
                 </div>
 
-                {/* Dots */}
+                {/* Dots and Mobile Navigation */}
                 {testimonios.length > 1 && (
-                    <div className="flex justify-center gap-2 mt-8">
-                        {testimonios.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => goTo(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                    ? "bg-white w-6"
-                                    : "bg-white/40 hover:bg-white/60"
-                                    }`}
-                                aria-label={`Go to testimonial ${index + 1}`}
-                            />
-                        ))}
+                    <div className="flex justify-center items-center gap-6 mt-8">
+                        {/* Mobile Prev */}
+                        <button
+                            onClick={prev}
+                            className="md:hidden bg-white/10 hover:bg-white/20 active:bg-white/30 backdrop-blur-md rounded-full p-2 transition-all border border-white/10 text-white"
+                            aria-label="Previous testimonial"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+
+                        <div className="flex justify-center gap-2">
+                            {testimonios.map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => goTo(index)}
+                                    className={`h-2.5 rounded-full transition-all duration-300 ${index === currentIndex
+                                        ? "bg-white w-8"
+                                        : "bg-white/40 hover:bg-white/60 w-2.5"
+                                        }`}
+                                    aria-label={`Go to testimonial ${index + 1}`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Mobile Next */}
+                        <button
+                            onClick={next}
+                            className="md:hidden bg-white/10 hover:bg-white/20 active:bg-white/30 backdrop-blur-md rounded-full p-2 transition-all border border-white/10 text-white"
+                            aria-label="Next testimonial"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 )}
             </div>
