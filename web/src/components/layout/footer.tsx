@@ -71,6 +71,16 @@ export function Footer() {
                                     Política de Privacidad
                                 </Link>
                             </li>
+                            <li>
+                                <Link href="/terminos" className="hover:text-white transition-colors">
+                                    Términos y Condiciones
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/politica-envios" className="hover:text-white transition-colors">
+                                    Política de Entrega
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 
