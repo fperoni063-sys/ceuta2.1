@@ -70,6 +70,9 @@ interface CourseFullData {
     descuento_fecha_fin: string | null;
     descuento_online_porcentaje: number | null;
     descuento_online_etiqueta: string | null;
+
+    // dLocal Go
+    dlocal_habilitado: boolean;
 }
 
 interface PageProps {
@@ -351,6 +354,9 @@ function CourseSidebar({ curso }: { curso: CourseFullData }) {
                 descuento_online_porcentaje: curso.descuento_online_porcentaje,
                 descuento_online_etiqueta: curso.descuento_online_etiqueta,
                 descuento_fecha_fin: curso.descuento_fecha_fin,
+                // dLocal Go
+                dlocal_habilitado: curso.dlocal_habilitado,
+                slug: curso.slug,
             }}
         />
     );

@@ -58,6 +58,9 @@ interface CourseFormData {
     
     // Integración
     url_web_vieja: string | null;
+
+    // dLocal Go
+    dlocal_habilitado: boolean;
 }
 
 const initialFormData: CourseFormData = {
@@ -107,6 +110,9 @@ const initialFormData: CourseFormData = {
 
     // Integración
     url_web_vieja: null,
+
+    // dLocal Go
+    dlocal_habilitado: false,
 };
 
 const DEPARTAMENTOS_URUGUAY = [
@@ -631,6 +637,31 @@ export default function NuevoCursoPage() {
                                 onChange={handleChange}
                                 placeholder="https://mpago.la/..."
                             />
+                        </div>
+
+                        {/* dLocal Go Toggle */}
+                        <div className="md:col-span-2">
+                            <label className="flex items-center gap-3 p-4 border rounded-xl bg-violet-50 border-violet-200 cursor-pointer hover:bg-violet-100 transition-colors">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        name="dlocal_habilitado"
+                                        checked={formData.dlocal_habilitado}
+                                        onChange={handleChange}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-violet-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                                </div>
+                                <div>
+                                    <span className="block font-medium text-gray-800 flex items-center gap-2">
+                                        🌐 Pago online con dLocal Go
+                                        {formData.dlocal_habilitado && <span className="text-xs bg-violet-600 text-white px-2 py-0.5 rounded-full">Activo</span>}
+                                    </span>
+                                    <span className="text-xs text-gray-600">
+                                        Permite a los alumnos de Argentina y otros países pagar con tarjeta de crédito/débito. El pago se verifica automáticamente.
+                                    </span>
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </Card>

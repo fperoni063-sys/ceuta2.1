@@ -54,8 +54,32 @@ export interface Curso {
     descuento_online_porcentaje: number | null;
     descuento_online_etiqueta: string | null;
 
+    // dLocal Go payment toggle
+    dlocal_habilitado: boolean;
+
     updated_at?: string;
     created_at?: string;
+}
+
+export type MetodoPago = 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal';
+
+export type DLocalPaymentStatus = 'PENDING' | 'PAID' | 'REJECTED' | 'CANCELLED' | 'EXPIRED';
+
+export interface DLocalPago {
+    id: number;
+    inscripto_id: number;
+    dlocal_payment_id: string | null;
+    order_id: string | null;
+    amount: number;
+    currency: string;
+    status: DLocalPaymentStatus;
+    redirect_url: string | null;
+    notification_url: string | null;
+    success_url: string | null;
+    raw_response: Record<string, unknown> | null;
+    raw_notification: Record<string, unknown> | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface FAQ {

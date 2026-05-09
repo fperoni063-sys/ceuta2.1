@@ -25,6 +25,8 @@ interface EnrollmentModalProps {
     coursePrice: number | null;
     linkMercadoPago?: string | null;
     cantidadCuotas?: number;
+    dlocalHabilitado?: boolean;
+    courseSlug?: string;
     // Discount fields
     descuento_porcentaje?: number | null;
     descuento_cupos_totales?: number | null;
@@ -38,7 +40,7 @@ interface FormData {
     email: string;
     telefono: string;
     recibirNovedades: boolean;
-    metodoPago: 'transferencia' | 'mercadopago' | 'efectivo' | '';
+    metodoPago: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal' | '';
     codigoDescuento: string;
 }
 
@@ -261,7 +263,7 @@ interface PaymentMethodProps {
     formData: FormData;
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
     coursePrice: number | null;
-    onNext: (method?: 'transferencia' | 'mercadopago' | 'efectivo') => void;
+    onNext: (method?: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal') => void;
     onBack: () => void;
     courseName?: string;
     cantidadCuotas?: number;
@@ -274,6 +276,7 @@ interface PaymentMethodProps {
     setTipoPago: (t: 'total' | 'seña') => void;
     finalPrice: number | null;
     setFinalPrice: (price: number | null) => void;
+    dlocalHabilitado?: boolean;
 }
 
 function Step3PaymentMethod({
@@ -293,6 +296,7 @@ function Step3PaymentMethod({
     setTipoPago,
     finalPrice,
     setFinalPrice,
+    dlocalHabilitado,
 }: PaymentMethodProps) {
     const [discountApplied, setDiscountApplied] = useState(false);
     const [discountError, setDiscountError] = useState('');
@@ -353,7 +357,7 @@ function Step3PaymentMethod({
         }
     };
 
-    const handleMethodSelect = (method: 'transferencia' | 'mercadopago' | 'efectivo') => {
+    const handleMethodSelect = (method: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal') => {
         setFormData(prev => ({ ...prev, metodoPago: method }));
         track('enrollment_payment_method_click', { metadata: { method } });
         // Pequenio timeout para asegurar que el estado se actualice antes de avanzar
@@ -551,7 +555,7 @@ function Step3PaymentMethod({
                     Elegí tu método de pago:
                 </p>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className={cnUtil("grid gap-2", dlocalHabilitado ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
                     {/* Option 1: Transferencia */}
                     <button
                         type="button"
@@ -617,6 +621,30 @@ function Step3PaymentMethod({
                         </div>
                         <span className="font-medium text-earth-900 dark:text-white text-xs text-center">Efectivo</span>
                     </button>
+
+                    {/* Option 4: dLocal - Internacional / Argentina */}
+                    {dlocalHabilitado && (
+                        <button
+                            type="button"
+                            onClick={() => handleMethodSelect('dlocal')}
+                            className={cnUtil(
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all group relative overflow-hidden",
+                                formData.metodoPago === 'dlocal'
+                                    ? "border-violet-500 bg-violet-50 dark:bg-violet-900/20 shadow-sm"
+                                    : "border-transparent bg-gray-50 dark:bg-muted/40 hover:bg-background dark:hover:bg-muted/60 hover:border-violet-200"
+                            )}
+                        >
+                            <div className={cnUtil(
+                                "w-10 h-10 rounded-full flex items-center justify-center text-xl mb-1 transition-colors",
+                                formData.metodoPago === 'dlocal'
+                                    ? "bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 text-violet-600 dark:text-violet-300"
+                                    : "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400"
+                            )}>
+                                🌐
+                            </div>
+                            <span className="font-medium text-earth-900 dark:text-white text-xs text-center leading-tight">Internacional<br/><span className="text-[10px] font-normal text-muted-foreground">ARG y más</span></span>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -692,6 +720,7 @@ function Step4Confirmation({
     amountToPay,
     cantidadCuotas = 1,
     tipoPago = 'total',
+    courseSlug,
 }: {
     formData: FormData;
     courseName: string;
@@ -703,12 +732,15 @@ function Step4Confirmation({
     amountToPay: number;
     cantidadCuotas?: number;
     tipoPago?: 'total' | 'seña';
+    courseSlug?: string;
 }) {
     const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
     const [loadingConfig, setLoadingConfig] = useState(true);
     const [showUpload, setShowUpload] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const [profileCompleted, setProfileCompleted] = useState(false);
+    const [dlocalLoading, setDlocalLoading] = useState(false);
+    const [dlocalError, setDlocalError] = useState<string | null>(null);
     const { track } = useAnalytics();
 
     // Helper para calcular qué mostrar según el tipo de pago
@@ -1100,6 +1132,114 @@ function Step4Confirmation({
                         )}
                     </div>
                 )}
+
+                {/* DLOCAL - INTERNATIONAL / ARGENTINA */}
+                {formData.metodoPago === 'dlocal' && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                        <div className="bg-violet-50 dark:bg-violet-950/20 p-5 rounded-xl border border-violet-100 dark:border-violet-500/20">
+                            <h3 className="font-semibold text-earth-900 dark:text-violet-50 mb-4 flex items-center gap-2">
+                                <span className="text-xl">🌐</span> Pago Internacional / Argentina
+                            </h3>
+
+                            {/* MONTO A PAGAR */}
+                            <div className="bg-white dark:bg-violet-900/20 border border-violet-200 dark:border-violet-500/20 rounded-xl p-4 mb-4 text-center">
+                                <p className="text-xs uppercase tracking-wider text-violet-600 dark:text-violet-400 font-medium mb-1">
+                                    {getDisplayInfo().label}
+                                </p>
+                                <span className="text-2xl sm:text-3xl font-bold text-earth-900 dark:text-white">
+                                    {formatearPrecio(getDisplayInfo().amount)}
+                                </span>
+                                {getDisplayInfo().subtitle && (
+                                    <p className="text-xs text-violet-600/70 dark:text-violet-400/70 mt-1">
+                                        {getDisplayInfo().subtitle}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="space-y-3 mb-4">
+                                <div className="flex gap-3 items-start">
+                                    <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</div>
+                                    <p className="text-sm text-walnut-700 dark:text-violet-100/80">
+                                        Hacé clic en <strong>"Pagar ahora"</strong> para ir al checkout seguro.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3 items-start">
+                                    <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</div>
+                                    <p className="text-sm text-walnut-700 dark:text-violet-100/80">
+                                        Completá el pago con tarjeta de crédito o débito.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3 items-start">
+                                    <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">3</div>
+                                    <p className="text-sm text-walnut-700 dark:text-violet-100/80">
+                                        Tu inscripción se confirma <strong>automáticamente</strong>. Sin necesidad de subir comprobante.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-violet-100/50 dark:bg-violet-900/30 rounded-lg px-3 py-2 mb-4">
+                                <p className="text-xs text-violet-700 dark:text-violet-300 text-center">
+                                    🔒 Pago procesado de forma segura por dLocal Go. Acepta tarjetas de Argentina y el mundo.
+                                </p>
+                            </div>
+
+                            {/* Error */}
+                            {dlocalError && (
+                                <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-500/20 rounded-lg p-3 mb-4 text-center animate-in fade-in">
+                                    <p className="text-sm text-red-700 dark:text-red-300">{dlocalError}</p>
+                                </div>
+                            )}
+
+                            {/* Pay Button */}
+                            <button
+                                onClick={async () => {
+                                    setDlocalLoading(true);
+                                    setDlocalError(null);
+                                    track('enrollment_dlocal_pay_click');
+                                    try {
+                                        const res = await fetch('/api/dlocal/create-payment', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                inscripto_id: enrollmentId,
+                                                curso_id: courseId,
+                                                amount: getDisplayInfo().amount,
+                                                payer_name: formData.nombre,
+                                                payer_email: formData.email,
+                                                payer_phone: formData.telefono,
+                                            }),
+                                        });
+                                        const data = await res.json();
+                                        if (data.redirect_url) {
+                                            track('enrollment_dlocal_redirect');
+                                            window.location.href = data.redirect_url;
+                                        } else {
+                                            setDlocalError(data.error || 'Error al crear el pago. Intent\u00e1 de nuevo.');
+                                            setDlocalLoading(false);
+                                        }
+                                    } catch {
+                                        setDlocalError('Error de conexi\u00f3n. Verific\u00e1 tu internet e intent\u00e1 de nuevo.');
+                                        setDlocalLoading(false);
+                                    }
+                                }}
+                                disabled={dlocalLoading}
+                                className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:from-violet-400 disabled:to-purple-400 text-white font-medium rounded-xl transition-all shadow-lg shadow-violet-600/20 hover:shadow-xl flex items-center justify-center gap-2"
+                            >
+                                {dlocalLoading ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Preparando pago seguro...
+                                    </>
+                                ) : (
+                                    <>
+                                        🔒 Pagar ahora — {formatearPrecio(getDisplayInfo().amount)}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Footer Buttons */}
@@ -1126,6 +1266,8 @@ export function EnrollmentModal({
     coursePrice,
     linkMercadoPago,
     cantidadCuotas,
+    dlocalHabilitado,
+    courseSlug,
     descuento_porcentaje,
     descuento_cupos_totales,
     descuento_cupos_usados,
@@ -1223,8 +1365,7 @@ export function EnrollmentModal({
     };
 
 
-    // Paso 2 -> Paso 3: Confirmar inscripción con método de pago
-    const submitEnrollment = async (methodOverride?: 'transferencia' | 'mercadopago' | 'efectivo') => {
+    const submitEnrollment = async (methodOverride?: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal') => {
         setIsSubmitting(true);
         try {
             const selectedMethod = methodOverride || formData.metodoPago || null;
@@ -1272,7 +1413,7 @@ export function EnrollmentModal({
         }
     };
 
-    const handleStep2Next = (method?: 'transferencia' | 'mercadopago' | 'efectivo') => {
+    const handleStep2Next = (method?: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal') => {
         submitEnrollment(method);
     };
 
@@ -1314,6 +1455,7 @@ export function EnrollmentModal({
                         setTipoPago={setTipoPago}
                         finalPrice={finalPrice}
                         setFinalPrice={setFinalPrice}
+                        dlocalHabilitado={dlocalHabilitado}
                     />
                 )}
 
@@ -1329,6 +1471,7 @@ export function EnrollmentModal({
                         amountToPay={tipoPago === 'seña' ? 500 : (finalPrice ?? (coursePrice || 0))}
                         cantidadCuotas={cantidadCuotas}
                         tipoPago={tipoPago}
+                        courseSlug={courseSlug}
                     />
                 )}
 

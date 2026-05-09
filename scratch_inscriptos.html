@@ -1,0 +1,1509 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<LINK REL="SHORTCUT ICON" HREF="../favicon.png">
+<title>CEUTA - Panel Administrador de Contenidos</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+
+
+<link rel="stylesheet" type="text/css" href="reset.css">
+<link href="estilos_admin.css?22836" rel="stylesheet" type="text/css">
+
+
+
+<script type="text/javascript" src="../js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="tinymce/tinymce.min.js"></script>
+<script type="text/javascript" src="core.js?4316"></script>
+
+<script type="text/javascript">
+	tinymce.init({ 
+		selector:'textarea.mceeditor', 
+		menubar: false,
+		language: 'es_AR',
+		theme_advanced_resizing : true,
+        theme_advanced_resize_horizontal : true, 
+		theme_advanced_resizing_use_cookie: false,
+			force_br_newlines : true,
+			force_p_newlines : false,
+			forced_root_block : 'p',		
+		plugins: [
+				"advlist autolink lists link anchor image charmap print preview anchor",
+				"searchreplace visualblocks code fullscreen",
+				"insertdatetime media table contextmenu paste jbimages paste"
+			],
+			/*file_browser_callback: function(field_name, url, type, win) {
+				alert('Ja!');
+				//win.document.getElementById(field_name).value = 'my browser value';
+			},*/	
+			toolbar: "insertfile undo redo | bold italic underline strikethrough | cut copy paste pastetext | styleselect formatselect fontsizeselect | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | fullscreen code | link unlink anchor | ",//image jbimages
+		  imagetools_cors_hosts: ['https://www.ceuta.org.uy/','www.tinymce.com', 'codepen.io'],
+		  content_css: [
+			'//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
+			'//www.tinymce.com/css/codepen.min.css'
+		  ],
+
+			image_advtab: true,
+		  	relative_urls : true,
+			document_base_url : "https://www.ceuta.org.uy/"
+	  		
+		  
+	});	
+	
+
+	$(document).ready(function($){
+
+		$('#menu i').click(function(e){
+			e.preventDefault();
+			$(this).toggleClass('visible');
+			$('#menu ul').toggleClass('visible');
+		});
+
+	});
+
+
+</script>
+</head>
+<body class="pg-inscriptos_list">
+
+<section id="header">
+
+<table width="95%" border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;" >
+  <tr>
+    <td width="181">&nbsp;</td>
+    <td width="814" align="right">&nbsp;</td>
+    <td width="72" align="right" valign="middle">&nbsp;</td>
+  </tr>
+  <tr>
+    <td><a href="?pg=inicio"><img src="img/logo.png" border="0" style="margin-bottom:25px;"/></a></td>
+    <td align="right">
+<h1 style=" margin-top:20px;">Panel Administrador de Contenidos</h1></td>
+    <td width="72" align="right" valign="middle"><a href="login/logout.php"><img name="salir" src="img/salir.png" width="65" height="31" border="0" alt=""></a></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td align="right">&nbsp;</td>
+    <td width="72" align="right" valign="middle">&nbsp;</td>
+  </tr>
+</table>
+
+</section>
+
+
+
+<section>
+
+<div id="menu" style="margin: 0 auto; clear:both; height:32px;">
+
+
+  <i>MENÚ</i>
+
+
+
+  <ul>
+  
+    <li class="comun "><a href="?pg=inicio">Inicio</a></li>
+    <li class="comun "><a href="?pg=programas_list">Programas<br>Componentes</a></li>
+    <li class="comun "><a href="?pg=cursos_list">Cursos<br/>Calendario</a></li>
+	  
+	    <li class="comun activo"><a href="?pg=inscriptos_list">Inscriptos</a></li>
+	  
+    <li class="comun "><a href="?pg=curcon_list">Cursos<br/>por convenio</a></li>
+    <li class="comun "><a href="?pg=integracion_list">Integración de Ceuta</a></li>
+    <li class="comun "><a href="?pg=acuerdos_list">Acuerdos<br>institucionales</a></li>
+        <li class="comun "><a href="?pg=instit_conv_list&ti=1">Instituciones Cooperantes</a></li>
+        <li class="comun "><a href="?pg=instit_conv_list&ti=2">Convenios</a></li>
+        <li class="comun "><a href="?pg=publicaciones_list">Publicaciones</a></li>
+    <li class="comun "><a href="?pg=noticias_list">Noticias</a></li>
+    
+    <li class="comun "><a href="?pg=galerias_list">Galerías<br/>de fotos</a></li>
+    <li class="comun "><a href="?pg=videos_list">Videos de<br/>la Galería</a></li>
+    
+    <li class="comun "><a href="?pg=paginas_list">Otras páginas</a></li>
+  </ul>
+</div>
+
+</section><section>
+<div id="main_container">
+  <div id="login_content" style="background-color:#FFF;">
+    <table width="100%"  border="0" align="center" cellpadding="0" cellspacing="0">   
+  <tr>
+    <td align="center">
+
+    	<table width="100%" border="0" cellspacing="0" cellpadding="0" id="controles">
+      <tr>
+        <td align="left"><h1>Inscriptos a cursos · Listado</h1></td>
+<td colspan="2" align="right">
+		  
+	  <section class="cont-form">
+		  <form name="cursos" style="display:inline-block;">
+		<div>Curso: 
+
+		<select name="curso" id="curso" onchange="location.replace(document.cursos.curso.value);" style="width:200px; margin-right:20px;">
+
+				<option value="panel.php?pg=inscriptos_list&cu="selected >------TODOS-------</option>		
+
+ <option value="panel.php?pg=inscriptos_list&cu=110" val="110"  >Huerta orgánica  full - 2026-06-11</option><option value="panel.php?pg=inscriptos_list&cu=185" val="185"  >Cultivo de hongos comestibles Full - 2026-06-11</option><option value="panel.php?pg=inscriptos_list&cu=192" val="192"  >Cosmética Natural  full - 2026-06-11</option><option value="panel.php?pg=inscriptos_list&cu=136" val="136"  >Cultivo de cannabis orgánico full - 2026-06-10</option><option value="panel.php?pg=inscriptos_list&cu=200" val="200"  >Jardines ecológicos  Full - 2026-06-10</option><option value="panel.php?pg=inscriptos_list&cu=49" val="49"  >Energía Solar Fotovoltaica  full - 2026-06-08</option><option value="panel.php?pg=inscriptos_list&cu=197" val="197"  >Reconocimiento y uso de plantas como medicina  full  - 2026-06-08</option><option value="panel.php?pg=inscriptos_list&cu=188" val="188"  >Construcción Natural semipresencial full - 2026-03-10</option><option value="panel.php?pg=inscriptos_list&cu=202" val="202"  >Introducción al Cultivo doméstico de Hongos. Cursos de Verano - 2026-02-05</option><option value="panel.php?pg=inscriptos_list&cu=203" val="203"  >Plantas medicinales: Botiquín natural. Cursos de Verano - 2026-02-04</option><option value="panel.php?pg=inscriptos_list&cu=201" val="201"  >Construcción natural: Biopiscinas y humedales construidos. Cursos de Verano - 2026-02-03</option><option value="panel.php?pg=inscriptos_list&cu=199" val="199"  >Reconocimiento y uso de plantas como medicina   - 2025-09-10</option><option value="panel.php?pg=inscriptos_list&cu=182" val="182"  >Ecoprint  - 2024-04-07</option><option value="panel.php?pg=inscriptos_list&cu=184" val="184"  >Fruticultura orgánica de hoja caduca, vid y citrus  - 2024-04-01</option><option value="panel.php?pg=inscriptos_list&cu=191" val="191"  >Farmacia natural presencial matutino - 2024-04-00</option><option value="panel.php?pg=inscriptos_list&cu=180" val="180"  >Jardines ecológicos  - 2024-03-19</option><option value="panel.php?pg=inscriptos_list&cu=153" val="153"  >Primer práctico curso Energía solar fotovoltaica - 2023-11-25</option><option value="panel.php?pg=inscriptos_list&cu=154" val="154"  >Segundo práctico curso Cannabis orgánico básico - 2023-11-18</option><option value="panel.php?pg=inscriptos_list&cu=152" val="152"  >Segundo práctico curso Construcción natural básico - 2023-11-11</option><option value="panel.php?pg=inscriptos_list&cu=151" val="151"  >Curso Soluciones urbanas sostenibles  - 2023-10-26</option><option value="panel.php?pg=inscriptos_list&cu=174" val="174"  >Energía Solar Fotovoltaica  - 2023-10-09</option><option value="panel.php?pg=inscriptos_list&cu=177" val="177"  >Cosmética Natural  - 2023-10-06</option><option value="panel.php?pg=inscriptos_list&cu=120" val="120"  >Fruticultura orgánica de hoja caduca, vid y citrus  - 2023-10-03</option><option value="panel.php?pg=inscriptos_list&cu=148" val="148"  >Charla Introductoria Jardinería ecológica  - 2023-08-23</option><option value="panel.php?pg=inscriptos_list&cu=149" val="149"  >Charla Introductoria Farmacia Natural - 2023-08-23</option><option value="panel.php?pg=inscriptos_list&cu=150" val="150"  >Charla Introductoria Bosques Comestibles  - 2023-08-23</option><option value="panel.php?pg=inscriptos_list&cu=146" val="146"  >Charla Introductoria Construcción Natural Básico - 2023-08-23</option><option value="panel.php?pg=inscriptos_list&cu=145" val="145"  >Charla Introductoria Fruticultura orgánica  - 2023-08-22</option><option value="panel.php?pg=inscriptos_list&cu=196" val="196"  >Reconocimiento y uso de plantas como medicina (Avanzado) - 2023-06-08</option><option value="panel.php?pg=inscriptos_list&cu=147" val="147"  >Charla Introductoria de Plantas Usadas como Medicina Avanzado - 2023-06-05</option><option value="panel.php?pg=inscriptos_list&cu=76" val="76"  >Huerta Agroecológica avanzada (Certificada) - 2023-06-01</option><option value="panel.php?pg=inscriptos_list&cu=144" val="144"  >Taller de Bosques Comestibles  - 2023-05-13</option><option value="panel.php?pg=inscriptos_list&cu=139" val="139"  >Cannabis Orgánico Pro (avanzado, certificado) - 2023-04-20</option><option value="panel.php?pg=inscriptos_list&cu=141" val="141"  >Sistemas agroforestales avanzado (certificado) - 2023-04-18</option><option value="panel.php?pg=inscriptos_list&cu=133" val="133"  >Ecotecnologías del fuego - 2023-03-29</option><option value="panel.php?pg=inscriptos_list&cu=117" val="117"  >Reconocimiento y uso de plantas como medicina full  - 2023-03-09</option><option value="panel.php?pg=inscriptos_list&cu=176" val="176"  >Reconocimiento y uso de plantas como medicina - 2023-03-09</option><option value="panel.php?pg=inscriptos_list&cu=142" val="142"  >Consumo Consciente  - 2022-09-27</option><option value="panel.php?pg=inscriptos_list&cu=137" val="137"  >Producción de Cerveza orgánica - 2022-09-19</option><option value="panel.php?pg=inscriptos_list&cu=132" val="132"  >Biomateriales para la revalorización de residuos orgánicos. - 2022-05-25</option><option value="panel.php?pg=inscriptos_list&cu=56" val="56"  >Saneamiento ecológico semipresencial  - 2022-04-29</option><option value="panel.php?pg=inscriptos_list&cu=118" val="118"  >Multiplicación de plantas comestibles, aromáticas y medicinales presencial - 2022-04-29</option><option value="panel.php?pg=inscriptos_list&cu=126" val="126"  >Bioinsumos para agricultura orgánica semipresencial o virtual - 2022-04-19</option><option value="panel.php?pg=inscriptos_list&cu=119" val="119"  >Cannabis orgánico semipresencial - 2022-03-17</option><option value="panel.php?pg=inscriptos_list&cu=130" val="130"  >Cultivo Cannabis Orgánico Virtual - 2022-03-17</option><option value="panel.php?pg=inscriptos_list&cu=114" val="114"  >Cocina natural, integral y de estación semipresencial - 2022-03-09</option><option value="panel.php?pg=inscriptos_list&cu=122" val="122"  >Cultivo, cosecha y cocina con frutos nativos  semipresencial - 2022-03-08</option><option value="panel.php?pg=inscriptos_list&cu=129" val="129"  >Energía solar térmica - 2022-03-02</option><option value="panel.php?pg=inscriptos_list&cu=134" val="134"  >Plantas medicinales semipresencial - 2020-10-09</option><option value="panel.php?pg=inscriptos_list&cu=116" val="116"  >Jardinería ecológica - 2019-10-03</option><option value="panel.php?pg=inscriptos_list&cu=113" val="113"  >Reconocimiento y uso de plantas como medicina - 2019-10-01</option><option value="panel.php?pg=inscriptos_list&cu=115" val="115"  >Charlas energía solar fotovoltaica y apicultura ecológica - 2019-09-14</option><option value="panel.php?pg=inscriptos_list&cu=104" val="104"  > - 2019-05-06</option><option value="panel.php?pg=inscriptos_list&cu=105" val="105"  >Taller teórico práctico bosques comestibles - 2019-05-05</option><option value="panel.php?pg=inscriptos_list&cu=103" val="103"  >Huerta orgánica - 2019-03-28</option><option value="panel.php?pg=inscriptos_list&cu=100" val="100"  >Construcción natural - 2019-03-27</option><option value="panel.php?pg=inscriptos_list&cu=102" val="102"  >Curso de Farmacia natural - 2019-03-26</option><option value="panel.php?pg=inscriptos_list&cu=101" val="101"  >Bosques Comestibles - 2019-03-25</option><option value="panel.php?pg=inscriptos_list&cu=69" val="69"  >Farmacia Natural  - 2018-08-28</option><option value="panel.php?pg=inscriptos_list&cu=88" val="88"  >Construcción Natural - 2018-03-21</option><option value="panel.php?pg=inscriptos_list&cu=81" val="81"  >Huerta Orgánica Práctica - 2017-10-25</option><option value="panel.php?pg=inscriptos_list&cu=77" val="77"  >Huerta Biointensiva (curso práctico) - 2017-09-16</option><option value="panel.php?pg=inscriptos_list&cu=97" val="97"  >Taller Intensivo de Diseño Hidrológico  - 2017-09-02</option><option value="panel.php?pg=inscriptos_list&cu=96" val="96"  >Prácticas Agroecológicas - 2017-07-22</option><option value="panel.php?pg=inscriptos_list&cu=91" val="91"  >Alimentos Germinados y Deshidratados  - 2017-07-12</option><option value="panel.php?pg=inscriptos_list&cu=51" val="51"  >Podas y Jardinería ecológica - 2017-07-10</option><option value="panel.php?pg=inscriptos_list&cu=95" val="95"  >Prácticas Agroecológicas - 2017-06-30</option><option value="panel.php?pg=inscriptos_list&cu=94" val="94"  >Permacultura Urbana  - 2016-06-08</option><option value="panel.php?pg=inscriptos_list&cu=93" val="93"  >Alimentación Conciente, Cocina Saludable - 2016-06-07</option><option value="panel.php?pg=inscriptos_list&cu=90" val="90"  >Reciclaje y Usos del Papel  - 2016-06-06</option><option value="panel.php?pg=inscriptos_list&cu=47" val="47"  >La Cocina Bruja - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=53" val="53"  >Podas de árboles y arbustos  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=55" val="55"  >Producción Ecológica de Semillas - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=66" val="66"  >Huerta Orgánica  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=68" val="68"  >Certificación Participativa en Agricultura Ecológica - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=70" val="70"  >Formulación de Proyectos - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=72" val="72"  >Energía Solar Térmica  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=73" val="73"  >Fruticultura Agroecológica (Podas de invierno) - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=74" val="74"  >Plantas Usadas como Medicina  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=75" val="75"  > Bioinsumos para huertos y jardines ecológicos - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=79" val="79"  >Reconocimiento y uso de plantas como medicina. Módulo 2 - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=87" val="87"  >Bosques Comestibles - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=89" val="89"  >Hongos Comestibles  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=92" val="92"  >Frutos Nativos en la Cocina  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=98" val="98"  >Taller Intensivo de Construcción Natural - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=99" val="99"  >Saneamiento Ecológico  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=106" val="106"  >Construcción Natural - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=107" val="107"  >Bosques comestibles Full - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=109" val="109"  >Cultivo, cosecha y cocina con frutos nativos - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=111" val="111"  >Farmacia natural  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=127" val="127"  >Farmacia natural presencial matutino - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=112" val="112"  >Saneamiento ecológico  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=121" val="121"  >Producción de hongos comestibles  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=123" val="123"  >Cosmética Natural  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=124" val="124"  >Ecoprint  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=125" val="125"  >Jardines ecológicos  Full - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=128" val="128"  > - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=131" val="131"  >Farmacia natural presencial matutino - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=198" val="198"  >Tierra y Medicina. Construcción Natural y Plantas - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=140" val="140"  >Construcción Natural Avanzado (Certificado) - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=143" val="143"  >Farmacia natural matutino - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=173" val="173"  >Energía Solar Fotovoltaica  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=175" val="175"  >Huerta orgánica  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=178" val="178"  >Cosmética Natural  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=179" val="179"  >Bosques comestibles  - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=181" val="181"  >Construcción Natural - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=183" val="183"  >Cannabis orgánico - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=186" val="186"  >Reconocimiento y uso de plantas como medicina - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=190" val="190"  >Farmacia natural full - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=193" val="193"  >Ecoprint semipresencial full - 0000-00-00</option><option value="panel.php?pg=inscriptos_list&cu=194" val="194"  >Fruticultura orgánica de hoja caduca, vid y citrus semipresencial full - 0000-00-00</option>
+</select>    
+
+</div>
+			  
+			  
+			  
+			  
+<div>  
+Estado: 
+
+<select name="estado" id="estado" onchange="location.replace(document.cursos.estado.value);" style="width:150px; margin-right:20px;">
+
+<option value="panel.php?pg=inscriptos_list&es="selected >----TODOS----</option>		
+
+ <option value="panel.php?pg=inscriptos_list&es=0" val="0"  >Pendiente</option><option value="panel.php?pg=inscriptos_list&es=1" val="1"  >1° Contacto establecido</option><option value="panel.php?pg=inscriptos_list&es=4" val="4"  >2° Contacto establecido</option><option value="panel.php?pg=inscriptos_list&es=2" val="2"  >Inscripción efectuada</option><option value="panel.php?pg=inscriptos_list&es=3" val="3"  >Cancelado</option>
+</select>    
+
+			  </div>
+	
+	
+</form>
+		  
+		  <div>
+			  			  <a href="panel.php?pg=inscriptos_list&mo=2">Modo responsivo >></a>
+			  			   <img src="img/file-xls.png" width="20" height="20" border="0" align="absmiddle" style="margin:0 5px 0 20px ;" /><a href="excel/xls_inscriptos.php">Exportar .XLS</a>
+			</div>
+		 </section>
+		  
+		  
+		  
+		  
+		  </td>
+      </tr>
+      <tr>
+        <td colspan="3" align="left"><div class="linea_gris_panel"></div></td>
+        </tr>
+      <tr>
+        <td width="33%" height="25" align="left">Total: <span class="ari14b">
+3116</span></td>
+        <td colspan="2" align="right"><span >1</span> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=2'>2</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=3'>3</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=4'>4</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=5'>5</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=6'>6</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=7'>7</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=8'>8</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=9'>9</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=2'>Siguiente &raquo;</a></td>
+        </tr>
+    </table></td>
+  </tr>
+  <tr>
+  <td>
+
+
+  	<table width="100%" border="0" cellpadding="5" cellspacing="0" 
+  	class="tablalista " >
+    
+
+
+  		<!-- head -->
+  		<thead>
+  			<tr>
+
+  				<th width="40">
+  					<span>N°&nbsp;</span><a href="/admin/panel.php?pg=inscriptos_list&por=id"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=id DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+  				<th width="270" class="curso">
+  					<span>Curso</span>
+  				</th>
+
+  				<th width="80" class="fecha">
+  					<span>Fecha in.</span>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=fecha"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=fecha DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th class="nombre">
+  					<span>Nombre</span>&nbsp;&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=nombre"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=nombre DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th width="80" class="ci">
+  					<span>C.I.</span> &nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=ci"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=ci DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th width="50" class="edad">
+  					<span>Edad</span> &nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=edad"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=edad DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th width="90" class="cel">
+  					<span>Celular</span> &nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=cel"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=cel DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th class="email">
+  					<span>E-mail</span> &nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=email"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=email DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th class="dpto" width="100">
+  					<span>Dpto.</span> &nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=dpto"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=dpto DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th class="dire">
+  					<span>Dirección</span> &nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=dir"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=dir DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th class="ref">
+  					<span>Ref.</span>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=ref"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=ref DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th width="90" class="nov">
+  					<span>Novedades</span>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=ref"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=ref DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th width="70" class="estado">
+  					<span>Estado</span>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=estado"><img src="img/order_asc.gif"  border="0" /></a>&nbsp;<a href="/admin/panel.php?pg=inscriptos_list&por=estado DESC"><img src="img/order_desc.gif"  border="0" /></a>
+  				</th>
+
+
+  				<th width="50" class="modificiar">
+  					Modificar
+  				</th>
+
+
+  				<th width="50" class="eliminar">
+  					Eliminar
+  				</th>
+
+
+
+  			</tr>
+  		</thead><!-- en head -->
+
+
+
+  		<!-- body -->
+  		<tbody>
+  					
+
+				<tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3271</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">05/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Sandra Gonzalez Rico</strong></td>
+						<td data-label="C.I.:" align="center">17913268</td>
+						<td data-label="Edad:" align="center">59</td>
+						<td data-label="Celular:" align="center">099124200</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:pssgrico@gmail.com">pssgrico@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Santiago Gadea 3278</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3271"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3271"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3270</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">05/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Mauro Delfino</strong></td>
+						<td data-label="C.I.:" align="center">34362793</td>
+						<td data-label="Edad:" align="center">56</td>
+						<td data-label="Celular:" align="center">099888166</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:maurodelfinocallero@hotmail.com">maurodelfinocallero@hotmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Zelmar Michelini 1297-101</td>
+
+						<td data-label="Referencia:" align="center">Amigo/a</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3270"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3270"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3269</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">05/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Fernando Caetano</strong></td>
+						<td data-label="C.I.:" align="center">31476280</td>
+						<td data-label="Edad:" align="center">55</td>
+						<td data-label="Celular:" align="center">095528425</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:fcaetano@adinet.com.uy">fcaetano@adinet.com.uy</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Dr Joaquin requena 3055</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3269"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3269"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3268</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cosmética Natural  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">05/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Romina Echeverría</strong></td>
+						<td data-label="C.I.:" align="center">51351341</td>
+						<td data-label="Edad:" align="center">33</td>
+						<td data-label="Celular:" align="center">092341463</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:recheverria.vicente@gmail.com">recheverria.vicente@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">ruta 46, aguas ctes</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3268"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3268"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3267</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de hongos comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">04/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Giovanna Mederos</strong></td>
+						<td data-label="C.I.:" align="center">45369982</td>
+						<td data-label="Edad:" align="center">38</td>
+						<td data-label="Celular:" align="center">098222320</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:giovannamederos364@gmail.com">giovannamederos364@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">El cano 4170</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3267"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3267"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3266</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">04/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Helena Rubio</strong></td>
+						<td data-label="C.I.:" align="center">29211448</td>
+						<td data-label="Edad:" align="center">72</td>
+						<td data-label="Celular:" align="center">099734253</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:rubiobilbao@gmail.com">rubiobilbao@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Salto</td>
+
+						<td data-label="Dirección:" align="center">Joaquin Suarez 437</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">--</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3266"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3266"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3265</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">04/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>ildo diaz</strong></td>
+						<td data-label="C.I.:" align="center">099963633</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">099963633</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:ildodiaz01@gmail.com">ildodiaz01@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">e</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">--</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3265"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3265"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3264</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">04/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Laura Rogé</strong></td>
+						<td data-label="C.I.:" align="center">094313034</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">094313034</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:rogelaura6@gmail.com">rogelaura6@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3264"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3264"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3263</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">04/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Anabella Rado</strong></td>
+						<td data-label="C.I.:" align="center">30880305</td>
+						<td data-label="Edad:" align="center">48</td>
+						<td data-label="Celular:" align="center">099989350</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:anabellalastoscas2016@gmail.com">anabellalastoscas2016@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Calle 9 entre Central y C. Las Toscas.</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3263"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3263"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3262</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">03/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Emiliano Medina Rodriguez</strong></td>
+						<td data-label="C.I.:" align="center">46521860</td>
+						<td data-label="Edad:" align="center">37</td>
+						<td data-label="Celular:" align="center">099274734</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:emimed56@gmail.com">emimed56@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Camino Carrasco N74, Paso carrasco</td>
+
+						<td data-label="Referencia:" align="center">Amigo/a</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3262"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3262"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3261</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de cannabis orgánico full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">02/05/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Silvia Vergara</strong></td>
+						<td data-label="C.I.:" align="center">00000000</td>
+						<td data-label="Edad:" align="center">99</td>
+						<td data-label="Celular:" align="center">094113156</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:siviverstoy@gmail.com">siviverstoy@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">-</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_1" title="1° Contacto establecido" >1° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3261"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3261"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3260</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">30/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Natalia Abente</strong></td>
+						<td data-label="C.I.:" align="center">2873391/5</td>
+						<td data-label="Edad:" align="center">55</td>
+						<td data-label="Celular:" align="center">094386046</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:nataliabente@gmail.com">nataliabente@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Valdivia 7983</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3260"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3260"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3259</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cosmética Natural </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">29/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Lorena</strong></td>
+						<td data-label="C.I.:" align="center">38914532</td>
+						<td data-label="Edad:" align="center">46</td>
+						<td data-label="Celular:" align="center">099092220</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:delfolore@gmail.com">delfolore@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">25 de mayo m 270 s17</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3259"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3259"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3258</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cannabis orgánico</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">29/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Micaela Sarracino </strong></td>
+						<td data-label="C.I.:" align="center">53348100</td>
+						<td data-label="Edad:" align="center">22</td>
+						<td data-label="Celular:" align="center">095600628</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:micaelasarracinoo@gmail.com">micaelasarracinoo@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">San Martín 5989</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3258"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3258"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3257</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de cannabis orgánico full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">29/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Martin Robaina</strong></td>
+						<td data-label="C.I.:" align="center">57249645</td>
+						<td data-label="Edad:" align="center">18</td>
+						<td data-label="Celular:" align="center">091828829</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:martinperezrobaina@gmail.com">martinperezrobaina@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">josé maria silva 4369</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">--</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3257"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3257"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3256</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cosmética Natural  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">29/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Virginia Martínez </strong></td>
+						<td data-label="C.I.:" align="center">17972591</td>
+						<td data-label="Edad:" align="center">56</td>
+						<td data-label="Celular:" align="center">097499335</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:virginiarociomartinez@gmail.com">virginiarociomartinez@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Ruta 8 km 26.700 calle río olimar solar 34</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3256"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3256"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3255</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">28/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Romina Lavega</strong></td>
+						<td data-label="C.I.:" align="center">56550744</td>
+						<td data-label="Edad:" align="center">19</td>
+						<td data-label="Celular:" align="center">096324361</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:rominalavega06@gmail.com">rominalavega06@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Serratosa 3812</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3255"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3255"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3254</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cosmética Natural </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">27/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Constanza Hermida </strong></td>
+						<td data-label="C.I.:" align="center">57642021</td>
+						<td data-label="Edad:" align="center">17</td>
+						<td data-label="Celular:" align="center">57642021</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:chermida0408@gmail.com">chermida0408@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Lavalleja barrio </td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3254"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3254"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3253</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">27/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>TARDAGUILA/A</strong></td>
+						<td data-label="C.I.:" align="center">40616722</td>
+						<td data-label="Edad:" align="center">38</td>
+						<td data-label="Celular:" align="center">092451270</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:andres.tardaguila@gmail.com">andres.tardaguila@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Cabral</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_4" title="2° Contacto establecido" >2° Contacto establecido</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3253"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3253"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3252</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de hongos comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">27/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Sebastián Andres Antelo Aldama</strong></td>
+						<td data-label="C.I.:" align="center">44674287</td>
+						<td data-label="Edad:" align="center">36</td>
+						<td data-label="Celular:" align="center">099197968</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:sebaantelo@gmail.com">sebaantelo@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Jaime Roldos y Pons 3619</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3252"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3252"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3251</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Jardines ecológicos  Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">14/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Rita Bellomo</strong></td>
+						<td data-label="C.I.:" align="center">1</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">94940053</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:operoni196@gmail.com">operoni196@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3251"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3251"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3250</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Bosques comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">12/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Estefania Alvarez Durango</strong></td>
+						<td data-label="C.I.:" align="center">1017928139</td>
+						<td data-label="Edad:" align="center">19</td>
+						<td data-label="Celular:" align="center">3025222053</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:nia2006.alvarez@gmail.com">nia2006.alvarez@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">...</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3250"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3250"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3249</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">09/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Andrés wallace</strong></td>
+						<td data-label="C.I.:" align="center">45094505</td>
+						<td data-label="Edad:" align="center">32</td>
+						<td data-label="Celular:" align="center">096984278</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:dario.wallace2020@gmail.com">dario.wallace2020@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">San José</td>
+
+						<td data-label="Dirección:" align="center">Yamandu Rodríguez mz15b s2</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3249"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3249"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3248</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">09/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Virginia Andreon</strong></td>
+						<td data-label="C.I.:" align="center">19568803</td>
+						<td data-label="Edad:" align="center">60</td>
+						<td data-label="Celular:" align="center">099917461</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:vandreon@gmail.com">vandreon@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Rene 1741</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3248"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3248"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3247</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">08/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>rosario franquez</strong></td>
+						<td data-label="C.I.:" align="center">3722525-5</td>
+						<td data-label="Edad:" align="center">53</td>
+						<td data-label="Celular:" align="center">099645427</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:franquezrosario305@gmail.com">franquezrosario305@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Florida</td>
+
+						<td data-label="Dirección:" align="center">gianola</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3247"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3247"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3246</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">07/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Mariana Cami</strong></td>
+						<td data-label="C.I.:" align="center">44973308</td>
+						<td data-label="Edad:" align="center">39</td>
+						<td data-label="Celular:" align="center">091811203</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:mariana__cami@hotmail.com">mariana__cami@hotmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Francisco Muñoz 3160</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3246"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3246"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3245</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Podas y Jardinería ecológica</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">07/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Maria Irupé Migliozzi</strong></td>
+						<td data-label="C.I.:" align="center">57082740</td>
+						<td data-label="Edad:" align="center">28</td>
+						<td data-label="Celular:" align="center">096124564</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:Migliozziirupe@gmail.com">Migliozziirupe@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Costa rica 1572 </td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3245"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3245"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3244</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cosmética Natural </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">06/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Marco Algorta Beramendi</strong></td>
+						<td data-label="C.I.:" align="center">46817265</td>
+						<td data-label="Edad:" align="center">47</td>
+						<td data-label="Celular:" align="center">099118628</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:marco.algorta@gmail.com">marco.algorta@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Maciel 1355</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3244"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3244"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3243</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">06/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Guillermo Recalde</strong></td>
+						<td data-label="C.I.:" align="center">3.064.118-7</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">092426083</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:contacto@revisilinstalaciones.com">contacto@revisilinstalaciones.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3243"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3243"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3242</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Jardines ecológicos  Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">06/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Monica</strong></td>
+						<td data-label="C.I.:" align="center">098464500</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">098464500</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:monaalaniz@gmail.com">monaalaniz@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Amigo/a</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3242"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3242"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3241</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">04/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Daniela Ribeiro </strong></td>
+						<td data-label="C.I.:" align="center">36747167</td>
+						<td data-label="Edad:" align="center">51</td>
+						<td data-label="Celular:" align="center">095875408</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:danys0599@gmail.com">danys0599@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Roosevelt 802</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3241"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3241"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3240</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Bosques comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">02/04/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Carolina Abelenda </strong></td>
+						<td data-label="C.I.:" align="center">42691950</td>
+						<td data-label="Edad:" align="center">44</td>
+						<td data-label="Celular:" align="center">091519105</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:abelendapaisajismo@gmail.com">abelendapaisajismo@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Maldonado</td>
+
+						<td data-label="Dirección:" align="center">Chiripa </td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3240"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3240"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3239</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Energía Solar Fotovoltaica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">31/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Jose Eusebio Morelli</strong></td>
+						<td data-label="C.I.:" align="center">13855074</td>
+						<td data-label="Edad:" align="center">75</td>
+						<td data-label="Celular:" align="center">098367031</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:jemorelli1950@yahoo.com">jemorelli1950@yahoo.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Av  Julieta Manzana 05 Solar 20</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3239"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3239"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3238</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Jardines ecológicos  Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">27/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Mauro Zunino </strong></td>
+						<td data-label="C.I.:" align="center">4194687-5</td>
+						<td data-label="Edad:" align="center">42</td>
+						<td data-label="Celular:" align="center">091485717</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:ecologizaciondecasas@gmail.com">ecologizaciondecasas@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">San José</td>
+
+						<td data-label="Dirección:" align="center">Cno. De La aviación 1.8km</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">--</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3238"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3238"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3237</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de hongos comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">24/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>ALVARO MORENO</strong></td>
+						<td data-label="C.I.:" align="center">1</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">094223110</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:establecimientodoncleto@gmail.com">establecimientodoncleto@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">e</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3237"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3237"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3236</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Construcción Natural semipresencial full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">24/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Elsa Peña </strong></td>
+						<td data-label="C.I.:" align="center">34360955</td>
+						<td data-label="Edad:" align="center">59</td>
+						<td data-label="Celular:" align="center">096401810</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:elsamape@gmail.com">elsamape@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Paysandú</td>
+
+						<td data-label="Dirección:" align="center">San Martín 1397</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3236"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3236"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3235</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">24/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Paula Chiesa</strong></td>
+						<td data-label="C.I.:" align="center">5.418.754-7</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">091564240</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:paulatabletttt@gmail.com">paulatabletttt@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3235"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3235"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3234</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de hongos comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">24/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Marisa Machado</strong></td>
+						<td data-label="C.I.:" align="center">17534919</td>
+						<td data-label="Edad:" align="center">64</td>
+						<td data-label="Celular:" align="center">098663307</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:marisamachado1703@gmail.com">marisamachado1703@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Lavalleja</td>
+
+						<td data-label="Dirección:" align="center">Cerro Pelado a 35km ciudad de Minas</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3234"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3234"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3233</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">23/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Diego Zuliani</strong></td>
+						<td data-label="C.I.:" align="center">111111111</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">099424900</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:diegofernandezuliani@gmail.com">diegofernandezuliani@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">3</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3233"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3233"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3232</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">23/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Mariela Carballo</strong></td>
+						<td data-label="C.I.:" align="center">25988986</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">094656158</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:carmariela1@gmail.com">carmariela1@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">1</td>
+
+						<td data-label="Referencia:" align="center">Amigo/a</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3232"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3232"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3231</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">23/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Lucia Sanguinetti</strong></td>
+						<td data-label="C.I.:" align="center">48860678</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">099347373</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:luciasanguinetti.cr@gmail.com">luciasanguinetti.cr@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Artigas</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Otro</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3231"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3231"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3230</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Jardines ecológicos  Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">22/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>carolina becerra</strong></td>
+						<td data-label="C.I.:" align="center">29841223</td>
+						<td data-label="Edad:" align="center">45</td>
+						<td data-label="Celular:" align="center">095303632</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:acarobece@hotmail.com">acarobece@hotmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Treinta y Tres</td>
+
+						<td data-label="Dirección:" align="center">Pública 2 entre Tomás Gómez y Heber Lacuesta </td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3230"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3230"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3229</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Plantas Usadas como Medicina </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">21/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Victor</strong></td>
+						<td data-label="C.I.:" align="center">20005818</td>
+						<td data-label="Edad:" align="center">47</td>
+						<td data-label="Celular:" align="center">099647288</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:victordayan24@gmail.com">victordayan24@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">26 de marzo 3459</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3229"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3229"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3228</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">21/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Amparo Etchegoimberry</strong></td>
+						<td data-label="C.I.:" align="center">27023415</td>
+						<td data-label="Edad:" align="center">55</td>
+						<td data-label="Celular:" align="center">098240469</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:amparoegarderes@gmail.com">amparoegarderes@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Belastiqui 1575</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3228"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3228"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3227</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Huerta orgánica  full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">20/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Carolina Vargas</strong></td>
+						<td data-label="C.I.:" align="center">4391606</td>
+						<td data-label="Edad:" align="center">46</td>
+						<td data-label="Celular:" align="center">098153984</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:carovargas16@gmail.com">carovargas16@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">propios 3041</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3227"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3227"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3226</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de hongos comestibles Full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">20/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Elizabeth Coitinho </strong></td>
+						<td data-label="C.I.:" align="center">19411369</td>
+						<td data-label="Edad:" align="center">56</td>
+						<td data-label="Celular:" align="center">094323908</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:jacpam1@hotmail.com">jacpam1@hotmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Ecuador solar 32 Pando </td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3226"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3226"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3225</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">20/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Elisa Morinico</strong></td>
+						<td data-label="C.I.:" align="center">33539654</td>
+						<td data-label="Edad:" align="center">1</td>
+						<td data-label="Celular:" align="center">099467202</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:emorinico@gmail.com">emorinico@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Florida</td>
+
+						<td data-label="Dirección:" align="center">E</td>
+
+						<td data-label="Referencia:" align="center">Amigo/a</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3225"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3225"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3224</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Cultivo de cannabis orgánico full</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">18/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Nicolas Bajmetkov</strong></td>
+						<td data-label="C.I.:" align="center">42395900</td>
+						<td data-label="Edad:" align="center">37</td>
+						<td data-label="Celular:" align="center">091622472</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:nbajmetkovt@gmail.com">nbajmetkovt@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Canelones</td>
+
+						<td data-label="Dirección:" align="center">Instrucciones del Año XIII, 840 </td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3224"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3224"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu" >
+
+						<td data-label="Nº:" align="center"><strong>3223</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Sistemas agroforestales avanzado (certificado)</em></strong></td>
+						<td data-label="Fecha inc.:" align="center">18/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Rubén </strong></td>
+						<td data-label="C.I.:" align="center">50711380</td>
+						<td data-label="Edad:" align="center">36</td>
+						<td data-label="Celular:" align="center">092540019</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:rubenlarroza12@gmail.com">rubenlarroza12@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Rocha</td>
+
+						<td data-label="Dirección:" align="center">Ruta 9 k 290</td>
+
+						<td data-label="Referencia:" align="center">Búsqueda en internet</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_3" title="Cancelado" >Cancelado</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3223"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3223"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr><tr class="tabla_menu1" >
+
+						<td data-label="Nº:" align="center"><strong>3222</strong></td>
+						<td data-label="Curso:" align="center"><strong><em>Reconocimiento y uso de plantas como medicina  full </em></strong></td>
+						<td data-label="Fecha inc.:" align="center">17/03/2026</td>
+						<td data-label="Nombre:" align="center"><strong>Romina Alves</strong></td>
+						<td data-label="C.I.:" align="center">48439031</td>
+						<td data-label="Edad:" align="center">29</td>
+						<td data-label="Celular:" align="center">098312911</td>
+						<td data-label="E-mail:" align="center"><a href="mailto:roalte96@gmail.com">roalte96@gmail.com</a></td>
+						<td data-label="Dpto.:" align="center">Montevideo</td>
+
+						<td data-label="Dirección:" align="center">Urquiza 3098 Apto 205</td>
+
+						<td data-label="Referencia:" align="center">Redes sociales</td>
+
+						<td data-label="Recibir nov.:" align="center">SI</td>
+					
+					<td data-label="Estado:" align="center" class="estado">
+						<div class="estado_incriptos_2" title="Inscripción efectuada" >Inscripción efectuada</div>
+					</td>
+
+				<td data-label="Modificar:" width="33" align="center" class="modificar"><a href="panel.php?pg=inscriptos_edit&id=3222"><img src="img/ico_edita.png" border="0" /></a></td>
+				<td data-label="Eliminar:" width="33" align="center" class="eliminar"><a href="panel.php?pg=inscriptos_del&id=3222"><img src="img/ico_elimina.png" border="0" /></a></td>
+				          </tr>		  	</tbody><!-- end body -->
+			</table>
+		</td>
+  </tr>
+
+
+
+  <tr>
+    <td><table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="33%" height="25" align="left">Total: <span class="ari14b">3116</span></td>
+        <td align="center" width="33%"></td>
+        <td align="right" width="33%"><span >1</span> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=2'>2</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=3'>3</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=4'>4</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=5'>5</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=6'>6</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=7'>7</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=8'>8</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=9'>9</a> | <a  href='/admin/panel.php?pg=inscriptos_list&_pagi_pg=2'>Siguiente &raquo;</a></td>
+      </tr>
+    </table></td>
+  </tr>
+</table> 
+
+  </div>
+</div>
+</section>
+</body>
+</html>

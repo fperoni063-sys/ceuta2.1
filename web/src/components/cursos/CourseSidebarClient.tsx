@@ -32,6 +32,9 @@ interface CourseSidebarProps {
         descuento_fecha_fin?: string | null;
         descuento_online_porcentaje?: number | null;
         descuento_online_etiqueta?: string | null;
+        // dLocal Go
+        dlocal_habilitado?: boolean;
+        slug?: string;
     };
 }
 
@@ -178,6 +181,8 @@ export function CourseSidebarClient({ curso }: CourseSidebarProps) {
                     descuento_cupos_usados={curso.descuento_cupos_usados}
                     descuento_etiqueta={activeDescuentoEtiqueta}
                     descuento_fecha_fin={curso.descuento_fecha_fin}
+                    dlocalHabilitado={curso.dlocal_habilitado}
+                    courseSlug={curso.slug}
                 />
                 <Button asChild variant="outline" className="w-full" size="lg">
                     <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
