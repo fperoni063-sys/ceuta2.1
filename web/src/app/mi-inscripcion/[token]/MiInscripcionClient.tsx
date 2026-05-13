@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { saveInscripcionCookie, useInscripciones } from '@/lib/hooks/useInscripcionCookie';
 import { UploadComprobante } from '@/components/payment/UploadComprobante';
 import { calculateFrozenPrice } from '@/lib/utils/priceLogic';
-import { CheckCircle, Clock } from 'lucide-react';
+import { formatearPrecio } from '@/lib/utils/discountUtils';
+import { CheckCircle, Clock, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { CompleteProfileForm } from '@/components/cursos/CompleteProfileForm';
@@ -48,6 +49,10 @@ interface InscripcionData {
         descuento_online_porcentaje?: number | null;
         descuento_online_etiqueta?: string | null;
         precio_online?: number | null;
+        // Argentina
+        es_curso_argentina?: boolean;
+        dlocal_habilitado?: boolean;
+        slug?: string;
     };
 }
 
@@ -78,8 +83,8 @@ interface Props {
     token: string;
 }
 
-type MetodoPago = 'transferencia' | 'mercadopago' | 'efectivo' | '';
-type PaymentStep = 'select' | 'show-details' | 'upload' | 'success';
+type MetodoPago = 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal' | '';
+type PaymentStep = 'select' | 'show-details' | 'upload' | 'success' | 'dlocal-redirect';
 
 export function MiInscripcionClient({ data, token }: Props) {
     const { removeInscripcion, updateEstadoInscripcion } = useInscripciones();
@@ -157,10 +162,14 @@ export function MiInscripcionClient({ data, token }: Props) {
     const cantidadCuotas = data.curso.cantidad_cuotas || 1;
     const valorCuota = Math.round(priceInfo.finalPrice / cantidadCuotas);
     const whatsappLink = `https://wa.me/59898910715`; // Default fallback
+    const esCursoArgentina = data.curso.es_curso_argentina ?? false;
+    const moneda = esCursoArgentina ? 'ARS' as const : 'UYU' as const;
 
     // Seña payment option
     const SENA_AMOUNT = 500;
     const [tipoPago, setTipoPago] = useState<'total' | 'seña'>('total');
+    const [dlocalLoading, setDlocalLoading] = useState(false);
+    const [dlocalError, setDlocalError] = useState<string | null>(null);
 
     // Helper para calcular qué mostrar según el tipo de pago
     const getDisplayInfo = () => {
@@ -189,11 +198,43 @@ export function MiInscripcionClient({ data, token }: Props) {
 
     const handleMethodSelect = (method: MetodoPago) => {
         setSelectedMethod(method);
+        if (method === 'dlocal') {
+            handleDlocalPayment();
+            return;
+        }
         if (method === 'mercadopago') {
             // No auto-open, user clicks button
         }
         // Para todos los métodos mostramos detalles/opciones (incluso MP para dar feedback visual)
         setPaymentStep('show-details');
+    };
+
+    const handleDlocalPayment = async () => {
+        setDlocalLoading(true);
+        setDlocalError(null);
+        try {
+            const response = await fetch('/api/dlocal/create-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    curso_id: data.curso.id,
+                    inscripto_id: data.id,
+                    amount: priceInfo.finalPrice,
+                    payer_name: data.nombre,
+                    payer_email: data.email,
+                }),
+            });
+            const result = await response.json();
+            if (result.redirect_url) {
+                window.location.href = result.redirect_url;
+            } else {
+                setDlocalError(result.error || 'Error al crear el pago. Intentá de nuevo.');
+            }
+        } catch {
+            setDlocalError('Error de conexión. Intentá de nuevo o contactanos por WhatsApp.');
+        } finally {
+            setDlocalLoading(false);
+        }
     };
 
     const handleUploadSuccess = useCallback(() => {
@@ -391,7 +432,8 @@ export function MiInscripcionClient({ data, token }: Props) {
                 {/* Price & Summary Card */}
                 <div className="bg-background rounded-2xl shadow-sm border border-earth-900/10 dark:border-white/10 overflow-hidden">
 
-                    {/* Selector Seña vs Total */}
+                    {/* Selector Seña vs Total - HIDDEN for Argentina */}
+                    {!esCursoArgentina && (
                     <div className="p-4 border-b border-earth-900/5 dark:border-white/5">
                         <p className="text-sm font-medium text-center mb-3 text-earth-900 dark:text-gray-100">
                             ¿Qué deseas abonar hoy?
@@ -423,6 +465,7 @@ export function MiInscripcionClient({ data, token }: Props) {
                             </button>
                         </div>
                     </div>
+                    )}
 
                     {/* Precio dinámico usando getDisplayInfo() */}
                     <div className="bg-green-950/10 dark:bg-green-900/20 border-b border-green-900/10 dark:border-white/5 p-4 sm:p-5 text-center">
@@ -467,6 +510,59 @@ export function MiInscripcionClient({ data, token }: Props) {
                     {/* Payment Selector */}
                     {paymentStep === 'select' && (
                         <div className="p-6 md:p-8 space-y-6">
+                            {esCursoArgentina ? (
+                                /* ============================================= */
+                                /* FLUJO ARGENTINA: Botón Pagar directo a dLocal  */
+                                /* ============================================= */
+                                <div className="space-y-5">
+                                    {/* Precio en ARS */}
+                                    <div className="text-center py-2">
+                                        <p className="text-sm text-muted-foreground mb-1">Total a pagar</p>
+                                        <p className="font-heading text-4xl font-bold text-green-700">
+                                            {formatearPrecio(priceInfo.finalPrice, moneda)}
+                                        </p>
+                                        {cantidadCuotas > 1 && (
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                {cantidadCuotas} cuotas de {formatearPrecio(valorCuota, moneda)}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Botón Pagar */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleMethodSelect('dlocal')}
+                                        disabled={dlocalLoading}
+                                        className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                        {dlocalLoading ? (
+                                            <><Clock className="w-5 h-5 animate-spin" /> Procesando...</>
+                                        ) : (
+                                            <><CreditCard className="w-6 h-6" /> Pagar</>
+                                        )}
+                                    </button>
+
+                                    {dlocalError && (
+                                        <p className="text-sm text-red-500 text-center">{dlocalError}</p>
+                                    )}
+
+                                    {/* Info Argentina */}
+                                    <div className="bg-blue-50/50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-lg p-3 text-left">
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-blue-600 dark:text-blue-400 mt-0.5 text-sm flex-shrink-0">ℹ️</span>
+                                            <ul className="text-xs text-blue-800 dark:text-blue-200/80 space-y-1 list-disc pl-3">
+                                                <li><strong>Pago seguro:</strong> Serás redirigido a una plataforma de pago segura.</li>
+                                                <li><strong>Elegí tu método:</strong> Crédito, débito, efectivo o transferencia — lo seleccionás en la plataforma de pago.</li>
+                                                <li><strong>Pago único:</strong> No es una suscripción. Se cobra una sola vez.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                /* ============================================= */
+                                /* FLUJO NORMAL (Uruguay): Múltiples métodos      */
+                                /* ============================================= */
+                                <>
                             <p className="text-center text-walnut-600 dark:text-gray-300 font-medium">
                                 Elegí cómo preferís pagar:
                             </p>
@@ -512,6 +608,8 @@ export function MiInscripcionClient({ data, token }: Props) {
                                     <span className="text-xs text-walnut-500 dark:text-gray-400 mt-1">Abitab / RedPagos</span>
                                 </button>
                             </div>
+                                </>
+                            )}
                         </div>
                     )}
 

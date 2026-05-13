@@ -58,7 +58,9 @@ export async function GET(
                 descuento_online_porcentaje,
                 descuento_online_etiqueta,
                 descuento_fecha_fin,
-                precio_online
+                precio_online,
+                es_curso_argentina,
+                dlocal_habilitado
             )
         `)
         .eq('access_token', token)

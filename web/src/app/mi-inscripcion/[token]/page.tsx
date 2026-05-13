@@ -48,6 +48,9 @@ interface ApiResponse {
             descuento_online_etiqueta?: string | null;
             descuento_fecha_fin?: string | null;
             precio_online?: number | null;
+            // Argentina
+            es_curso_argentina?: boolean;
+            dlocal_habilitado?: boolean;
         };
     };
 }
