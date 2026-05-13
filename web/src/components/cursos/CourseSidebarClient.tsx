@@ -35,6 +35,8 @@ interface CourseSidebarProps {
         // dLocal Go
         dlocal_habilitado?: boolean;
         slug?: string;
+        // Argentina
+        es_curso_argentina?: boolean;
     };
 }
 
@@ -61,6 +63,9 @@ export function CourseSidebarClient({ curso }: CourseSidebarProps) {
     const activeDescuentoEtiqueta = esHibridoConOnline && modalidadSeleccionada === 'online'
         ? curso.descuento_online_etiqueta
         : curso.descuento_etiqueta;
+
+    // Moneda según si es curso Argentina
+    const moneda = curso.es_curso_argentina ? 'ARS' as const : 'UYU' as const;
 
     return (
         <div className="bg-background rounded-2xl shadow-lg border border-earth-900/10 dark:border-white/5 p-6 md:p-8 sticky top-24">
@@ -114,6 +119,7 @@ export function CourseSidebarClient({ curso }: CourseSidebarProps) {
                         descuentoEtiqueta={activeDescuentoEtiqueta}
                         descuentoFechaFin={curso.descuento_fecha_fin}
                         variant="sidebar"
+                        moneda={moneda}
                     />
                 ) : (
                     <p className="font-heading text-4xl font-bold text-accent">Consultar</p>
@@ -183,6 +189,7 @@ export function CourseSidebarClient({ curso }: CourseSidebarProps) {
                     descuento_fecha_fin={curso.descuento_fecha_fin}
                     dlocalHabilitado={curso.dlocal_habilitado}
                     courseSlug={curso.slug}
+                    esCursoArgentina={curso.es_curso_argentina}
                 />
                 <Button asChild variant="outline" className="w-full" size="lg">
                     <a href={whatsappLink} target="_blank" rel="noopener noreferrer">

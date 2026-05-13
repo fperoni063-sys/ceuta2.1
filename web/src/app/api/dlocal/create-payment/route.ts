@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         // ============================================================
         const { data: curso, error: cursoError } = await supabase
             .from('cursos')
-            .select('id, nombre, precio, dlocal_habilitado, slug')
+            .select('id, nombre, precio, dlocal_habilitado, slug, es_curso_argentina')
             .eq('id', curso_id)
             .single();
 
@@ -122,10 +122,16 @@ export async function POST(request: NextRequest) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ceuta-cursos.vercel.app';
         const orderId = generateOrderId(inscripto_id);
 
+        // Determine currency and country based on course config
+        const currency = curso.es_curso_argentina ? 'ARS' : 'UYU';
+        const country = curso.es_curso_argentina ? 'AR' : 'UY';
+
+        console.log(`[dLocal] Creating ${currency} payment for course ${curso.id} (Argentina: ${!!curso.es_curso_argentina})`);
+
         const dlocalResponse = await createPayment({
             amount,
-            currency: 'UYU',
-            country: 'UY',
+            currency,
+            country,
             orderId,
             description: `Curso: ${curso.nombre} - ${payer_name || inscripto.nombre}`.substring(0, 100),
             successUrl: `${appUrl}/pago-exitoso?order=${orderId}`,
@@ -148,7 +154,7 @@ export async function POST(request: NextRequest) {
                 dlocal_payment_id: dlocalResponse.id,
                 order_id: orderId,
                 amount,
-                currency: 'UYU',
+                currency,
                 status: dlocalResponse.status || 'PENDING',
                 redirect_url: dlocalResponse.redirect_url,
                 notification_url: `${appUrl}/api/dlocal/webhook`,

@@ -70,6 +70,9 @@ interface CourseFormData {
 
     // dLocal Go
     dlocal_habilitado: boolean;
+
+    // Argentina
+    es_curso_argentina: boolean;
 }
 
 const DEPARTAMENTOS_URUGUAY = [
@@ -162,6 +165,9 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
 
                     // dLocal Go
                     dlocal_habilitado: data.dlocal_habilitado ?? false,
+
+                    // Argentina
+                    es_curso_argentina: data.es_curso_argentina ?? false,
                 });
             } catch (err: any) {
                 setError(err.message || 'Error al cargar datos');
@@ -720,6 +726,41 @@ export default function EditarCursoPage({ params }: { params: Promise<{ id: stri
                                     </span>
                                     <span className="text-xs text-gray-600">
                                         Permite a los alumnos de Argentina y otros países pagar con tarjeta de crédito/débito. El pago se verifica automáticamente.
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+
+                        {/* Argentina Course Toggle */}
+                        <div className="md:col-span-2">
+                            <label className="flex items-center gap-3 p-4 border rounded-xl bg-sky-50 border-sky-200 cursor-pointer hover:bg-sky-100 transition-colors">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.es_curso_argentina}
+                                        onChange={(e) => {
+                                            setFormData(prev => {
+                                                if (!prev) return prev;
+                                                const isArgentina = e.target.checked;
+                                                return {
+                                                    ...prev,
+                                                    es_curso_argentina: isArgentina,
+                                                    // Auto-enable dLocal when Argentina is activated
+                                                    dlocal_habilitado: isArgentina ? true : prev.dlocal_habilitado,
+                                                };
+                                            });
+                                        }}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                                </div>
+                                <div>
+                                    <span className="block font-medium text-gray-800 flex items-center gap-2">
+                                        🇦🇷 Curso para Argentina
+                                        {formData.es_curso_argentina && <span className="text-xs bg-sky-600 text-white px-2 py-0.5 rounded-full">Activo</span>}
+                                    </span>
+                                    <span className="text-xs text-gray-600">
+                                        El precio se muestra en pesos argentinos (ARS). Solo se ofrece pago por tarjeta (dLocal). Se habilita dLocal automáticamente.
                                     </span>
                                 </div>
                             </label>

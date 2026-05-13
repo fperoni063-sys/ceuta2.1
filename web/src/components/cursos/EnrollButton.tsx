@@ -12,6 +12,7 @@ interface EnrollButtonProps {
     cantidadCuotas?: number;
     dlocalHabilitado?: boolean;
     courseSlug?: string;
+    esCursoArgentina?: boolean;
     // Discount fields
     descuento_porcentaje?: number | null;
     descuento_cupos_totales?: number | null;
@@ -28,6 +29,7 @@ export function EnrollButton({
     cantidadCuotas,
     dlocalHabilitado,
     courseSlug,
+    esCursoArgentina,
     descuento_porcentaje,
     descuento_cupos_totales,
     descuento_cupos_usados,
@@ -60,6 +62,7 @@ export function EnrollButton({
                 descuento_fecha_fin={descuento_fecha_fin}
                 dlocalHabilitado={dlocalHabilitado}
                 courseSlug={courseSlug}
+                esCursoArgentina={esCursoArgentina}
             />
         </>
     );

@@ -57,6 +57,9 @@ export interface Curso {
     // dLocal Go payment toggle
     dlocal_habilitado: boolean;
 
+    // Argentina course flag
+    es_curso_argentina: boolean;
+
     updated_at?: string;
     created_at?: string;
 }

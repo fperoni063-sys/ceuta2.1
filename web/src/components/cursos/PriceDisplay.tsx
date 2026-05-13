@@ -27,6 +27,9 @@ export interface PriceDisplayProps {
     // Mostrar desglose de cuotas
     showCuotas?: boolean;
 
+    // Moneda (default UYU)
+    moneda?: 'UYU' | 'ARS';
+
     // Clases adicionales
     className?: string;
 }
@@ -41,6 +44,7 @@ export function PriceDisplay({
     descuentoFechaFin = null,
     variant = 'sidebar',
     showCuotas = true,
+    moneda = 'UYU',
     className = '',
 }: PriceDisplayProps) {
     // Calcular descuento
@@ -76,7 +80,7 @@ export function PriceDisplay({
                 {/* Precio original tachado (si hay descuento) */}
                 {descuento.tieneDescuento && (
                     <span className={styles.originalPrice}>
-                        {formatearPrecio(descuento.precioOriginal)}
+                        {formatearPrecio(descuento.precioOriginal, moneda)}
                     </span>
                 )}
 
@@ -89,22 +93,22 @@ export function PriceDisplay({
                             {cantidadCuotas} cuotas de
                         </span>
                         <span className={styles.mainPrice}>
-                            {formatearPrecio(precioCuota)}
+                            {formatearPrecio(precioCuota, moneda)}
                         </span>
                         <span className={styles.totalLabel}>
-                            (Total: {formatearPrecio(descuento.precioFinal)})
+                            (Total: {formatearPrecio(descuento.precioFinal, moneda)})
                         </span>
                     </div>
                 ) : (
                     <span className={styles.mainPrice}>
-                        {formatearPrecio(descuento.precioFinal)}
+                        {formatearPrecio(descuento.precioFinal, moneda)}
                     </span>
                 )}
 
                 {/* Ahorro (si hay descuento significativo y variante lo permite) */}
                 {descuento.tieneDescuento && descuento.ahorro > 0 && variant !== 'compact' && (
                     <span className={styles.savings}>
-                        Ahorrás {formatearPrecio(descuento.ahorro)}
+                        Ahorrás {formatearPrecio(descuento.ahorro, moneda)}
                     </span>
                 )}
             </div>

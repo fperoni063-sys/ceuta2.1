@@ -27,6 +27,7 @@ interface EnrollmentModalProps {
     cantidadCuotas?: number;
     dlocalHabilitado?: boolean;
     courseSlug?: string;
+    esCursoArgentina?: boolean;
     // Discount fields
     descuento_porcentaje?: number | null;
     descuento_cupos_totales?: number | null;
@@ -277,6 +278,7 @@ interface PaymentMethodProps {
     finalPrice: number | null;
     setFinalPrice: (price: number | null) => void;
     dlocalHabilitado?: boolean;
+    esCursoArgentina?: boolean;
 }
 
 function Step3PaymentMethod({
@@ -297,6 +299,7 @@ function Step3PaymentMethod({
     finalPrice,
     setFinalPrice,
     dlocalHabilitado,
+    esCursoArgentina,
 }: PaymentMethodProps) {
     const [discountApplied, setDiscountApplied] = useState(false);
     const [discountError, setDiscountError] = useState('');
@@ -412,6 +415,67 @@ function Step3PaymentMethod({
 
     const currentPriceToDisplay = tipoPago === 'seña' ? SENA_AMOUNT : (finalPrice || 0);
 
+    // =====================================================
+    // FLUJO ARGENTINA: Pago directo con dLocal
+    // =====================================================
+    if (esCursoArgentina) {
+        const monedaARS = 'ARS' as const;
+        const precioARS = finalPrice || coursePrice || 0;
+        return (
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Precio en ARS */}
+                <div className="text-center py-4">
+                    <p className="text-sm text-muted-foreground mb-1">Total a pagar</p>
+                    <p className="font-heading text-4xl font-bold text-green-700">
+                        {formatearPrecio(precioARS, monedaARS)}
+                    </p>
+                    {cantidadCuotas > 1 && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {cantidadCuotas} cuotas de {formatearPrecio(Math.round(precioARS / cantidadCuotas), monedaARS)}
+                        </p>
+                    )}
+                </div>
+
+                {/* Botón grande de Pagar */}
+                <button
+                    type="button"
+                    onClick={() => handleMethodSelect('dlocal')}
+                    className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    <CreditCard className="w-6 h-6" />
+                    Pagar
+                </button>
+
+                {/* Info */}
+                <div className="bg-blue-50/50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-lg p-3 text-left">
+                    <div className="flex items-start gap-2">
+                        <span className="text-blue-600 dark:text-blue-400 mt-0.5 text-sm flex-shrink-0">ℹ️</span>
+                        <ul className="text-xs text-blue-800 dark:text-blue-200/80 space-y-1 list-disc pl-3">
+                            <li>
+                                <strong>Pago seguro:</strong> Serás redirigido a una plataforma de pago segura.
+                            </li>
+                            <li>
+                                <strong>Métodos:</strong> Tarjeta de crédito, débito y más opciones locales.
+                            </li>
+                            <li>
+                                <strong>Garantía:</strong> Podés cancelar y solicitar reembolso antes del inicio del curso.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="flex gap-3 mt-4">
+                    <Button type="button" variant="outline" onClick={onBack} className="w-full">
+                        Volver
+                    </Button>
+                </div>
+            </form>
+        );
+    }
+
+    // =====================================================
+    // FLUJO NORMAL (Uruguay): Múltiples métodos de pago
+    // =====================================================
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             {/* Cupo Reservado Banner - aparece y desaparece */}
@@ -1268,6 +1332,7 @@ export function EnrollmentModal({
     cantidadCuotas,
     dlocalHabilitado,
     courseSlug,
+    esCursoArgentina,
     descuento_porcentaje,
     descuento_cupos_totales,
     descuento_cupos_usados,
@@ -1456,6 +1521,7 @@ export function EnrollmentModal({
                         finalPrice={finalPrice}
                         setFinalPrice={setFinalPrice}
                         dlocalHabilitado={dlocalHabilitado}
+                        esCursoArgentina={esCursoArgentina}
                     />
                 )}
 

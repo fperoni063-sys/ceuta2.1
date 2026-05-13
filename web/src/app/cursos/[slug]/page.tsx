@@ -73,6 +73,9 @@ interface CourseFullData {
 
     // dLocal Go
     dlocal_habilitado: boolean;
+
+    // Argentina
+    es_curso_argentina: boolean;
 }
 
 interface PageProps {
@@ -356,6 +359,8 @@ function CourseSidebar({ curso }: { curso: CourseFullData }) {
                 descuento_fecha_fin: curso.descuento_fecha_fin,
                 // dLocal Go
                 dlocal_habilitado: curso.dlocal_habilitado,
+                // Argentina
+                es_curso_argentina: curso.es_curso_argentina,
                 slug: curso.slug,
             }}
         />
@@ -648,7 +653,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                         offers: {
                             "@type": "Offer",
                             price: curso.precio,
-                            priceCurrency: "UYU",
+                            priceCurrency: curso.es_curso_argentina ? "ARS" : "UYU",
                             category: "Paid",
                         },
                         hasCourseInstance: {

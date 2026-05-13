@@ -101,18 +101,21 @@ export function calcularDescuento(config: DiscountConfig): DiscountResult {
 // =====================================================
 
 /**
- * Formatea un precio en pesos uruguayos de forma determinista
+ * Formatea un precio en pesos de forma determinista
  * Evita problemas de hidratación (UYU vs $)
+ * @param moneda - 'UYU' (default) o 'ARS' para pesos argentinos
  */
-export function formatearPrecio(precio: number | null): string {
+export function formatearPrecio(precio: number | null, moneda: 'UYU' | 'ARS' = 'UYU'): string {
     if (precio === null || precio === undefined) return 'Consultar';
 
+    // Usar punto como separador de miles para ambos locales (determinista)
     const formatter = new Intl.NumberFormat('es-UY', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     });
 
-    return `$ ${formatter.format(precio)}`;
+    const prefix = moneda === 'ARS' ? 'AR$ ' : '$ ';
+    return `${prefix}${formatter.format(precio)}`;
 }
 
 /**
