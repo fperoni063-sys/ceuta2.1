@@ -455,10 +455,10 @@ function Step3PaymentMethod({
                                 <strong>Pago seguro:</strong> Serás redirigido a una plataforma de pago segura.
                             </li>
                             <li>
-                                <strong>Métodos:</strong> Tarjeta de crédito, débito y más opciones locales.
+                                <strong>Elegí tu método:</strong> Crédito, débito, efectivo o transferencia — lo seleccionás en la plataforma de pago.
                             </li>
                             <li>
-                                <strong>Garantía:</strong> Podés cancelar y solicitar reembolso antes del inicio del curso.
+                                <strong>Pago único:</strong> No es una suscripción. Se cobra una sola vez.
                             </li>
                         </ul>
                     </div>
