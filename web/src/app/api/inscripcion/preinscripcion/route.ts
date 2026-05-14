@@ -17,7 +17,7 @@ import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { curso_id, nombre, email, telefono } = body;
+        const { curso_id, nombre, email, telefono, event_id } = body;
 
         // Validate required fields
         if (!curso_id || !nombre || !email || !telefono) {
@@ -166,6 +166,56 @@ export async function POST(request: NextRequest) {
         if (curso?.url_web_vieja) {
             // Hacemos await pero es seguro porque tiene un AbortController de 4s
             await sincronizarPreinscripcion({ nombre, email, telefono }, curso.url_web_vieja);
+        }
+
+        // ============================================================
+        // META CONVERSIONS API (Server-side) — Fire and forget
+        // Sends the Lead event to Meta for campaign optimization.
+        // This NEVER blocks the response or affects the user flow.
+        // ============================================================
+        try {
+            if (process.env.FB_PIXEL_ID && process.env.FB_CAPI_ACCESS_TOKEN && event_id) {
+                const { createHash } = await import('crypto');
+                const hashSha256 = (val: string) => createHash('sha256').update(val.trim().toLowerCase()).digest('hex');
+
+                const eventData = {
+                    data: [{
+                        event_name: 'Lead',
+                        event_time: Math.floor(Date.now() / 1000),
+                        event_id: event_id,
+                        action_source: 'website',
+                        event_source_url: request.headers.get('referer') || 'https://ceuta.org.uy',
+                        user_data: {
+                            em: [hashSha256(email)],
+                            ph: [hashSha256(telefono.replace(/\D/g, ''))],
+                            fn: [hashSha256(nombre.split(' ')[0])],
+                            client_ip_address: request.headers.get('x-forwarded-for')?.split(',')[0] || '',
+                            client_user_agent: request.headers.get('user-agent') || '',
+                        },
+                        custom_data: {
+                            content_name: cursoNombre,
+                            content_category: 'course_enrollment',
+                            content_ids: [String(curso_id)],
+                        },
+                    }],
+                };
+
+                // Fire without await — response goes to user immediately
+                fetch(
+                    `https://graph.facebook.com/v20.0/${process.env.FB_PIXEL_ID}/events?access_token=${process.env.FB_CAPI_ACCESS_TOKEN}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(eventData),
+                    }
+                )
+                .then(res => res.json())
+                .then(result => console.log('[META-CAPI] ✅ Lead enviado (server):', result))
+                .catch(err => console.warn('[META-CAPI] ⚠️ Error (ignorado):', err));
+            }
+        } catch (capiError) {
+            // Absolutely never let this block the response
+            console.warn('[META-CAPI] ⚠️ Error preparando evento (ignorado):', capiError);
         }
 
         return NextResponse.json({

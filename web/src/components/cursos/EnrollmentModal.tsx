@@ -1390,6 +1390,15 @@ export function EnrollmentModal({
     // Paso 1 -> Paso 2: Guardar datos de contacto en BD y avanzar
     const handleStep1Next = async () => {
         setIsSubmitting(true);
+
+        // Generate event_id for Meta Pixel deduplication (browser + server)
+        // This is done BEFORE the API call so both sides share the same ID
+        let metaEventId: string | undefined;
+        try {
+            const { generateEventId } = await import('@/lib/utils/metaPixel');
+            metaEventId = generateEventId();
+        } catch { /* metaPixel not available — ignored */ }
+
         try {
             const response = await fetch('/api/inscripcion/preinscripcion', {
                 method: 'POST',
@@ -1399,6 +1408,7 @@ export function EnrollmentModal({
                     nombre: formData.nombre,
                     email: formData.email,
                     telefono: formData.telefono,
+                    event_id: metaEventId, // For server-side CAPI deduplication
                 }),
             });
 
@@ -1417,6 +1427,20 @@ export function EnrollmentModal({
                         data.cursoNombre || courseName
                     );
                 }
+
+                // META PIXEL: Fire client-side Lead event AFTER successful save
+                // This is completely independent — if it fails, inscription still works
+                try {
+                    const { trackMetaLead } = await import('@/lib/utils/metaPixel');
+                    trackMetaLead({
+                        eventId: metaEventId || 'fallback',
+                        courseName: courseName,
+                        courseId: courseId,
+                        email: formData.email,
+                        phone: formData.telefono,
+                        name: formData.nombre,
+                    });
+                } catch { /* Meta pixel error — silently ignored */ }
             }
             // Siempre avanzar al paso 2, incluso si falla el guardado
             setStep(2);
