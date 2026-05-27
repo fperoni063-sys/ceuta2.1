@@ -567,7 +567,10 @@ export function MiInscripcionClient({ data, token }: Props) {
                                 Elegí cómo preferís pagar:
                             </p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className={cn(
+                                "grid grid-cols-1 gap-4",
+                                data.curso.dlocal_habilitado ? "md:grid-cols-4" : "md:grid-cols-3"
+                            )}>
                                 {/* Option 1: Transferencia */}
                                 <button
                                     onClick={() => handleMethodSelect('transferencia')}
@@ -607,7 +610,26 @@ export function MiInscripcionClient({ data, token }: Props) {
                                     <span className="font-semibold text-earth-900 dark:text-white">Efectivo</span>
                                     <span className="text-xs text-walnut-500 dark:text-gray-400 mt-1">Abitab / RedPagos</span>
                                 </button>
+
+                                {/* Option 4: dLocal Go */}
+                                {data.curso.dlocal_habilitado && (
+                                    <button
+                                        onClick={() => handleMethodSelect('dlocal')}
+                                        disabled={dlocalLoading}
+                                        className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-transparent bg-gray-50 dark:bg-muted/30 hover:bg-white dark:hover:bg-muted/50 hover:border-violet-200 dark:hover:border-violet-800 hover:shadow-md transition-all group"
+                                    >
+                                        <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                                            🌐
+                                        </div>
+                                        <span className="font-semibold text-earth-900 dark:text-white">Pago Online / Tarjeta</span>
+                                        <span className="text-xs text-walnut-500 dark:text-gray-400 mt-1">Financiamiento dLocal Go</span>
+                                    </button>
+                                )}
                             </div>
+
+                            {dlocalError && (
+                                <p className="text-sm text-red-500 text-center mt-4">{dlocalError}</p>
+                            )}
                                 </>
                             )}
                         </div>
