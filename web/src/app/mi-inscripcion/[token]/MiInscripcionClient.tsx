@@ -52,7 +52,6 @@ interface InscripcionData {
         // Argentina
         es_curso_argentina?: boolean;
         dlocal_habilitado?: boolean;
-        slug?: string;
     };
 }
 
@@ -198,7 +197,7 @@ export function MiInscripcionClient({ data, token }: Props) {
 
     const handleMethodSelect = (method: MetodoPago) => {
         setSelectedMethod(method);
-        if (method === 'dlocal') {
+        if (method === 'dlocal' && esCursoArgentina) {
             handleDlocalPayment();
             return;
         }
@@ -219,7 +218,7 @@ export function MiInscripcionClient({ data, token }: Props) {
                 body: JSON.stringify({
                     curso_id: data.curso.id,
                     inscripto_id: data.id,
-                    amount: priceInfo.finalPrice,
+                    amount: valorCuota, // Cobrar solo una cuota
                     payer_name: data.nombre,
                     payer_email: data.email,
                 }),
@@ -517,14 +516,25 @@ export function MiInscripcionClient({ data, token }: Props) {
                                 <div className="space-y-5">
                                     {/* Precio en ARS */}
                                     <div className="text-center py-2">
-                                        <p className="text-sm text-muted-foreground mb-1">Total a pagar</p>
-                                        <p className="font-heading text-4xl font-bold text-green-700">
-                                            {formatearPrecio(priceInfo.finalPrice, moneda)}
-                                        </p>
-                                        {cantidadCuotas > 1 && (
-                                            <p className="text-sm text-muted-foreground mt-1">
-                                                {cantidadCuotas} cuotas de {formatearPrecio(valorCuota, moneda)}
-                                            </p>
+                                        {cantidadCuotas > 1 ? (
+                                            <>
+                                                <p className="text-sm text-muted-foreground mb-1">
+                                                    Primera cuota (1 de {cantidadCuotas})
+                                                </p>
+                                                <p className="font-heading text-4xl font-bold text-green-700">
+                                                    {formatearPrecio(valorCuota, moneda)}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground mt-1.5">
+                                                    Total del curso: {formatearPrecio(priceInfo.finalPrice, moneda)}
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="text-sm text-muted-foreground mb-1">Total a pagar</p>
+                                                <p className="font-heading text-4xl font-bold text-green-700">
+                                                    {formatearPrecio(priceInfo.finalPrice, moneda)}
+                                                </p>
+                                            </>
                                         )}
                                     </div>
 
@@ -538,7 +548,7 @@ export function MiInscripcionClient({ data, token }: Props) {
                                         {dlocalLoading ? (
                                             <><Clock className="w-5 h-5 animate-spin" /> Procesando...</>
                                         ) : (
-                                            <><CreditCard className="w-6 h-6" /> Pagar</>
+                                            <><CreditCard className="w-6 h-6" /> Pagar ahora</>
                                         )}
                                     </button>
 
@@ -611,7 +621,7 @@ export function MiInscripcionClient({ data, token }: Props) {
                                     <span className="text-xs text-walnut-500 dark:text-gray-400 mt-1">Abitab / RedPagos</span>
                                 </button>
 
-                                {/* Option 4: dLocal Go */}
+                                {/* Option 4: dLocal - Pago Argentina */}
                                 {data.curso.dlocal_habilitado && (
                                     <button
                                         onClick={() => handleMethodSelect('dlocal')}
@@ -621,8 +631,8 @@ export function MiInscripcionClient({ data, token }: Props) {
                                         <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
                                             🌐
                                         </div>
-                                        <span className="font-semibold text-earth-900 dark:text-white">Pago Online / Tarjeta</span>
-                                        <span className="text-xs text-walnut-500 dark:text-gray-400 mt-1">Financiamiento dLocal Go</span>
+                                        <span className="font-semibold text-earth-900 dark:text-white">Pago Argentina</span>
+                                        <span className="text-xs text-walnut-500 dark:text-gray-400 mt-1">Tarjetas y cuotas en ARS</span>
                                     </button>
                                 )}
                             </div>
@@ -827,6 +837,72 @@ export function MiInscripcionClient({ data, token }: Props) {
                                             <span className="text-xs opacity-90 font-normal">Subir comprobante ahora</span>
                                         </button>
                                     </div>
+                                </div>
+                            )}
+
+                            {selectedMethod === 'dlocal' && (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                                    <div className="bg-violet-50 dark:bg-violet-950/20 p-6 rounded-xl border border-violet-100 dark:border-violet-500/20">
+                                        <h3 className="font-semibold text-earth-900 dark:text-violet-50 mb-4 flex items-center gap-2">
+                                            <span>🌐</span> Pago Tarjeta Argentina
+                                        </h3>
+
+                                        {/* MONTO A PAGAR */}
+                                        <div className="bg-white dark:bg-violet-900/30 border border-violet-200 dark:border-violet-500/20 rounded-xl p-4 sm:p-5 text-center shadow-sm">
+                                            <p className="text-xs uppercase tracking-wider text-violet-600 dark:text-violet-400 font-semibold mb-2">
+                                                {cantidadCuotas > 1 ? `Primera cuota (1 de ${cantidadCuotas})` : 'Total a pagar'}
+                                            </p>
+                                            <div className="flex items-center justify-center gap-2 sm:gap-3">
+                                                <span className="text-2xl sm:text-4xl font-bold text-earth-900 dark:text-white">
+                                                    ${valorCuota.toLocaleString('es-UY')} UYU
+                                                </span>
+                                            </div>
+                                            {cantidadCuotas > 1 && (
+                                                <p className="text-xs text-violet-600/70 dark:text-violet-400/70 mt-1.5">
+                                                    Total del curso: ${priceInfo.finalPrice.toLocaleString('es-UY')} UYU
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Instructions */}
+                                        <div className="space-y-3 mt-4">
+                                            <div className="flex gap-3 items-start">
+                                                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</div>
+                                                <p className="text-sm text-walnut-700 dark:text-violet-100/80">
+                                                    Hacé clic en el botón de abajo para abrir la pasarela de pago segura de <strong>dLocal Go</strong>.
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-3 items-start">
+                                                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</div>
+                                                <p className="text-sm text-walnut-700 dark:text-violet-100/80">
+                                                    El monto se convertirá automáticamente a <strong>Pesos Argentinos (ARS)</strong> al cambio oficial de dLocal.
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-3 items-start">
+                                                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">3</div>
+                                                <p className="text-sm text-walnut-700 dark:text-violet-100/80">
+                                                    Una vez completado el pago, tu inscripción se confirmará <strong>automáticamente</strong>. Sin necesidad de subir comprobante.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <button
+                                        onClick={handleDlocalPayment}
+                                        disabled={dlocalLoading}
+                                        className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+                                    >
+                                        {dlocalLoading ? (
+                                            <><Clock className="w-5 h-5 animate-spin" /> Procesando...</>
+                                        ) : (
+                                            <><CreditCard className="w-6 h-6" /> Ir a Pagar con Tarjeta Argentina</>
+                                        )}
+                                    </button>
+
+                                    {dlocalError && (
+                                        <p className="text-sm text-red-500 text-center">{dlocalError}</p>
+                                    )}
                                 </div>
                             )}
 

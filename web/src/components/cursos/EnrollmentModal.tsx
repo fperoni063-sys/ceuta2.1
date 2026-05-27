@@ -421,18 +421,31 @@ function Step3PaymentMethod({
     if (esCursoArgentina) {
         const monedaARS = 'ARS' as const;
         const precioARS = finalPrice || coursePrice || 0;
+        const cuotaARS = Math.round(precioARS / cantidadCuotas);
+        
         return (
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Precio en ARS */}
                 <div className="text-center py-4">
-                    <p className="text-sm text-muted-foreground mb-1">Total a pagar</p>
-                    <p className="font-heading text-4xl font-bold text-green-700">
-                        {formatearPrecio(precioARS, monedaARS)}
-                    </p>
-                    {cantidadCuotas > 1 && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {cantidadCuotas} cuotas de {formatearPrecio(Math.round(precioARS / cantidadCuotas), monedaARS)}
-                        </p>
+                    {cantidadCuotas > 1 ? (
+                        <>
+                            <p className="text-sm text-muted-foreground mb-1">
+                                Primera cuota (1 de {cantidadCuotas})
+                            </p>
+                            <p className="font-heading text-4xl font-bold text-green-700">
+                                {formatearPrecio(cuotaARS, monedaARS)}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1.5">
+                                Total del curso: {formatearPrecio(precioARS, monedaARS)}
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-sm text-muted-foreground mb-1">Total a pagar</p>
+                            <p className="font-heading text-4xl font-bold text-green-700">
+                                {formatearPrecio(precioARS, monedaARS)}
+                            </p>
+                        </>
                     )}
                 </div>
 
@@ -686,7 +699,7 @@ function Step3PaymentMethod({
                         <span className="font-medium text-earth-900 dark:text-white text-xs text-center">Efectivo</span>
                     </button>
 
-                    {/* Option 4: dLocal - Internacional / Argentina */}
+                    {/* Option 4: dLocal - Pago Argentina */}
                     {dlocalHabilitado && (
                         <button
                             type="button"
@@ -706,7 +719,10 @@ function Step3PaymentMethod({
                             )}>
                                 🌐
                             </div>
-                            <span className="font-medium text-earth-900 dark:text-white text-xs text-center leading-tight">Internacional<br/><span className="text-[10px] font-normal text-muted-foreground">ARG y más</span></span>
+                            <span className="font-medium text-earth-900 dark:text-white text-xs text-center leading-tight">
+                                Pago Argentina<br/>
+                                <span className="text-[10px] font-normal text-muted-foreground">Tarjetas y cuotas ARS</span>
+                            </span>
                         </button>
                     )}
                 </div>
@@ -1197,12 +1213,12 @@ function Step4Confirmation({
                     </div>
                 )}
 
-                {/* DLOCAL - INTERNATIONAL / ARGENTINA */}
+                {/* DLOCAL - PAGO ARGENTINA */}
                 {formData.metodoPago === 'dlocal' && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                         <div className="bg-violet-50 dark:bg-violet-950/20 p-5 rounded-xl border border-violet-100 dark:border-violet-500/20">
                             <h3 className="font-semibold text-earth-900 dark:text-violet-50 mb-4 flex items-center gap-2">
-                                <span className="text-xl">🌐</span> Pago Internacional / Argentina
+                                <span className="text-xl">🌐</span> Pago Tarjeta Argentina
                             </h3>
 
                             {/* MONTO A PAGAR */}
@@ -1211,7 +1227,7 @@ function Step4Confirmation({
                                     {getDisplayInfo().label}
                                 </p>
                                 <span className="text-2xl sm:text-3xl font-bold text-earth-900 dark:text-white">
-                                    {formatearPrecio(getDisplayInfo().amount)}
+                                    {formatearPrecio(getDisplayInfo().amount, 'UYU')}
                                 </span>
                                 {getDisplayInfo().subtitle && (
                                     <p className="text-xs text-violet-600/70 dark:text-violet-400/70 mt-1">
@@ -1225,13 +1241,13 @@ function Step4Confirmation({
                                 <div className="flex gap-3 items-start">
                                     <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</div>
                                     <p className="text-sm text-walnut-700 dark:text-violet-100/80">
-                                        Hacé clic en <strong>"Pagar ahora"</strong> para ir al checkout seguro.
+                                        Hacé clic en <strong>"Pagar ahora"</strong> para ir al checkout seguro de dLocal.
                                     </p>
                                 </div>
                                 <div className="flex gap-3 items-start">
                                     <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</div>
                                     <p className="text-sm text-walnut-700 dark:text-violet-100/80">
-                                        Completá el pago con tarjeta de crédito o débito.
+                                        Completá el pago. El monto se convertirá automáticamente a <strong>Pesos Argentinos (ARS)</strong> en la plataforma.
                                     </p>
                                 </div>
                                 <div className="flex gap-3 items-start">

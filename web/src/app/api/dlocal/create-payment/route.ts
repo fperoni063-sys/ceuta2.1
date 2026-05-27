@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
         // Determine currency and country based on course config
         const currency = curso.es_curso_argentina ? 'ARS' : 'UYU';
-        const country = curso.es_curso_argentina ? 'AR' : 'UY';
+        const country = 'AR'; // Forzado a AR para habilitar Rapipago/Pago Fácil y tarjetas locales de Argentina
 
         console.log(`[dLocal] Creating ${currency} payment for course ${curso.id} (Argentina: ${!!curso.es_curso_argentina})`);
 
