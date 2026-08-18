@@ -72,21 +72,42 @@ export async function getFunnelStats(startDate?: string, endDate?: string) {
         query = query.lte('created_at', endUtc);
     }
 
-    // Fetch critical events for funnel
-    // Note: handling large datasets in memory is bad, but for 'super basic' internal tool with low traffic it's fine.
-    // For scale, use SQL aggregations or RPC.
-    const { data: events, error } = await query.in('event_name', [
-        'enrollment_modal_open',
-        'enrollment_step_1_complete',
-        'enrollment_step_2_complete',
-        'enrollment_step_3_view',
-        'enrollment_payment_method_click',
-        'enrollment_step_4_view',
-        'enrollment_comprobante_upload',
-        'course_view'
-    ]);
+    // Fetch critical events for funnel with high limit
+    const { data: events, error } = await query
+        .in('event_name', [
+            'enrollment_modal_open',
+            'enrollment_step_1_complete',
+            'enrollment_step_2_complete',
+            'enrollment_step_3_view',
+            'enrollment_payment_method_click',
+            'enrollment_step_4_view',
+            'enrollment_comprobante_upload',
+            'course_view',
+            'home_view'
+        ])
+        .limit(50000);
 
-    if (error) throw error;
+    if (error) {
+        console.error('Error fetching funnel stats:', error);
+        return {
+            visits: 0,
+            homeVisits: 0,
+            courseVisits: 0,
+            funnel: {
+                open: 0,
+                contact: 0,
+                details: 0,
+                payment: 0,
+                confirmation: 0,
+                upload: 0,
+            },
+            paymentMethods: {
+                mercadopago: 0,
+                transferencia: 0,
+                efectivo: 0,
+            }
+        };
+    }
 
     // Process events
     const stats = {
@@ -180,7 +201,7 @@ export async function getCourseVisitsStats(startDate?: string, endDate?: string)
         query = query.lte('created_at', endUtc);
     }
 
-    const { data: events, error } = await query;
+    const { data: events, error } = await query.limit(50000);
 
     if (error) {
         console.error('Error fetching course visits:', error);
@@ -244,7 +265,7 @@ export async function getDailyStats(startDateStr?: string, endDateStr?: string) 
         .gte('created_at', startUtc)
         .lte('created_at', endUtc);
 
-    const { data: events, error } = await query;
+    const { data: events, error } = await query.limit(50000);
     if (error) {
         console.error('Error fetching daily stats:', error);
         return [];

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1360,14 +1360,18 @@ export function EnrollmentModal({
     const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Track Modal Open/Close
+    const wasOpenRef = useRef(false);
+
+    // Track Modal Open/Close solo cuando cambia de estado real
     useEffect(() => {
         if (isOpen) {
+            wasOpenRef.current = true;
             track('enrollment_modal_open', { courseId });
-        } else {
+        } else if (wasOpenRef.current) {
+            wasOpenRef.current = false;
             track('enrollment_modal_close', { courseId, metadata: { lastStep: step } });
         }
-    }, [isOpen]);
+    }, [isOpen, courseId, step, track]);
 
     const [enrollmentId, setEnrollmentId] = useState<number | undefined>(undefined);
     const [token, setToken] = useState<string | null>(null);
