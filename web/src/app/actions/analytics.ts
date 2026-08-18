@@ -305,3 +305,34 @@ export async function getDailyStats(startDateStr?: string, endDateStr?: string) 
     result.sort((a, b) => a.date.localeCompare(b.date));
     return result;
 }
+
+/**
+ * Elimina los eventos de analytics con más de `daysToKeep` días de antigüedad (default: 30 días).
+ * Mantiene la base de datos dentro del límite gratuito de Supabase.
+ */
+export async function purgeOldAnalyticsEvents(daysToKeep: number = 30): Promise<{ success: boolean; deletedCount?: number; error?: string }> {
+    try {
+        const supabase = createAdminClient();
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+        const cutoffIso = cutoffDate.toISOString();
+
+        // Eliminar eventos con created_at menor a la fecha límite
+        const { error, count } = await supabase
+            .from('analytics_events')
+            .delete({ count: 'exact' })
+            .lt('created_at', cutoffIso);
+
+        if (error) {
+            console.error('Error purgando eventos de analytics:', error);
+            return { success: false, error: error.message };
+        }
+
+        console.log(`🧹 Purga de analytics completada: eliminados registros anteriores a ${cutoffIso} (total: ${count ?? 0})`);
+        return { success: true, deletedCount: count ?? 0 };
+    } catch (err) {
+        console.error('Error inesperado purgando analytics:', err);
+        return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
+    }
+}
+

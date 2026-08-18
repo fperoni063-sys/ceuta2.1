@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { getFunnelStats, getCourseVisitsStats, getDailyStats } from '@/app/actions/analytics';
+import { getFunnelStats, getCourseVisitsStats, getDailyStats, purgeOldAnalyticsEvents } from '@/app/actions/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Users, TrendingUp, CreditCard, MousePointerClick, BookOpen, Eye, UserCheck, CalendarDays } from 'lucide-react';
+import { Loader2, Users, TrendingUp, CreditCard, MousePointerClick, BookOpen, Eye, UserCheck, CalendarDays, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { Button } from '@/components/ui/button';
 
 type FunnelStats = {
     visits: number;
@@ -62,8 +63,10 @@ export default function AnalyticsPage() {
         return formatLocalDate(d);
     });
     const [endDate, setEndDate] = useState<string>(() => formatLocalDate(new Date()));
+    const [purging, setPurging] = useState(false);
+    const [purgeMessage, setPurgeMessage] = useState<string | null>(null);
 
-    useEffect(() => {
+    const loadData = useCallback(() => {
         setLoading(true);
         Promise.all([
             getFunnelStats(startDate, endDate),
@@ -77,6 +80,33 @@ export default function AnalyticsPage() {
             })
             .finally(() => setLoading(false));
     }, [startDate, endDate]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handlePurgeOld = async () => {
+        if (!confirm('¿Deseas eliminar permanentemente los eventos de analítica de más de 30 días? Esto liberará espacio en Supabase.')) {
+            return;
+        }
+
+        setPurging(true);
+        setPurgeMessage(null);
+        try {
+            const res = await purgeOldAnalyticsEvents(30);
+            if (res.success) {
+                setPurgeMessage(`✓ Se eliminaron ${res.deletedCount ?? 0} registros antiguos`);
+                loadData();
+            } else {
+                setPurgeMessage(`Error: ${res.error || 'No se pudo purgar'}`);
+            }
+        } catch {
+            setPurgeMessage('Error al ejecutar la purga');
+        } finally {
+            setPurging(false);
+            setTimeout(() => setPurgeMessage(null), 5000);
+        }
+    };
 
     if (loading && !stats) {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-green-700" /></div>;
@@ -103,23 +133,50 @@ export default function AnalyticsPage() {
     return (
         <div className="p-6 space-y-8 animate-in fade-in">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-3xl font-heading font-bold text-earth-900">Analítica Avanzada</h1>
-                <div className="flex items-center gap-3 bg-white p-2 rounded-lg border shadow-sm">
-                    <CalendarDays className="w-5 h-5 text-gray-400" />
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="date"
-                            className="text-sm px-2 py-1 rounded border-gray-200 outline-none focus:ring-1 focus:ring-green-700"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                        <span className="text-gray-400 text-sm">hasta</span>
-                        <input
-                            type="date"
-                            className="text-sm px-2 py-1 rounded border-gray-200 outline-none focus:ring-1 focus:ring-green-700"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
+                <div>
+                    <h1 className="text-3xl font-heading font-bold text-earth-900">Analítica Avanzada</h1>
+                    {purgeMessage && (
+                        <p className="text-xs text-green-700 font-medium mt-1 animate-in fade-in">{purgeMessage}</p>
+                    )}
+                </div>
+                <div className="flex items-center flex-wrap gap-3">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePurgeOld}
+                        disabled={purging}
+                        className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                        title="Eliminar eventos con más de 30 días de antigüedad para no llenar Supabase"
+                    >
+                        {purging ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                                Limpiando...
+                            </>
+                        ) : (
+                            <>
+                                <Trash2 className="w-4 h-4 mr-1.5" />
+                                Limpiar &gt; 30 días
+                            </>
+                        )}
+                    </Button>
+                    <div className="flex items-center gap-3 bg-white p-2 rounded-lg border shadow-sm">
+                        <CalendarDays className="w-5 h-5 text-gray-400" />
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="date"
+                                className="text-sm px-2 py-1 rounded border-gray-200 outline-none focus:ring-1 focus:ring-green-700"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                            />
+                            <span className="text-gray-400 text-sm">hasta</span>
+                            <input
+                                type="date"
+                                className="text-sm px-2 py-1 rounded border-gray-200 outline-none focus:ring-1 focus:ring-green-700"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
