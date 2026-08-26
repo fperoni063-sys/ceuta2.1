@@ -85,7 +85,7 @@ El componente `EnrollmentModal.tsx` es el corazón de la conversión.
     *   Legacy (no usar en código nuevo): `pagado`, `confirmado`, `primer_contacto`, `segundo_contacto`.
 
 ### 4. Sistema de Emails
-*   **Motor:** `emailService.ts` → Resend (si hay `RESEND_API_KEY`) o SMTP (`SMTP_USER` + `SMTP_PASSWORD` / `SMTP_PASS`).
+*   **Motor:** `emailService.ts` → intenta Resend; si Resend rechaza (modo prueba / sin dominio), cae a Gmail SMTP. GitHub Actions **no** envía mails a alumnos.
 *   **De:** `EMAIL_FROM`. Sin dominio verificado en Resend, solo se puede mandar al mail de la cuenta Resend, desde `onboarding@resend.dev`.
 *   **Secuencia:**
     1.  `confirmacion` (inmediato, 0h) en `/api/inscripcion/preinscripcion`.

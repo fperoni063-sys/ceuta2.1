@@ -45,4 +45,26 @@ describe('emailTransport', () => {
             .toBe('CEUTA <secretaria@ceuta.org.uy>');
         expect(getFromAddress('resend', {})).toBe('CEUTA <onboarding@resend.dev>');
     });
+
+    it('ignores placeholder EMAIL_FROM and Resend onboarding when sending via SMTP', () => {
+        expect(getFromAddress('smtp', {
+            EMAIL_FROM: 'EMAIL_FROM',
+            SMTP_USER: 'a@b.com',
+        })).toBe('CEUTA <a@b.com>');
+        expect(getFromAddress('smtp', {
+            EMAIL_FROM: 'CEUTA <onboarding@resend.dev>',
+            SMTP_USER: 'a@b.com',
+        })).toBe('CEUTA <a@b.com>');
+    });
+
+    it('reports resend+smtp when both are configured', () => {
+        const status = getEmailProviderStatus({
+            RESEND_API_KEY: 're_test',
+            SMTP_USER: 'a@b.com',
+            SMTP_PASSWORD: 'secret',
+        });
+        expect(status.provider).toBe('resend+smtp');
+        expect(status.smtpFallback).toBe(true);
+        expect(status.configured).toBe(true);
+    });
 });

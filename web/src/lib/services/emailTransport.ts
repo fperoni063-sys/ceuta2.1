@@ -1,6 +1,7 @@
 /**
  * Resolución pura del transporte de email (sin I/O).
- * Resend (HTTP) tiene prioridad porque SMTP es frágil en Vercel serverless.
+ * Resend (HTTP) es el primario. SMTP/Gmail es fallback gratis para alumnos
+ * mientras el dominio de Resend no esté verificado.
  */
 export type EmailTransportKind = 'resend' | 'smtp' | 'none';
 
@@ -10,20 +11,41 @@ export function getSmtpPassword(
     return env.SMTP_PASSWORD || env.SMTP_PASS || undefined;
 }
 
+export function hasResend(env: NodeJS.Dict<string> = process.env): boolean {
+    return Boolean(env.RESEND_API_KEY?.trim());
+}
+
+export function hasSmtp(env: NodeJS.Dict<string> = process.env): boolean {
+    const smtpPass = getSmtpPassword(env);
+    return Boolean(env.SMTP_USER?.trim() && smtpPass?.trim());
+}
+
 export function resolveEmailTransport(
     env: NodeJS.Dict<string> = process.env
 ): EmailTransportKind {
-    if (env.RESEND_API_KEY?.trim()) return 'resend';
-    const smtpPass = getSmtpPassword(env);
-    if (env.SMTP_USER?.trim() && smtpPass?.trim()) return 'smtp';
+    if (hasResend(env)) return 'resend';
+    if (hasSmtp(env)) return 'smtp';
     return 'none';
+}
+
+function looksLikeEmailFrom(value: string): boolean {
+    const trimmed = value.trim();
+    if (trimmed === 'EMAIL_FROM') return false;
+    return /[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+/.test(trimmed);
 }
 
 export function getFromAddress(
     kind: EmailTransportKind,
     env: NodeJS.Dict<string> = process.env
 ): string {
-    if (env.EMAIL_FROM?.trim()) return env.EMAIL_FROM.trim();
+    const configured = env.EMAIL_FROM?.trim();
+    if (configured && looksLikeEmailFrom(configured)) {
+        if (kind === 'smtp' && configured.includes('onboarding@resend.dev')) {
+            // Gmail no puede mandar como onboarding@resend.dev
+        } else {
+            return configured;
+        }
+    }
     if (kind === 'smtp' && env.SMTP_USER?.trim()) {
         return `CEUTA <${env.SMTP_USER.trim()}>`;
     }
@@ -31,11 +53,16 @@ export function getFromAddress(
 }
 
 export function getEmailProviderStatus(env: NodeJS.Dict<string> = process.env) {
-    const provider = resolveEmailTransport(env);
+    const resend = hasResend(env);
+    const smtp = hasSmtp(env);
+    const provider: EmailTransportKind | 'resend+smtp' =
+        resend && smtp ? 'resend+smtp' : resend ? 'resend' : smtp ? 'smtp' : 'none';
+    const kind: EmailTransportKind = resend ? 'resend' : smtp ? 'smtp' : 'none';
     return {
         configured: provider !== 'none',
         provider,
-        from: provider === 'none' ? null : getFromAddress(provider, env),
+        from: kind === 'none' ? null : getFromAddress(kind, env),
+        smtpFallback: smtp,
     };
 }
 

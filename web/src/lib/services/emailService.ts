@@ -59,6 +59,10 @@ async function sendViaSmtp(data: EmailData, from: string): Promise<string> {
     return info.messageId || 'smtp';
 }
 
+function smtpIsAvailable(): boolean {
+    return Boolean(process.env.SMTP_USER?.trim() && getSmtpPassword()?.trim());
+}
+
 async function deliverEmail(data: EmailData): Promise<{ messageId: string; provider: EmailTransportKind }> {
     const provider = resolveEmailTransport();
 
@@ -68,15 +72,21 @@ async function deliverEmail(data: EmailData): Promise<{ messageId: string; provi
         );
     }
 
-    const from = getFromAddress(provider);
-
     if (provider === 'resend') {
-        const messageId = await sendViaResend(data, from);
-        return { messageId, provider };
+        try {
+            const messageId = await sendViaResend(data, getFromAddress('resend'));
+            return { messageId, provider: 'resend' };
+        } catch (resendError) {
+            if (!smtpIsAvailable()) throw resendError;
+            const reason = resendError instanceof Error ? resendError.message : 'Resend error';
+            console.warn(`⚠️ Resend no pudo enviar (${reason}). Fallback a SMTP/Gmail.`);
+            const messageId = await sendViaSmtp(data, getFromAddress('smtp'));
+            return { messageId, provider: 'smtp' };
+        }
     }
 
-    const messageId = await sendViaSmtp(data, from);
-    return { messageId, provider };
+    const messageId = await sendViaSmtp(data, getFromAddress('smtp'));
+    return { messageId, provider: 'smtp' };
 }
 
 async function logEmailResult(params: {

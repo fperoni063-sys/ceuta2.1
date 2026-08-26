@@ -26,6 +26,7 @@ export default function EmailTemplatesPage() {
         configured: boolean;
         provider: string;
         from: string | null;
+        smtpFallback?: boolean;
     } | null>(null);
     const [testTo, setTestTo] = useState('');
     const [testing, setTesting] = useState(false);
@@ -118,7 +119,8 @@ export default function EmailTemplatesPage() {
                         ) : providerStatus.configured ? (
                             <span className="font-medium text-green-700">
                                 listo ({providerStatus.provider}
-                                {providerStatus.from ? ` · ${providerStatus.from}` : ''})
+                                {providerStatus.from ? ` · ${providerStatus.from}` : ''}
+                                {providerStatus.smtpFallback ? ' · Gmail de respaldo' : ''})
                             </span>
                         ) : (
                             <span className="font-medium text-red-700">
