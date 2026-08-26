@@ -22,10 +22,45 @@ export default function EmailTemplatesPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
+    const [providerStatus, setProviderStatus] = useState<{
+        configured: boolean;
+        provider: string;
+        from: string | null;
+    } | null>(null);
+    const [testTo, setTestTo] = useState('');
+    const [testing, setTesting] = useState(false);
+    const [testMessage, setTestMessage] = useState<string | null>(null);
 
     useEffect(() => {
         fetchTemplates();
+        fetch('/api/admin/email-test')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.provider) setProviderStatus(data);
+            })
+            .catch(() => null);
     }, []);
+
+    async function sendTestEmail() {
+        setTesting(true);
+        setTestMessage(null);
+        try {
+            const res = await fetch('/api/admin/email-test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to: testTo || undefined }),
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setTestMessage(`✅ Enviado a ${data.to} vía ${data.provider}`);
+            } else {
+                setTestMessage(`❌ ${data.error || 'Error al enviar'}`);
+            }
+        } catch {
+            setTestMessage('❌ No se pudo contactar al servidor');
+        }
+        setTesting(false);
+    }
 
     async function fetchTemplates() {
         const res = await fetch('/api/admin/email-templates');
@@ -72,6 +107,43 @@ export default function EmailTemplatesPage() {
                     </Link>
                     <h1 className="text-2xl font-bold text-walnut-800 mt-2">📧 Templates de Email</h1>
                 </div>
+            </div>
+
+            <div className="mb-6 p-4 rounded-lg border bg-white space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm text-walnut-700">
+                        Estado del envío:{' '}
+                        {providerStatus == null ? (
+                            <span className="text-gray-400">cargando…</span>
+                        ) : providerStatus.configured ? (
+                            <span className="font-medium text-green-700">
+                                listo ({providerStatus.provider}
+                                {providerStatus.from ? ` · ${providerStatus.from}` : ''})
+                            </span>
+                        ) : (
+                            <span className="font-medium text-red-700">
+                                no configurado — falta RESEND_API_KEY en Vercel
+                            </span>
+                        )}
+                    </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                        type="email"
+                        placeholder="Email de prueba (opcional, usa el tuyo si está vacío)"
+                        value={testTo}
+                        onChange={(e) => setTestTo(e.target.value)}
+                        className="flex-1 p-3 border rounded-lg text-sm focus:ring-2 focus:ring-sage-500 focus:border-sage-500"
+                    />
+                    <button
+                        onClick={sendTestEmail}
+                        disabled={testing}
+                        className="bg-sage-600 hover:bg-sage-700 text-white px-4 py-3 rounded-lg text-sm font-medium disabled:opacity-50"
+                    >
+                        {testing ? 'Enviando…' : 'Enviar correo de prueba'}
+                    </button>
+                </div>
+                {testMessage && <p className="text-sm">{testMessage}</p>}
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">

@@ -1,27 +1,20 @@
 name: Trigger Cron Job
-# Force update workflow
+
+# DISABLED 2026-08-26
+# This hourly job never had GitHub secrets APP_URL / CRON_SECRET, so "Check Secrets"
+# failed on every run (2,264 failures). GitHub emailed the repo owner each time.
+# Recordatorios now run via Vercel Cron once per day (Hobby plan allows daily crons).
+# Do not add `schedule:` back unless those secrets exist AND you want hourly runs.
 
 on:
-  schedule:
-    - cron: '0 * * * *' # Ejecutar cada hora
-  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña Actions
+  workflow_dispatch:
 
 jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Secrets
+      - name: Disabled on purpose
         run: |
-          if [ -z "${{ secrets.APP_URL }}" ]; then
-            echo "Error: APP_URL secret is missing. Please add it to GitHub Repository Settings > Secrets."
-            exit 1
-          fi
-          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
-            echo "Error: CRON_SECRET secret is missing. Please add it to GitHub Repository Settings > Secrets."
-            exit 1
-          fi
-
-      - name: Call Cron Endpoint
-        run: |
-          curl --fail --location -X GET ${{ secrets.APP_URL }}/api/cron/send-scheduled-emails \
-          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          echo "GitHub Actions cron is disabled."
+          echo "Scheduled emails are sent by Vercel Cron: /api/cron/send-scheduled-emails"
+          echo "See SYSTEM_CONTEXT.md and como implementar/CONFIGURAR_EMAIL.md"

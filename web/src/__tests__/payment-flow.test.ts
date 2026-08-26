@@ -27,6 +27,7 @@ jest.mock('@/lib/cloudinary', () => ({
 jest.mock('@/lib/services/emailService', () => ({
     sendPaymentStatusEmail: jest.fn(),
     cancelScheduledEmails: jest.fn(),
+    sendPaymentProofReceivedEmail: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 // Full mock of next/server to avoid runtime dependency issues in JSDOM

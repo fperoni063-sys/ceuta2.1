@@ -12,21 +12,22 @@ Este archivo es la **Memoria Central y Contexto del Sistema** para cualquier Int
 *   **Framework:** Next.js 16 (App Router).
 *   **Lenguaje:** TypeScript.
 *   **Estilos:** TailwindCSS (v4) + Shadcn/UI.
-*   **Base de Datos & Auth:** Supabase (PostgreSQL).
-*   **Storage:** Cloudinary (para comprobantes e imágenes).
-*   **Emails:** Nodemailer (SMTP Gmail) + Cron Jobs (GitHub Actions).
-*   **Deploy:** Vercel.
+*   **Base de Datos & Auth:** Supabase (PostgreSQL) — plan gratuito.
+*   **Storage:** Cloudinary (comprobantes e imágenes).
+*   **Emails:** Resend HTTP (primario). SMTP/Nodemailer solo como fallback. Templates en DB.
+*   **Cron:** Vercel Cron diario (Hobby: máximo 1 corrida/día). GitHub Actions horario **desactivado**.
+*   **Deploy:** Vercel (Hobby).
+*   **Pagos:** Mercado Pago (preference API) + dLocal (Argentina) + transferencia con comprobante.
 
 **Diagrama de Arquitectura:**
 ```mermaid
 graph TB
-    User[👤 Usuario] --> Next[⚡ Next.js Server]
-    User --> Cloud[☁️ Cloudinary]
-    Next --> DB[(🔥 Supabase)]
-    Next --> SMTP[📧 Nodemailer]
-    Cron[⏰ GitHub Actions] --> Next
-    User -.-> Cookie[🍪 Cookie Local]
-    DB --> Auth[🔐 Supabase Auth (Admins)]
+    User[Usuario] --> Next[Next.js en Vercel]
+    User --> Cloud[Cloudinary]
+    Next --> DB[(Supabase)]
+    Next --> Resend[Resend HTTP]
+    VercelCron[Vercel Cron diario] --> Next
+    DB --> Auth[Supabase Auth Admins]
 ```
 
 ---
@@ -37,22 +38,22 @@ El modelo de datos es relacional y centralizado en Supabase.
 
 | Tabla | Descripción Crítica | Detalles Importantes |
 |-------|---------------------|----------------------|
-| `cursos` | Catálogo educativo | Precios, fechas, descuentos por cupo, galería de imágenes, video_url, sincronización con web vieja (url_web_vieja). |
-| `inscriptos` | Usuarios (Leads/Alumnos) | Centraliza todo. Campos clave: `access_token` (magic link login), `estado`, `comprobante_url`, `monto_pago` (precio congelado al inscribirse). |
-| `docentes` | Equipo docente | Información pública de profesores. FK desde `cursos.docente_id`. |
-| `programa_clases` | Temario de cada curso | Clases numeradas con tipo (teórico/práctico) y flags de presencial/virtual. FK a `cursos`. |
-| `faqs_cursos` | Preguntas frecuentes | FAQ por curso o globales (curso_id NULL = aparece en todos). FK a `cursos`. |
-| `descuentos` | Códigos promocionales | Validación manual por código. Relación N:N conceptual con cursos. |
-| `email_templates` | Plantillas HTML/Texto | DEFINEN el contenido de los correos. No hardcodear textos, usar esto. |
-| `scheduled_emails` | Cola de envío | Emails programados (24h, 72h, 7d). Estado `pending` -> `sent`/`cancelled`. |
-| `email_logs` | Historial de envíos | Auditoría de comunicaciones. FK a `inscriptos`. |
-| `testimonios` | Testimonios de alumnos | Nombre, texto, foto. Se muestran en landing. |
-| `configuracion` | Config del sistema | Pares clave/valor (email contacto, datos bancarios, etc.). |
-| `analytics_events` | Tracking de visitas | Eventos con session_id, page_path, UTMs, referrer. |
-| `embeddings_cursos` | Embeddings vectoriales | Para búsqueda semántica / IA. FK a `cursos`. |
-| `historial_chats` | Historial de chats | Mensajes entrantes/salientes por teléfono (para bot WhatsApp). |
+| `cursos` | Catálogo educativo | Precios, fechas, descuentos por cupo, galería, video_url, sync web vieja (`url_web_vieja`). |
+| `inscriptos` | Usuarios (Leads/Alumnos) | Centraliza todo. `access_token` (magic link), `estado`, `comprobante_url`, `monto_pago` (precio congelado). |
+| `docentes` | Equipo docente | FK desde `cursos.docente_id`. |
+| `programa_clases` | Temario de cada curso | FK a `cursos`. |
+| `faqs_cursos` | Preguntas frecuentes | `curso_id` NULL = global. |
+| `descuentos` | Códigos promocionales | Validación en backend. |
+| `email_templates` | Plantillas HTML/Texto | DEFINEN el contenido. No hardcodear textos de secuencia. |
+| `scheduled_emails` | Cola de envío | 24h, 72h, 7d. `pending` → `sent` / `cancelled` / `failed`. |
+| `email_logs` | Historial de envíos | Auditoría. FK a `inscriptos`. |
+| `testimonios` | Testimonios de alumnos | Landing. |
+| `configuracion` | Config del sistema | Pares clave/valor (email contacto, datos bancarios). |
+| `analytics_events` | Tracking de visitas | session_id, page_path, UTMs. |
+| `embeddings_cursos` | Embeddings vectoriales | Búsqueda semántica. |
+| `historial_chats` | Historial de chats | Bot WhatsApp. |
 
-**Nota:** Los comprobantes de pago se guardan como URL en la columna `comprobante_url` de la tabla `inscriptos` (no existe una tabla separada de comprobantes).
+**Nota:** Los comprobantes de pago se guardan como URL en `inscriptos.comprobante_url` (no hay tabla de comprobantes).
 
 ---
 
@@ -60,49 +61,60 @@ El modelo de datos es relacional y centralizado en Supabase.
 
 ### 1. Inscripción (Wizard de 3 Pasos + Perfil Post-Pago)
 El componente `EnrollmentModal.tsx` es el corazón de la conversión.
-1.  **Paso 1 (Contacto):** Pide Nombre/Email/Tel. Crea registro en DB (`estado: 'pago_pendiente'`). Genera `access_token`.
-2.  **Paso 2 (Pago):** Elegir tipo de pago (Total/Cuota o Seña $500). Elegir método (Transferencia/MercadoPago/Efectivo). Código de descuento opcional.
-3.  **Paso 3 (Confirmación):** Muestra instrucciones de pago según método elegido. Habilita subida de comprobante.
-4.  **Post-Upload (Perfil):** Después de subir el comprobante, se muestra `CompleteProfileForm` pidiendo datos personales (Cédula, Edad, Departamento, Dirección, Cómo se enteró).
+1.  **Paso 1 (Contacto):** Nombre/Email/Tel. Crea registro (`estado: 'contacto'`). Genera `access_token`. Envía email `confirmacion` y programa la secuencia.
+2.  **Paso 2 (Pago):** Tipo (Total/Cuota o Seña) y método (Transferencia / MercadoPago / dLocal / Efectivo). Código de descuento opcional.
+3.  **Paso 3 (Confirmación):** Instrucciones + subida de comprobante.
+4.  **Post-Upload (Perfil):** `CompleteProfileForm` (Cédula, Edad, Departamento, Dirección, Cómo se enteró).
 
 ### 2. Portal de Usuario ("Mi Inscripción")
-*   **Acceso:** Vía Magic Link (`/mi-inscripcion/[token]`).
-*   **Seguridad:** El `token` (32 chars hex) es la llave. Expiración configurable (default 8-30 días).
-*   **UX:** Uso de cookie `ceuta_inscripciones` solo para mostrar banner "Retomar inscripción".
-*   **Funcionalidad:** Ver estado actual, subir comprobante si falta, y completar perfil si no lo hizo.
+*   **Acceso:** Magic Link (`/mi-inscripcion/[token]`).
+*   **Seguridad:** El `token` (32 chars hex) es la llave. No regenerar salvo pedido explícito.
+*   **UX:** Cookie `ceuta_inscripciones` solo para el banner "Retomar inscripción".
 
-### 3. Pagos y Verificación (Manual)
-*   **Mercado Pago:** ⚠️ **Link Estático Genérico**. NO hay integración de API/Webhooks.
-*   **Flujo:** Usuario paga -> Usuario sube foto -> Admin verifica manualmente.
-*   **Estados de Pago:**
-    *   `pago_pendiente`: Inscripto, pero no subió nada.
-    *   `pago_a_verificar`: Subió comprobante, admin debe revisar.
-    *   `verificado`: Admin aprobó (envía email confirmación final).
-    *   `rechazado`: Admin rechazó (envía email con motivo).
+### 3. Pagos y Verificación
+*   **Transferencia:** Usuario paga → sube foto → admin verifica.
+*   **Mercado Pago:** Preference API (`/api/mercadopago/preference`).
+*   **dLocal:** Cursos Argentina (`/api/dlocal/*`).
+*   **Estados reales de `inscriptos.estado`:**
+    *   `contacto`: Solo paso 1.
+    *   `pago_pendiente`: Eligió método, no subió comprobante.
+    *   `pago_a_verificar`: Subió comprobante.
+    *   `verificado`: Admin aprobó.
+    *   `rechazado`: Admin rechazó.
+    *   `cancelado`: Baja.
+    *   Legacy (no usar en código nuevo): `pagado`, `confirmado`, `primer_contacto`, `segundo_contacto`.
 
-### 4. Sistema de Emails Automatizados
-*   **Motor:** `emailService.ts` + `scheduler` en DB + Cron (GitHub Actions).
-*   **Secuencia Típica:**
-    1.  `confirmacion` (Inmediato - 0h): "Recibimos tu solicitud".
-    2.  `recordatorio_24h` (24h después): "No olvides completar tu pago".
-    3.  `urgencia_72h` (72h después): Testimonios y urgencia.
-    4.  `ultima_oportunidad_7d` (7 días): Aviso final.
-*   **Stop Condition:** Si `estado` cambia a `verificado` o `pagado`, se cancelan los emails pendientes.
+### 4. Sistema de Emails
+*   **Motor:** `emailService.ts` → Resend (si hay `RESEND_API_KEY`) o SMTP (`SMTP_USER` + `SMTP_PASSWORD` / `SMTP_PASS`).
+*   **De:** `EMAIL_FROM`. Sin dominio verificado en Resend, solo se puede mandar al mail de la cuenta Resend, desde `onboarding@resend.dev`.
+*   **Secuencia:**
+    1.  `confirmacion` (inmediato, 0h) en `/api/inscripcion/preinscripcion`.
+    2.  `recordatorio_24h` (24h).
+    3.  `urgencia_72h` (72h).
+    4.  `ultima_oportunidad_7d` (7 días).
+*   **Stop de recordatorios:** se cancelan al subir comprobante (`pago_a_verificar`) y en `verificado` / `rechazado` / `cancelado`. El cron también saltea esos estados.
+*   **Cron:** Vercel llama `GET /api/cron/send-scheduled-emails` una vez por día (`0 12 * * *`) con `Authorization: Bearer CRON_SECRET`. En Hobby no hay cron horario. Un atraso de hasta ~24h en recordatorios es esperado y aceptable.
+*   **GitHub Actions:** el workflow horario se desactivó. Nunca tuvo secretos `APP_URL`/`CRON_SECRET`, falló **2.264 veces** y GitHub maileaba cada fallo al dueño del repo. No reactivar el `schedule:` sin esos secretos.
+*   **Vercel + SMTP:** no es el camino. Las funciones serverless cortan conexiones SMTP; Gmail además bloquea IPs de datacenter. Por eso Resend (HTTP) es el primario. Nunca disparar `sendEmail` en fire-and-forget: hay que `await` antes de responder.
+*   **Prueba:** `/admin/email-templates` → "Enviar correo de prueba" (`POST /api/admin/email-test`).
+*   **Guía operativa:** `como implementar/CONFIGURAR_EMAIL.md`.
 
 ### 5. Sincronización con Web Vieja ("Modo Hacker")
-*   **Servicio:** `syncViejaWeb.ts` realiza un POST automático al formulario PHP de la web vieja (ceuta.org.uy) cada vez que hay una nueva preinscripción.
-*   **Configuración:** El campo `url_web_vieja` en la tabla `cursos` almacena la URL del formulario del curso en la web vieja. Si no está configurado, no se sincroniza.
+*   **Servicio:** `syncViejaWeb.ts` hace POST al formulario PHP de ceuta.org.uy en cada preinscripción.
+*   **Config:** `cursos.url_web_vieja`. Si está vacío, no sincroniza.
 
 ---
 
 ## 🛡️ Invariantes y Reglas de Oro (DO NOT BREAK)
 
-1.  **Templates en DB:** NUNCA hardcodear el cuerpo de los emails en TypeScript. Usar `processTemplate` con `email_templates`.
-2.  **Validación de Precio:** El frontend es solo visual. El precio final SIEMPRE se recalcula/valida en backend (`/api/admin` o `/api/inscripcion`) antes de confirmar.
-3.  **Magic Links:** El `access_token` en `inscriptos` es sagrado. No regenerar a menos que sea solicitado explícitamente (riesgo de invalidar links enviados).
-4.  **Admin Client:** Usar `createAdminClient()` (service role) SOLO en rutas de API seguras (`/api/*`) o Server Actions protegidas. NUNCA enviar al cliente.
-5.  **Storage:** Los comprobantes van a Cloudinary carpeta `ceuta/comprobantes`.
-6.  **Imágenes de cursos:** Portadas e imágenes hero van a Cloudinary `ceuta/cursos/portadas` y `ceuta/cursos/heroes`. Las galerías se almacenan como array de URLs en el campo `galeria` de `cursos`.
+1.  **Templates en DB:** NUNCA hardcodear el cuerpo de la secuencia de emails en TypeScript. Usar `processTemplate` con `email_templates`. Excepción: mails de sistema one-off (`comprobante_recibido`, test admin) pueden usar `generateEmailHtml`.
+2.  **Validación de Precio:** El frontend es solo visual. El precio final SIEMPRE se recalcula/valida en backend.
+3.  **Magic Links:** El `access_token` en `inscriptos` es sagrado. No regenerar a menos que se pida explícitamente.
+4.  **Admin Client:** `createAdminClient()` (service role) SOLO en `/api/*` o Server Actions protegidas. NUNCA al cliente.
+5.  **Storage:** Comprobantes → Cloudinary `ceuta/comprobantes`.
+6.  **Imágenes de cursos:** Portadas/heroes → `ceuta/cursos/portadas` y `ceuta/cursos/heroes`. Galerías = array de URLs en `cursos.galeria`.
+7.  **Email en Vercel:** `await` el envío. No fire-and-forget. Preferir Resend sobre SMTP.
+8.  **Stop de nurturing:** si el estado deja de ser lead de pago pendiente, cancelar `scheduled_emails` pendientes.
 
 ---
 
@@ -111,35 +123,31 @@ El componente `EnrollmentModal.tsx` es el corazón de la conversión.
 ```
 /src
   /app
-    /api                 -> Backend Lógica (Inscripción, Admin, Cron)
+    /api                 -> Backend (Inscripción, Admin, Cron)
+      /cron/send-scheduled-emails
+      /admin/email-test  -> GET estado del proveedor, POST prueba
     /admin               -> Panel de Control (Protected)
     /mi-inscripcion      -> Portal Usuario (Magic Link)
     /cursos/[slug]       -> Página pública de cada curso
   /components
-    /cursos/EnrollmentModal.tsx  -> 🔴 Componente Crítico (Wizard 3 pasos)
-    /cursos/CompleteProfileForm.tsx -> Datos personales post-pago
-    /cursos/ImageCarousel.tsx    -> Galería de imágenes con efecto ambient
-    /admin/ReviewPaymentModal.tsx -> Verificación de Pagos
+    /cursos/EnrollmentModal.tsx  -> 🔴 Wizard 3 pasos
+    /cursos/CompleteProfileForm.tsx
   /lib
-    /services/emailService.ts    -> Lógica de envíos
-    /services/syncViejaWeb.ts    -> Sincronización web vieja
-    /utils/discountUtils.ts      -> Cálculo de precios y descuentos
-    /utils/priceLogic.ts         -> Lógica centralizada de precios
-    /utils/tokens.ts             -> Generación de Magic Links
-  /types
-    /db.ts                       -> Tipos de la base de datos
-    /admin.ts                    -> Tipos del panel admin
+    /services/emailService.ts    -> Envíos (Resend / SMTP)
+    /services/emailTransport.ts  -> Resolución del proveedor
+    /services/syncViejaWeb.ts
+    /utils/templateProcessor.ts
+    /utils/tokens.ts
 /supabase
-  /migrations            -> Historial de cambios en DB
+  /migrations
 ```
 
 ---
 
-## 🚦 Estado Actual (Abril 2026)
-*   Integración de **Mercado Pago es pasiva** (link estático).
-*   Sistema de recordatorios automáticos **activo** vía Cron.
-*   Subida de archivos migrada a **Cloudinary**.
-*   Email Service migrado a **Nodemailer**.
-*   Galería de imágenes y video implementados.
+## 🚦 Estado Actual (Agosto 2026)
+*   Deploy en **Vercel Hobby**. Supabase y Resend también en plan gratuito.
+*   Email: código listo para Resend. **Requiere** `RESEND_API_KEY` (+ dominio verificado para mandar a alumnos) en Vercel. Ver `como implementar/CONFIGURAR_EMAIL.md`.
+*   Cron de recordatorios: **Vercel diario**. GitHub Actions horario desactivado (era la fuente de miles de mails de error).
+*   Subida de archivos: **Cloudinary**.
+*   Pagos: Mercado Pago + dLocal (AR) + transferencia.
 *   Sincronización con web vieja (ceuta.org.uy) implementada.
-*   Deploy en **Vercel**.

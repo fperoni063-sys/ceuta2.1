@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { sendEmail } from '@/lib/services/emailService';
+import { sendEmail, STOP_REMINDER_STATES } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 // Tipos para la respuesta de la base de datos
 interface Inscripto {
@@ -96,11 +99,11 @@ export async function GET(request: NextRequest) {
             continue;
         }
 
-        // Saltar si ya pagó (y no es un email de confirmación de pago, unque esos no suelen programarse así)
-        if (inscripto.estado === 'pagado' || inscripto.estado === 'confirmado') {
+        // Saltar si el inscripto ya no debe recibir recordatorios de pago
+        if ((STOP_REMINDER_STATES as readonly string[]).includes(inscripto.estado)) {
             await supabase
                 .from('scheduled_emails')
-                .update({ estado: 'cancelled', last_error: 'Already paid or confirmed' })
+                .update({ estado: 'cancelled', last_error: `Stop state: ${inscripto.estado}` })
                 .eq('id', scheduled.id);
             skipped++;
             continue;

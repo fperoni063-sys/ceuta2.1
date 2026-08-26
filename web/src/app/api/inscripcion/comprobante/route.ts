@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { uploadFile, UPLOAD_FOLDERS } from '@/lib/cloudinary';
-import { sendPaymentProofReceivedEmail } from '@/lib/services/emailService';
+import { sendPaymentProofReceivedEmail, cancelScheduledEmails } from '@/lib/services/emailService';
 
 // Max file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -119,13 +119,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Send confirmation email (Fire and forget, don't block response)
-        sendPaymentProofReceivedEmail(inscripto.id)
-            .then(res => {
-                if (!res.success) console.error('Error sending proof email:', res.error);
-                else console.log('📧 Proof received email sent');
-            })
-            .catch(err => console.error('Error sending proof email:', err));
+        // En Vercel hay que await-ear el SMTP/HTTP: si se dispara "fire and forget"
+        // la función se congela al responder y el correo nunca sale.
+        try {
+            await cancelScheduledEmails(inscripto.id);
+            const emailResult = await sendPaymentProofReceivedEmail(inscripto.id);
+            if (!emailResult.success) {
+                console.error('Error sending proof email:', emailResult.error);
+            } else {
+                console.log('📧 Proof received email sent');
+            }
+        } catch (emailErr) {
+            console.error('Error sending proof email:', emailErr);
+        }
 
         return NextResponse.json({
             success: true,

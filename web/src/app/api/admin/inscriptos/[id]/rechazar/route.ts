@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
-import { sendPaymentStatusEmail } from '@/lib/services/emailService';
+import { sendPaymentStatusEmail, cancelScheduledEmails } from '@/lib/services/emailService';
 
 export async function POST(
     request: NextRequest,
@@ -57,7 +57,12 @@ export async function POST(
             );
         }
 
-        // 3. Send rejection email
+        try {
+            await cancelScheduledEmails(id);
+        } catch (e) {
+            console.error('Non-blocking error cancelling emails:', e);
+        }
+
         await sendPaymentStatusEmail(id, 'rejected', motivo);
 
         return NextResponse.json({

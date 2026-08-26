@@ -1,20 +1,16 @@
+import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { createAdminClient } from '@/lib/supabase/server';
 import { generateEmailHtml } from '@/lib/utils/email-layout';
+import {
+    getEmailProviderStatus,
+    getFromAddress,
+    getSmtpPassword,
+    resolveEmailTransport,
+    type EmailTransportKind,
+} from '@/lib/services/emailTransport';
 
-// Inicializar Transporter de Nodemailer
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+export { getEmailProviderStatus, STOP_REMINDER_STATES } from '@/lib/services/emailTransport';
 
 export interface EmailData {
     to: string;
@@ -23,77 +19,152 @@ export interface EmailData {
     text: string;
 }
 
+async function sendViaResend(data: EmailData, from: string): Promise<string> {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const { data: result, error } = await resend.emails.send({
+        from,
+        to: data.to,
+        subject: data.subject,
+        html: data.html,
+        text: data.text,
+    });
+
+    if (error) {
+        throw new Error(error.message || 'Resend rejected the email');
+    }
+
+    return result?.id || 'resend';
+}
+
+async function sendViaSmtp(data: EmailData, from: string): Promise<string> {
+    const port = Number(process.env.SMTP_PORT) || 587;
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port,
+        secure: port === 465,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: getSmtpPassword(),
+        },
+    });
+
+    const info = await transporter.sendMail({
+        from,
+        to: data.to,
+        subject: data.subject,
+        html: data.html,
+        text: data.text,
+    });
+
+    return info.messageId || 'smtp';
+}
+
+async function deliverEmail(data: EmailData): Promise<{ messageId: string; provider: EmailTransportKind }> {
+    const provider = resolveEmailTransport();
+
+    if (provider === 'none') {
+        throw new Error(
+            'Email no configurado: falta RESEND_API_KEY (recomendado) o SMTP_USER + SMTP_PASSWORD'
+        );
+    }
+
+    const from = getFromAddress(provider);
+
+    if (provider === 'resend') {
+        const messageId = await sendViaResend(data, from);
+        return { messageId, provider };
+    }
+
+    const messageId = await sendViaSmtp(data, from);
+    return { messageId, provider };
+}
+
+async function logEmailResult(params: {
+    inscriptoId?: number;
+    templateNombre?: string;
+    to: string;
+    subject: string;
+    success: boolean;
+    errorMessage?: string;
+}): Promise<void> {
+    if (!params.inscriptoId) return;
+
+    const supabase = createAdminClient();
+
+    try {
+        await supabase.from('email_logs').insert({
+            inscripto_id: params.inscriptoId,
+            template_nombre: params.templateNombre,
+            email_destino: params.to,
+            asunto: params.subject,
+            estado: params.success ? 'sent' : 'failed',
+            error_mensaje: params.success ? null : params.errorMessage || 'Unknown error',
+            enviado_at: params.success ? new Date().toISOString() : null,
+        });
+
+        if (params.success) {
+            await supabase.rpc('increment_emails_enviados', {
+                p_inscripto_id: params.inscriptoId,
+            });
+        }
+    } catch (logError) {
+        console.error('Failed to write email_logs:', logError);
+    }
+}
+
 /**
- * Envía un email usando Resend y registra en el log
+ * Envía un email (Resend HTTP, o SMTP como fallback) y registra el resultado.
  */
 export async function sendEmail(
     data: EmailData,
     inscriptoId?: number,
     templateNombre?: string
-): Promise<{ success: boolean; error?: string }> {
-    const supabase = createAdminClient();
-
-    // Debug Logs para ayudar en Vercel
+): Promise<{ success: boolean; error?: string; provider?: EmailTransportKind }> {
     console.log(`📧 Preparing to send email to: ${data.to}`);
 
-    // Validar configuración
-    // Validar configuración
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
-        console.error('❌ SMTP Credentials are missing via process.env');
-        return { success: false, error: 'Configuration Error: SMTP Credentials missing' };
+    const status = getEmailProviderStatus();
+    if (!status.configured) {
+        const error = 'Configuration Error: falta RESEND_API_KEY o credenciales SMTP';
+        console.error(`❌ ${error}`);
+        await logEmailResult({
+            inscriptoId,
+            templateNombre,
+            to: data.to,
+            subject: data.subject,
+            success: false,
+            errorMessage: error,
+        });
+        return { success: false, error };
     }
 
     try {
-        // Enviar email vía Nodemailer
-        const info = await transporter.sendMail({
-            from: `"CEUTA" <${process.env.SMTP_USER}>`, // Remitente
+        const { messageId, provider } = await deliverEmail(data);
+        console.log(`✅ Email sent via ${provider}. MessageId: ${messageId}`);
+
+        await logEmailResult({
+            inscriptoId,
+            templateNombre,
             to: data.to,
             subject: data.subject,
-            html: data.html,
-            text: data.text,
+            success: true,
         });
 
-        console.log(`✅ Email sent successfully via Nodemailer. MessageId: ${info.messageId}`);
+        return { success: true, provider };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.error('❌ Email send error:', error);
 
-        // Registrar éxito en log
-        if (inscriptoId) {
-            await supabase.from('email_logs').insert({
-                inscripto_id: inscriptoId,
-                template_nombre: templateNombre,
-                email_destino: data.to,
-                asunto: data.subject,
-                estado: 'sent',
-                enviado_at: new Date().toISOString(),
-            });
+        await logEmailResult({
+            inscriptoId,
+            templateNombre,
+            to: data.to,
+            subject: data.subject,
+            success: false,
+            errorMessage: message,
+        });
 
-            // Actualizar contador en inscripto
-            await supabase.rpc('increment_emails_enviados', {
-                p_inscripto_id: inscriptoId
-            });
-        }
-
-        return { success: true };
-
-    } catch (error: any) {
-        console.error('❌ Nodemailer Error:', error);
-
-        // Registrar fallo en BD
-        if (inscriptoId) {
-            await supabase.from('email_logs').insert({
-                inscripto_id: inscriptoId,
-                template_nombre: templateNombre,
-                email_destino: data.to,
-                asunto: data.subject,
-                estado: 'failed',
-                error_mensaje: error.message || 'Unknown error',
-            });
-        }
-        return { success: false, error: error.message };
+        return { success: false, error: message };
     }
-
-    // (Code removed)
-
-    // (Code removed)
 }
 
 /**
@@ -102,7 +173,6 @@ export async function sendEmail(
 export async function scheduleEmailSequence(inscriptoId: number): Promise<void> {
     const supabase = createAdminClient();
 
-    // Obtener templates de la secuencia ordenados
     const { data: templates } = await supabase
         .from('email_templates')
         .select('nombre, horas_despues')
@@ -114,11 +184,8 @@ export async function scheduleEmailSequence(inscriptoId: number): Promise<void> 
 
     const now = new Date();
 
-    // Programar cada email de la secuencia
     for (const template of templates) {
         if (template.horas_despues === 0) {
-            // El primer email (confirmación) se envía inmediatamente
-            // No lo programamos, lo enviamos directo
             continue;
         }
 
@@ -137,7 +204,7 @@ export async function scheduleEmailSequence(inscriptoId: number): Promise<void> 
 }
 
 /**
- * Cancela emails programados (cuando el usuario ya pagó)
+ * Cancela emails programados (cuando el usuario ya pagó o subió comprobante)
  */
 export async function cancelScheduledEmails(inscriptoId: number): Promise<void> {
     const supabase = createAdminClient();
@@ -153,7 +220,6 @@ export async function cancelScheduledEmails(inscriptoId: number): Promise<void> 
 
 /**
  * Envía email de estado de pago (Confirmado / Rechazado)
- * Busca el template correspondiente en la base de datos
  */
 export async function sendPaymentStatusEmail(
     inscriptoId: number,
@@ -162,7 +228,6 @@ export async function sendPaymentStatusEmail(
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = createAdminClient();
 
-    // 1. Obtener datos del inscripto
     const { data: inscripto, error: inscriptoError } = await supabase
         .from('inscriptos')
         .select(`
@@ -176,10 +241,8 @@ export async function sendPaymentStatusEmail(
         return { success: false, error: 'Inscripto no encontrado' };
     }
 
-    // 2. Determinar template
     const templateName = status === 'approved' ? 'pago_confirmado' : 'pago_rechazado';
 
-    // 3. Obtener template
     const { data: template, error: templateError } = await supabase
         .from('email_templates')
         .select('*')
@@ -191,16 +254,13 @@ export async function sendPaymentStatusEmail(
         return { success: false, error: `Template ${templateName} no encontrado` };
     }
 
-    // 4. Reemplazar variables
     let subject = template.asunto;
     let html = template.contenido_html;
     let text = template.contenido_texto;
 
     const nombreCorto = inscripto.nombre.split(' ')[0];
-    const linkInscripcion = `${process.env.NEXT_PUBLIC_APP_URL}/mi-inscripcion/${inscripto.access_token}`;
+    const linkInscripcion = `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL}/mi-inscripcion/${inscripto.access_token}`;
 
-
-    // Type casting for relationship
     const cursoNombre = Array.isArray(inscripto.cursos)
         ? inscripto.cursos[0]?.nombre
         : (inscripto.cursos as unknown as { nombre: string })?.nombre || 'Curso';
@@ -216,19 +276,17 @@ export async function sendPaymentStatusEmail(
         replacements['{{motivo_rechazo}}'] = rejectReason;
     }
 
-    // Aplicar reemplazos
     Object.entries(replacements).forEach(([key, value]) => {
         subject = subject.replace(new RegExp(key, 'g'), value);
         html = html.replace(new RegExp(key, 'g'), value);
         text = text.replace(new RegExp(key, 'g'), value);
     });
 
-    // 5. Enviar email
     return sendEmail({
         to: inscripto.email,
-        subject: subject,
-        html: html,
-        text: text
+        subject,
+        html,
+        text,
     }, inscriptoId, templateName);
 }
 
@@ -240,7 +298,6 @@ export async function sendPaymentProofReceivedEmail(
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = createAdminClient();
 
-    // 1. Obtener datos del inscripto
     const { data: inscripto, error: inscriptoError } = await supabase
         .from('inscriptos')
         .select(`
@@ -254,7 +311,6 @@ export async function sendPaymentProofReceivedEmail(
         return { success: false, error: 'Inscripto no encontrado' };
     }
 
-    // 2. Definir contenido (Hardcoded por ahora para asegurar funcionalidad, idealmente mover a DB)
     const cursoNombre = Array.isArray(inscripto.cursos)
         ? inscripto.cursos[0]?.nombre
         : (inscripto.cursos as unknown as { nombre: string })?.nombre || 'Curso';
@@ -262,7 +318,6 @@ export async function sendPaymentProofReceivedEmail(
     const nombreCorto = inscripto.nombre.split(' ')[0];
     const subject = `Recibimos tu comprobante - CEUTA`;
 
-    // Contenido específico del correo
     const content = `
         <h2 style="color: #111827; margin-top: 0; text-align: center;">¡Hola ${nombreCorto}!</h2>
         
@@ -288,11 +343,10 @@ export async function sendPaymentProofReceivedEmail(
 
     const text = `Hola ${nombreCorto}, hemos recibido tu comprobante de pago para el curso ${cursoNombre}. Lo verificaremos a la brevedad y te avisaremos.`;
 
-    // 3. Enviar email
     return sendEmail({
         to: inscripto.email,
-        subject: subject,
-        html: html,
-        text: text
+        subject,
+        html,
+        text,
     }, inscriptoId, 'comprobante_recibido');
 }
