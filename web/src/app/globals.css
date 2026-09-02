@@ -116,3 +116,23 @@ body {
 .font-heading {
   font-family: var(--font-lora), Georgia, serif;
 }
+/* ---------------------------------------------------------------
+ * Barra fija de inscripcion (CourseStickyCta)
+ *
+ * La barra publica su alto real en --ceuta-cta-h. Los elementos
+ * flotantes del layout (boton de WhatsApp, banner de "retomar
+ * inscripcion") se corren hacia arriba esa misma cantidad para no
+ * quedar tapados. Se usa translateY y no `bottom` a proposito: asi
+ * funciona sin importar cual sea el offset base de cada elemento.
+ * --------------------------------------------------------------- */
+.ceuta-floating-offset {
+  transform: translateY(calc(-1 * var(--ceuta-cta-h, 0px)));
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ceuta-floating-offset {
+    transition: none;
+  }
+}

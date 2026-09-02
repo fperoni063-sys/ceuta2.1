@@ -12,6 +12,8 @@ import { ProgramaSection } from '@/components/cursos/ProgramaSection';
 import { FAQ, ProgramaClase } from '@/types/db';
 import { PriceDisplay, DiscountBadge } from '@/components/cursos/PriceDisplay';
 import { CourseSidebarClient } from '@/components/cursos/CourseSidebarClient';
+import { CourseEnrollProvider, CourseEnrollData } from '@/components/cursos/CourseEnrollContext';
+import { InlineEnrollCta } from '@/components/cursos/InlineEnrollCta';
 import { CourseTracker } from '@/components/analytics/CourseTracker';
 import { ImageCarousel } from '@/components/cursos/ImageCarousel';
 import { CourseVideo } from '@/components/cursos/CourseVideo';
@@ -329,42 +331,41 @@ function CourseHeader({ curso }: { curso: CourseFullData }) {
     );
 }
 
-function CourseSidebar({ curso }: { curso: CourseFullData }) {
-    // Nota: CourseSidebarClient es un componente 'use client', se importa arriba
-    // y se usa directamente aquí. No usar require() porque causa hydration mismatches.
-    return (
-        <CourseSidebarClient
-            curso={{
-                id: curso.id,
-                nombre: curso.nombre,
-                precio: curso.precio,
-                cantidad_cuotas: curso.cantidad_cuotas,
-                duracion: curso.duracion,
-                lugar: curso.lugar,
-                lugar_a_confirmar: curso.lugar_a_confirmar,
-                departamento_probable: curso.departamento_probable,
-                fecha_inicio: curso.fecha_inicio,
-                fecha_a_confirmar: curso.fecha_a_confirmar,
-                link_mercado_pago: curso.link_mercado_pago,
-                modalidad: curso.modalidad,
-                permite_online: curso.permite_online,
-                precio_online: curso.precio_online,
-                // Discount fields
-                descuento_porcentaje: curso.descuento_porcentaje,
-                descuento_cupos_totales: curso.descuento_cupos_totales,
-                descuento_cupos_usados: curso.descuento_cupos_usados ?? 0,
-                descuento_etiqueta: curso.descuento_etiqueta,
-                descuento_online_porcentaje: curso.descuento_online_porcentaje,
-                descuento_online_etiqueta: curso.descuento_online_etiqueta,
-                descuento_fecha_fin: curso.descuento_fecha_fin,
-                // dLocal Go
-                dlocal_habilitado: curso.dlocal_habilitado,
-                // Argentina
-                es_curso_argentina: curso.es_curso_argentina,
-                slug: curso.slug,
-            }}
-        />
-    );
+/**
+ * Aplana el curso al subconjunto que necesita la inscripción.
+ * Este objeto alimenta el provider, y de ahí lo leen la sidebar, la barra fija
+ * del pie y los CTA del contenido: una sola fuente, un solo precio.
+ */
+function toEnrollData(curso: CourseFullData): CourseEnrollData {
+    return {
+        id: curso.id,
+        nombre: curso.nombre,
+        precio: curso.precio,
+        cantidad_cuotas: curso.cantidad_cuotas,
+        duracion: curso.duracion,
+        lugar: curso.lugar,
+        lugar_a_confirmar: curso.lugar_a_confirmar,
+        departamento_probable: curso.departamento_probable,
+        fecha_inicio: curso.fecha_inicio,
+        fecha_a_confirmar: curso.fecha_a_confirmar,
+        link_mercado_pago: curso.link_mercado_pago,
+        modalidad: curso.modalidad,
+        permite_online: curso.permite_online,
+        precio_online: curso.precio_online,
+        // Discount fields
+        descuento_porcentaje: curso.descuento_porcentaje,
+        descuento_cupos_totales: curso.descuento_cupos_totales,
+        descuento_cupos_usados: curso.descuento_cupos_usados ?? 0,
+        descuento_etiqueta: curso.descuento_etiqueta,
+        descuento_online_porcentaje: curso.descuento_online_porcentaje,
+        descuento_online_etiqueta: curso.descuento_online_etiqueta,
+        descuento_fecha_fin: curso.descuento_fecha_fin,
+        // dLocal Go
+        dlocal_habilitado: curso.dlocal_habilitado,
+        // Argentina
+        es_curso_argentina: curso.es_curso_argentina,
+        slug: curso.slug,
+    };
 }
 
 function CourseContent({ curso, programa }: { curso: CourseFullData; programa: ProgramaClase[] }) {
@@ -471,14 +472,22 @@ function CourseContent({ curso, programa }: { curso: CourseFullData; programa: P
 
             {/* Programa del Curso */}
             {programa.length > 0 && (
-                <ProgramaSection
-                    clases={programa}
-                    diaTeortico={curso.dia_teorico}
-                    horarioTeorico={curso.horario_teorico}
-                    diaPractico={curso.dia_practico}
-                    horarioPractico={curso.horario_practico}
-                    teoricasPresenciales={curso.teoricas_presenciales}
-                />
+                <>
+                    <ProgramaSection
+                        clases={programa}
+                        diaTeortico={curso.dia_teorico}
+                        horarioTeorico={curso.horario_teorico}
+                        diaPractico={curso.dia_practico}
+                        horarioPractico={curso.horario_practico}
+                        teoricasPresenciales={curso.teoricas_presenciales}
+                    />
+                    {/* Cierre después del programa: acá la persona ya sabe qué va a aprender */}
+                    <InlineEnrollCta
+                        origen="post_programa"
+                        titulo="Ya viste todo lo que vas a aprender"
+                        subtitulo="Reservá tu lugar ahora y definí la forma de pago después."
+                    />
+                </>
             )}
 
             {/* Testimonios Section */}
@@ -508,6 +517,15 @@ function CourseContent({ curso, programa }: { curso: CourseFullData; programa: P
                         ))}
                     </div>
                 </section>
+            )}
+
+            {/* Cierre después de la prueba social */}
+            {curso.testimonios && curso.testimonios.length > 0 && (
+                <InlineEnrollCta
+                    origen="post_testimonios"
+                    titulo="Sumate a los que ya lo hicieron"
+                    subtitulo="Dejás tus datos en un minuto y te guiamos desde ahí."
+                />
             )}
 
             {/* Certification */}
@@ -675,30 +693,49 @@ export default async function CourseDetailPage({ params }: PageProps) {
             {/* Header with Image */}
             <CourseHeader curso={curso} />
 
-            {/* Main Content */}
-            <Container>
-                <div className="grid lg:grid-cols-3 gap-8 mt-8">
-                    {/* Content Column */}
-                    <div className="lg:col-span-2 order-2 lg:order-1">
-                        <CourseContent curso={curso} programa={programa} />
-                    </div>
-
-                    {/* Sidebar Column */}
-                    <div className="order-1 lg:order-2">
-                        <CourseSidebar curso={curso} />
-                    </div>
-                </div>
-            </Container>
-
-            {/* FAQs Section */}
-            {faqs.length > 0 && (
+            {/*
+              * Todo lo que puede inscribir vive dentro del provider: sidebar, CTA
+              * del contenido, cierre final y la barra fija del pie. Un solo modal,
+              * un solo precio.
+              */}
+            <CourseEnrollProvider curso={toEnrollData(curso)}>
+                {/* Main Content */}
                 <Container>
-                    <FAQSection faqs={faqs} />
-                </Container>
-            )}
+                    <div className="grid lg:grid-cols-3 gap-8 mt-8">
+                        {/* Content Column */}
+                        <div className="lg:col-span-2 order-2 lg:order-1">
+                            <CourseContent curso={curso} programa={programa} />
+                        </div>
 
-            {/* Related Courses */}
-            <RelatedCourses courses={relatedCourses} />
+                        {/* Sidebar Column */}
+                        <div className="order-1 lg:order-2">
+                            <CourseSidebarClient />
+                        </div>
+                    </div>
+                </Container>
+
+                {/* FAQs Section */}
+                {faqs.length > 0 && (
+                    <Container>
+                        <FAQSection faqs={faqs} />
+                    </Container>
+                )}
+
+                {/* Cierre final: última pantalla útil antes de los cursos relacionados */}
+                <Container>
+                    <div className="mt-10">
+                        <InlineEnrollCta
+                            origen="post_faq"
+                            titulo="¿Te quedó alguna duda?"
+                            subtitulo="Escribinos y te la sacamos, o reservá tu cupo directamente."
+                            mostrarWhatsapp
+                        />
+                    </div>
+                </Container>
+
+                {/* Related Courses */}
+                <RelatedCourses courses={relatedCourses} />
+            </CourseEnrollProvider>
         </main>
     );
 }
