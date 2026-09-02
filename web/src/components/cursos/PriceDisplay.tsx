@@ -89,19 +89,33 @@ export function PriceDisplay({
                     <div className={styles.cuotasContainer}>
                         {variant === 'card' && <Sparkles className="w-4 h-4 text-orange-400 mr-1" />}
                         <span className={styles.cuotasLabel}>
-                            {variant !== 'card' && '✨ '}
-                            {cantidadCuotas} cuotas de
+                            {/* En la sidebar el número grande es lo que hay que pagar HOY
+                                para entrar, no el total del curso. Decirlo cambia la
+                                decisión: son $2.940, no $8.820. */}
+                            {variant === 'sidebar'
+                                ? 'Empezás con'
+                                : <>{variant !== 'card' && '✨ '}{cantidadCuotas} cuotas de</>}
                         </span>
                         <span className={styles.mainPrice}>
                             {formatearPrecio(precioCuota, moneda)}
                         </span>
                         <span className={styles.totalLabel}>
-                            (Total: {formatearPrecio(descuento.precioFinal, moneda)})
+                            {variant === 'sidebar'
+                                ? `1ª de ${cantidadCuotas} cuotas, una por mes`
+                                : `(Total: ${formatearPrecio(descuento.precioFinal, moneda)})`}
                         </span>
                     </div>
                 ) : (
                     <span className={styles.mainPrice}>
                         {formatearPrecio(descuento.precioFinal, moneda)}
+                    </span>
+                )}
+
+                {/* Total del curso: fuera de la píldora y legible, no entre paréntesis
+                    en gris. Es el número que genera confianza cuando se entiende. */}
+                {variant === 'sidebar' && showCuotas && cantidadCuotas > 1 && (
+                    <span className={styles.courseTotal}>
+                        Curso completo: {formatearPrecio(descuento.precioFinal, moneda)}
                     </span>
                 )}
 
@@ -167,6 +181,7 @@ function getStyles(variant: PriceDisplayProps['variant']) {
         totalLabel: 'text-xs text-gray-400',
         savings: 'text-xs text-green-600 font-medium mt-1',
         cuposMessage: 'text-xs text-amber-600 font-medium mt-2',
+        courseTotal: 'hidden',
     };
 
     switch (variant) {
@@ -175,8 +190,10 @@ function getStyles(variant: PriceDisplayProps['variant']) {
                 ...baseStyles,
                 container: 'flex flex-col items-center text-center',
                 mainPrice: 'font-heading font-bold text-3xl text-green-700',
-                cuotasContainer: 'flex flex-col items-center gap-1 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 border border-green-200 dark:border-green-800/30 text-green-800 dark:text-green-300 px-4 py-2 rounded-full',
-                cuotasLabel: 'text-sm font-medium',
+                cuotasContainer: 'flex flex-col items-center gap-0.5 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 border border-green-200 dark:border-green-800/30 text-green-800 dark:text-green-300 px-5 py-2.5 rounded-2xl',
+                cuotasLabel: 'text-xs font-medium uppercase tracking-wide opacity-80',
+                totalLabel: 'text-xs font-medium opacity-90',
+                courseTotal: 'mt-2.5 text-sm font-medium text-foreground/80 tabular-nums',
                 cuposMessage: 'text-sm text-amber-600 dark:text-amber-400 font-medium mt-3 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-lg',
             };
 

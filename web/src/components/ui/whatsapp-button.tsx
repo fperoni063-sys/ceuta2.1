@@ -22,7 +22,7 @@ export function WhatsAppButton({ message, phoneNumber }: WhatsAppButtonProps = {
     const whatsappUrl = `https://wa.me/${cleanNumber}?text=${preloadedMessage}`;
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 group">
+        <div className="fixed bottom-6 right-6 z-50 group ceuta-floating-offset">
             {/* Tooltip */}
             <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 <div className="bg-earth-900 text-white text-sm px-4 py-2 rounded-lg shadow-xl whitespace-nowrap font-medium">

@@ -80,7 +80,7 @@ export function InscripcionBanner() {
         const iconEmoji = hasUrgent ? '⚠️' : allConfirmed ? '🎉' : '📋';
 
         return (
-            <div className="fixed bottom-24 right-4 left-4 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-md z-50 animate-in slide-in-from-bottom-4 duration-300">
+            <div className="fixed bottom-24 right-4 left-4 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-md z-50 animate-in slide-in-from-bottom-4 duration-300 ceuta-floating-offset">
                 <div className="bg-background dark:bg-card rounded-xl shadow-xl border border-sage-200 dark:border-white/10 p-4">
                     <div className="flex items-start gap-4">
                         <div className={`${bannerColor} p-2 rounded-full`}>
@@ -134,7 +134,7 @@ export function InscripcionBanner() {
     // (O iterar sobre todas si hay varias, pero el diseño actual parece optimizado para listas)
 
     return (
-        <div className="fixed bottom-24 right-4 left-4 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-md z-50 space-y-2 pointer-events-none">
+        <div className="fixed bottom-24 right-4 left-4 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-md z-50 space-y-2 pointer-events-none ceuta-floating-offset">
             {inscripciones.map((inscripcion: InscripcionPendiente) => {
                 // Filtrar lo que no queremos mostrar
                 if (dismissedCursos.has(inscripcion.cursoId)) return null;

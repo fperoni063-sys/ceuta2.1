@@ -1,69 +1,30 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { EnrollmentModal } from '@/components/cursos/EnrollmentModal';
+import { useCourseEnroll } from '@/components/cursos/courseEnrollStore';
 
-interface EnrollButtonProps {
-    courseId: number;
-    courseName: string;
-    coursePrice: number | null;
-    linkMercadoPago?: string | null;
-    cantidadCuotas?: number;
-    dlocalHabilitado?: boolean;
-    courseSlug?: string;
-    esCursoArgentina?: boolean;
-    // Discount fields
-    descuento_porcentaje?: number | null;
-    descuento_cupos_totales?: number | null;
-    descuento_cupos_usados?: number;
-    descuento_etiqueta?: string | null;
-    descuento_fecha_fin?: string | null;
-}
-
-export function EnrollButton({
-    courseId,
-    courseName,
-    coursePrice,
-    linkMercadoPago,
-    cantidadCuotas,
-    dlocalHabilitado,
-    courseSlug,
-    esCursoArgentina,
-    descuento_porcentaje,
-    descuento_cupos_totales,
-    descuento_cupos_usados,
-    descuento_etiqueta,
-    descuento_fecha_fin,
-}: EnrollButtonProps) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+/**
+ * CTA principal de la sidebar.
+ *
+ * Ya no monta su propio EnrollmentModal: el modal es unico y vive en
+ * CourseEnrollProvider. Asi la barra fija, los CTA del contenido y este boton
+ * abren siempre la misma instancia, con el mismo precio y la misma modalidad.
+ *
+ * El wrapper lleva el anchorRef del contexto: es lo que la barra fija observa
+ * para saber si este boton sigue a la vista.
+ */
+export function EnrollButton() {
+    const { openModal, anchorRef } = useCourseEnroll();
 
     return (
-        <>
+        <div ref={anchorRef}>
             <Button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => openModal('sidebar')}
                 className="w-full"
                 size="lg"
             >
                 Reservar mi cupo - Gratis
             </Button>
-            <EnrollmentModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                courseId={courseId}
-                courseName={courseName}
-                coursePrice={coursePrice}
-                linkMercadoPago={linkMercadoPago}
-                cantidadCuotas={cantidadCuotas}
-                descuento_porcentaje={descuento_porcentaje}
-                descuento_cupos_totales={descuento_cupos_totales}
-                descuento_cupos_usados={descuento_cupos_usados}
-                descuento_etiqueta={descuento_etiqueta}
-                descuento_fecha_fin={descuento_fecha_fin}
-                dlocalHabilitado={dlocalHabilitado}
-                courseSlug={courseSlug}
-                esCursoArgentina={esCursoArgentina}
-            />
-        </>
+        </div>
     );
 }
