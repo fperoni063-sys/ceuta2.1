@@ -17,6 +17,8 @@ import { InlineEnrollCta } from '@/components/cursos/InlineEnrollCta';
 import { CourseTracker } from '@/components/analytics/CourseTracker';
 import { ImageCarousel } from '@/components/cursos/ImageCarousel';
 import { CourseVideo } from '@/components/cursos/CourseVideo';
+import { CourseIntro } from '@/components/cursos/CourseIntro';
+import { etiquetasDeCurso, etiquetaCategoria, etiquetaModalidad } from '@/lib/utils/courseLabels';
 
 interface Docente {
     nombre: string;
@@ -238,8 +240,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     return {
         title: `${curso.nombre} | Cursos CEUTA Uruguay`,
-        description: curso.transformacion_hook || curso.descripcion || `Aprende ${curso.nombre} con CEUTA Uruguay. ${curso.duracion || ''} ${curso.modalidad || ''}`,
-        keywords: `${curso.categoria || 'permacultura'}, ${curso.nombre}, curso uruguay, ${curso.lugar || 'montevideo'}`,
+        description: curso.transformacion_hook || curso.descripcion || `Aprende ${curso.nombre} con CEUTA Uruguay. ${curso.duracion || ''} ${etiquetaModalidad(curso.modalidad) || ''}`,
+        // `categoria` viene 'ninguno' en 7 de 9 cursos: sin traducir, las keywords
+        // de la página arrancaban con la palabra "ninguno".
+        keywords: [
+            etiquetaCategoria(curso.categoria) || 'permacultura',
+            curso.nombre,
+            'curso uruguay',
+            curso.lugar || 'montevideo',
+        ].join(', '),
         openGraph: {
             title: curso.nombre,
             description: curso.transformacion_hook || curso.descripcion || 'Formación en CEUTA Uruguay',
@@ -304,17 +313,21 @@ function CourseHeader({ curso }: { curso: CourseFullData }) {
                 {/* Title Container - ahora DENTRO de la imagen */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
                     <Container>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                            {curso.categoria && (
-                                <Badge variant="default">{curso.categoria}</Badge>
-                            )}
-                            {curso.modalidad && (
-                                <Badge variant="secondary">{curso.modalidad}</Badge>
-                            )}
-                            {curso.nivel && (
-                                <Badge variant="accent">{curso.nivel}</Badge>
-                            )}
-                        </div>
+                        {/* Etiquetas traducidas. Antes se imprimían los enums crudos
+                            y lo primero que se leía era "ninguno hibrido
+                            todos_los_niveles" arriba del título. */}
+                        {(() => {
+                            const etiquetas = etiquetasDeCurso(curso);
+                            if (etiquetas.length === 0) return null;
+                            const variantes = ['default', 'secondary', 'accent'] as const;
+                            return (
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {etiquetas.map((e, i) => (
+                                        <Badge key={e} variant={variantes[i % variantes.length]}>{e}</Badge>
+                                    ))}
+                                </div>
+                            );
+                        })()}
                         <h1 className="font-heading text-xl md:text-4xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                             {curso.nombre}
                         </h1>
@@ -371,38 +384,9 @@ function toEnrollData(curso: CourseFullData): CourseEnrollData {
 function CourseContent({ curso, programa }: { curso: CourseFullData; programa: ProgramaClase[] }) {
     return (
         <div className="space-y-8">
-            {/* Promo Video */}
-            {curso.video_url && (
-                <section>
-                    <CourseVideo videoUrl={curso.video_url} />
-                </section>
-            )}
-
-            {/* Transformation Hook */}
-            {curso.transformacion_hook && (
-                <div className="bg-cream/20 rounded-lg p-6 border-l-4 border-green-700">
-                    <p className="text-lg text-earth-900 font-medium italic">
-                        {curso.transformacion_hook}
-                    </p>
-                </div>
-            )}
-
-            {/* Publico Objetivo */}
-            {curso.publico_objetivo && curso.publico_objetivo.length > 0 && (
-                <section>
-                    <h2 className="font-heading text-2xl font-bold text-earth-900 mb-4">
-                        ¿Para quién es este curso?
-                    </h2>
-                    <ul className="space-y-3">
-                        {curso.publico_objetivo.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-3">
-                                <span className="text-xl">🎯</span>
-                                <span className="text-lg text-foreground/80">{item}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            )}
+            {/* El video, el hook y "¿Para quién es?" se movieron a <CourseIntro>,
+                que se renderiza ARRIBA de la tarjeta de precio. Ver el comentario
+                de ese componente para el porqué. */}
 
             {/* Que vas a lograr / Description */}
             {(curso.que_vas_a_lograr && curso.que_vas_a_lograr.length > 0) ? (
@@ -699,17 +683,34 @@ export default async function CourseDetailPage({ params }: PageProps) {
               * un solo precio.
               */}
             <CourseEnrollProvider curso={toEnrollData(curso)}>
-                {/* Main Content */}
+                {/*
+                  * Orden en celular = orden del DOM: promesa -> precio -> resto.
+                  * En escritorio la colocación explícita deja todo como estaba:
+                  * intro y resto apilados en las dos columnas de la izquierda, y
+                  * la tarjeta de precio a la derecha ocupando las dos filas, para
+                  * que siga siendo sticky a lo largo de toda la página.
+                  * No se usan clases `order-*`: acá el DOM ya está en el orden que
+                  * queremos para celular, y en lg mandan col-start/row-start.
+                  */}
                 <Container>
-                    <div className="grid lg:grid-cols-3 gap-8 mt-8">
-                        {/* Content Column */}
-                        <div className="lg:col-span-2 order-2 lg:order-1">
-                            <CourseContent curso={curso} programa={programa} />
+                    <div className="grid gap-8 mt-8 lg:grid-cols-3">
+                        {/* 1 · La promesa, antes que el precio */}
+                        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1">
+                            <CourseIntro
+                                videoUrl={curso.video_url}
+                                hook={curso.transformacion_hook}
+                                publicoObjetivo={curso.publico_objetivo}
+                            />
                         </div>
 
-                        {/* Sidebar Column */}
-                        <div className="order-1 lg:order-2">
+                        {/* 2 · Precio + CTA */}
+                        <div className="lg:col-start-3 lg:row-start-1 lg:row-span-2">
                             <CourseSidebarClient />
+                        </div>
+
+                        {/* 3 · El detalle que sostiene el precio */}
+                        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2">
+                            <CourseContent curso={curso} programa={programa} />
                         </div>
                     </div>
                 </Container>

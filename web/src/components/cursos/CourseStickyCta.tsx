@@ -15,14 +15,18 @@ import { ShieldCheck, CalendarClock } from 'lucide-react';
  * botón a mano. Medido: de 12.258 visitantes, 41 abrieron el formulario.
  *
  * Reglas de la barra:
- *  - Aparece recién cuando el CTA de la sidebar sale de pantalla (nunca dos veces
- *    el mismo botón a la vista).
+ *  - Nunca sobre la primera pantalla: ahí va sola la promesa del curso.
+ *  - Después, aparece siempre que el CTA de la sidebar no esté a la vista, para
+ *    no repetir el mismo botón dos veces en pantalla.
  *  - Se esconde con el modal abierto.
  *  - Publica su alto en --ceuta-cta-h para que el botón flotante de WhatsApp suba
  *    y no quede tapado.
  */
 
 const WHATSAPP_NUMBER = '59898910715';
+
+/** Alto aproximado de la primera pantalla: debajo de esto la barra no aparece. */
+const UMBRAL_PRIMERA_PANTALLA = 500;
 
 export function CourseStickyCta() {
     const {
@@ -47,13 +51,23 @@ export function CourseStickyCta() {
         if (!mounted) return;
 
         const check = () => {
+            // Nunca sobre la primera pantalla: ahí va la promesa sola, que es lo
+            // que tiene que coincidir con el anuncio del que viene la persona.
+            const scrolleoAlgo = window.scrollY > UMBRAL_PRIMERA_PANTALLA;
+
             if (!anchorNode || !anchorNode.isConnected) {
-                // Sin ancla caemos a un umbral fijo para no dejar la página sin barra.
-                setPastAnchor(window.scrollY > 600);
+                setPastAnchor(scrolleoAlgo);
                 return;
             }
-            // El ancla ya quedó por encima del viewport => mostramos la barra.
-            setPastAnchor(anchorNode.getBoundingClientRect().bottom < 0);
+
+            // Se muestra siempre que el CTA de la sidebar NO esté a la vista, sea
+            // porque todavía no se llegó a él o porque ya quedó atrás. Antes solo
+            // cubría el segundo caso; desde que la tarjeta de precio bajó (la
+            // promesa va primero) eso dejaba un tramo largo arriba sin ningún
+            // botón a mano.
+            const r = anchorNode.getBoundingClientRect();
+            const anclaALaVista = r.bottom > 0 && r.top < window.innerHeight;
+            setPastAnchor(scrolleoAlgo && !anclaALaVista);
         };
 
         check();
