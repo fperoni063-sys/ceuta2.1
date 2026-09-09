@@ -109,8 +109,37 @@ Puntos de entrada, todos contra **la misma instancia de `EnrollmentModal`**:
 ⚠️ **Ojo con `descuento_cupos_usados`:** `calcularDescuento` exige
 `cuposTotales > 0` **y** `cuposDisponibles > 0` para aplicar el descuento. Si el
 contador de cupos usados alcanza al total, **el descuento se apaga solo** y el
-precio salta al de lista en toda la página. Hoy los 10 cursos tienen
-`cupos_totales = 10` y `cupos_usados = 0`.
+precio salta al de lista en toda la página.
+
+#### 1.c. Orden de la ficha de curso — 03/09/2026
+
+**La promesa va antes que el precio.** El orden en celular es:
+
+    hero + título → hook → "¿Para quién es?" → precio + CTA → todo lo demás
+
+Medido en la ficha de hongos (375×812): hook en la pantalla 0,46; "para quién"
+en 0,64; precio en 0,93; CTA de la sidebar en 1,48.
+
+*   **El precio no se esconde**, pasa de la primera pantalla al arranque de la
+    segunda. Antes la tarjeta caía justo debajo del título, así que a alguien que
+    venía de un anuncio se le cotizaba antes de contarle qué se llevaba, y el
+    `transformacion_hook` —el mejor texto del sitio— quedaba a ~1.000px, debajo
+    del precio y del botón.
+*   **"¿Qué vas a lograr?" queda DEBAJO del precio a propósito.** Es el detalle
+    que justifica el número una vez que la persona ya decidió que le interesa, y
+    ocupa demasiado alto como para meterlo antes (empujaría el precio a la
+    tercera pantalla).
+*   **La grilla usa `lg:col-start` / `lg:row-start`, no `order-*`.** El DOM ya
+    está en el orden de celular; en `lg` la colocación explícita deja el
+    escritorio igual que antes: intro y resto apilados en las dos columnas de la
+    izquierda, y la tarjeta de precio en la columna 3 **abarcando las dos filas**,
+    que es lo que la mantiene sticky a lo largo de toda la página. Si se toca
+    esta grilla, verificar que el `row-span-2` siga ahí.
+*   **Los enums nunca se imprimen crudos.** `categoria`, `modalidad` y `nivel`
+    pasan por `lib/utils/courseLabels.ts`. Antes lo primero que se leía en toda
+    ficha era "ninguno hibrido todos_los_niveles". Las etiquetas además venden:
+    `basico` es "Desde cero", no "Básico". `categoria: 'ninguno'` (7 de 9 cursos)
+    no renderiza nada. El mismo mapa se usa en las `keywords` del `<head>`.
 
 ### 2. Portal de Usuario ("Mi Inscripción")
 *   **Acceso:** Magic Link (`/mi-inscripcion/[token]`).
@@ -138,6 +167,36 @@ precio salta al de lista en toda la página. Hoy los 10 cursos tienen
     2.  `recordatorio_24h` (24h).
     3.  `urgencia_72h` (72h).
     4.  `ultima_oportunidad_7d` (7 días).
+    5.  `recordatorio_14d` (14 días) — **desactivado hasta aprobar el texto**.
+    6.  `ultimo_contacto_30d` (30 días) — **desactivado hasta aprobar el texto**.
+        Es el último de la secuencia y el mail lo dice. **No hay día 60 a
+        propósito** (dicho por Franco: "el de sesenta es un montón").
+*   **⚠️ La inscripción cierra ~14 días DESPUÉS de que el curso empieza**
+    (dicho por Franco, 2026-09-03). Los recordatorios se agendan por días desde
+    el alta, sin mirar el calendario del curso, así que hace falta una compuerta:
+    `inscripcionCerrada()` en el cron cancela cualquier recordatorio cuya fecha
+    de envío caiga después de `fecha_inicio + 14 días`. Aplica a **toda** la
+    secuencia, no solo a los dos nuevos. Sin esto, quien se pre-inscribe dos días
+    antes del comienzo recibe el mail de 30 días cuando el curso arrancó hace un
+    mes y ya no se puede anotar. Si el curso tiene `fecha_a_confirmar`, no se
+    puede afirmar que cerró y el envío pasa.
+*   **La regla de las 2 semanas NO se le escribe al cliente.** Es aproximada y de
+    uso interno: ponerle fecha exacta en un mail la convierte en una promesa
+    pública que CEUTA después tiene que honrar.
+*   **Contradicción de tono pendiente:** `ultima_oportunidad_7d` dice "tu reserva
+    expira hoy" y "liberaremos tu cupo". Si después llegan el de 14 y el de 30,
+    esa amenaza queda desmentida. Hay un `UPDATE` sugerido, comentado, al pie de
+    la migración `20260903120000`. No se aplicó solo: es texto que hoy le llega
+    a clientes reales.
+*   **Aperturas y clics:** `/api/webhooks/resend` marca `abierto_at` y
+    `clicked_at` en `email_logs`, casando por `provider_message_id` (el id que
+    devuelve Resend, que ahora se guarda al enviar). La firma de Svix se valida
+    contra el **cuerpo crudo**, nunca contra el JSON reparseado. Requiere
+    `RESEND_WEBHOOK_SECRET` y **el dominio verificado**: mientras se mande desde
+    `onboarding@resend.dev` no llega ningún evento aunque el código esté
+    desplegado. El tracking de **clics** reescribe los enlaces del mail para que
+    pasen por un redirect de Resend — el enlace único deja de verse como una URL
+    de CEUTA. Se puede activar solo aperturas; el handler funciona igual.
 *   **Stop de recordatorios:** se cancelan al subir comprobante (`pago_a_verificar`) y en `verificado` / `rechazado` / `cancelado`. El cron también saltea esos estados.
 *   **Cron:** Vercel llama `GET /api/cron/send-scheduled-emails` una vez por día (`0 12 * * *`) con `Authorization: Bearer CRON_SECRET`. En Hobby no hay cron horario. Un atraso de hasta ~24h en recordatorios es esperado y aceptable.
 *   **GitHub Actions:** el workflow horario se desactivó. Nunca tuvo secretos `APP_URL`/`CRON_SECRET`, falló **2.264 veces** y GitHub maileaba cada fallo al dueño del repo. No reactivar el `schedule:` sin esos secretos.
@@ -148,6 +207,30 @@ precio salta al de lista en toda la página. Hoy los 10 cursos tienen
 ### 5. Sincronización con Web Vieja ("Modo Hacker")
 *   **Servicio:** `syncViejaWeb.ts` hace POST al formulario PHP de ceuta.org.uy en cada preinscripción.
 *   **Config:** `cursos.url_web_vieja`. Si está vacío, no sincroniza.
+
+**El punto delicado es qué curso se manda.** El curso viaja como `id_curso`, y ese id
+no está en Supabase: vive escondido dentro del string `url_web_vieja` escrito a mano.
+Orden de resolución, sin defaults:
+
+1.  El `id_curso` que **declara el formulario de la propia página** (`idCursoDeclaradoEnHtml`).
+    Es la fuente autoritativa: es el valor que mandaría un humano llenando ese form.
+2.  Si la página no responde, el único segmento numérico del path (`extraerIdCursoViejo`).
+3.  Si no hay ninguno de los dos, **no se sincroniza** y se loguea.
+
+**NUNCA poner un id por defecto.** Hasta el 09/09/2026 el código hacía
+`match(/\/calendario\/(\d+)\//)` con fallback `'200'`. Solar Fotovoltaica es el único
+curso cuya URL lleva un segmento extra (`/cursos/calendario/anteriores/49/…`), no
+matcheaba, y caía al default. **200 es Jardines ecológicos.** Cuatro personas que se
+anotaron a Solar quedaron archivadas como Jardines en el panel viejo, y el bot de
+WhatsApp — que lee ese panel — les escribió nombrando el curso equivocado. Una ya
+había pagado. Un id inventado no falla: corrompe callado y alguien más abajo lo lee
+como cierto. Que falte el registro se nota; que esté mal, no.
+
+*   **Auditoría:** `node scripts/auditar-cursos-web-vieja.js` (o `npm run audit:web-vieja`)
+    compara, para cada curso, el id del path contra el que declara la página. Solo lectura,
+    sale con código 1 si algo mapea mal. **Correlo al agregar un curso o cambiar su
+    `url_web_vieja`.**
+*   **Regresión cubierta:** `web/src/__tests__/sync-vieja-web.test.ts`.
 
 ### 6. Sistema de Precios, Cuotas y Descuentos
 *   **Motor:** `discountUtils.ts` (`calcularDescuento`, `formatearPrecio`, `calcularPrecioCuota`).
