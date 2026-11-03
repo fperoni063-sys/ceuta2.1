@@ -140,6 +140,10 @@ en 0,64; precio en 0,93; CTA de la sidebar en 1,48.
     ficha era "ninguno hibrido todos_los_niveles". Las etiquetas además venden:
     `basico` es "Desde cero", no "Básico". `categoria: 'ninguno'` (7 de 9 cursos)
     no renderiza nada. El mismo mapa se usa en las `keywords` del `<head>`.
+*   **La foto de arriba no se estira.** En una pantalla grande, a todo el ancho y con
+    alto fijo, quedaba en una franja de 8 a 1: borrosa y con las cabezas cortadas.
+    Desde `2xl` tiene 1440px de ancho máximo, sobre la misma foto difuminada. En
+    celular no cambió nada.
 
 ### 2. Portal de Usuario ("Mi Inscripción")
 *   **Acceso:** Magic Link (`/mi-inscripcion/[token]`).
@@ -237,6 +241,11 @@ como cierto. Que falte el registro se nota; que esté mal, no.
 *   **Componente UI:** `PriceDisplay.tsx` unifica la visualización (cuotas, tachado, ahorro, cupos y fecha límite) de forma reactiva y determinista.
 *   **Base de datos:** Columnas en `cursos` (`precio`, `cantidad_cuotas`, `descuento_porcentaje`, `descuento_cupos_totales`, `descuento_cupos_usados`, `descuento_etiqueta`, `descuento_fecha_fin`, etc.).
 *   **Guía operativa maestra para promociones:** `docs/SISTEMA_PRECIOS_Y_DESCUENTOS.md`.
+*   **Códigos de descuento (tabla `descuentos`):** el modal manda el código y el `curso_id` a `/api/validate-discount`, que llama a `validate_discount_code(p_code, p_curso_id)`. La función **siempre devuelve una fila**: si sirve lo dice `valid`. Hasta el 03/11/2026 la ruta llamaba con `p_codigo` y ningún código funcionó nunca.
+    *   Al inscribirse, `/api/inscripcion` vuelve a validar y guarda el precio en `precio_pagado`; sin eso, Mi inscripción muestra el precio de lista.
+    *   Un enlace con `?codigo=MONTE20` deja el código aplicado en el paso de pago.
+    *   Un curso que se vende solo con código lleva `descuento_fecha_fin` y `descuento_porcentaje` vacío: la ficha muestra el vencimiento y el modal abre la caja del código.
+    *   `fecha_fin` se compara contra la fecha en UTC: para cortar a las 23:59 de Uruguay, cargar el día siguiente (el código sigue valiendo hasta las 21:00 de ese día).
 
 ---
 

@@ -285,16 +285,34 @@ function CourseHeader({ curso }: { curso: CourseFullData }) {
 
     return (
         <div className="relative">
-            {/* Hero Image con título integrado */}
-            <div className="relative h-[240px] md:h-[320px] w-full overflow-hidden">
+            {/* Hero Image con título integrado.
+                En una pantalla grande la foto a todo el ancho quedaba estirada en una
+                franja de 8 a 1, borrosa y con las cabezas cortadas. Desde 2xl tiene un
+                ancho máximo y va sobre la misma foto difuminada. */}
+            <div className="relative h-[240px] md:h-[320px] lg:h-[400px] 2xl:h-[460px] w-full overflow-hidden 2xl:bg-earth-900">
                 {heroImage ? (
-                    <Image
-                        src={heroImage}
-                        alt={curso.nombre}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
+                    <>
+                        <div className="absolute inset-0 hidden 2xl:block" aria-hidden="true">
+                            <Image
+                                src={heroImage}
+                                alt=""
+                                fill
+                                sizes="640px"
+                                className="object-cover blur-2xl scale-110 opacity-70 saturate-150"
+                            />
+                        </div>
+                        <div className="absolute inset-0 2xl:left-1/2 2xl:right-auto 2xl:w-full 2xl:max-w-[1440px] 2xl:-translate-x-1/2 2xl:[mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+                            <Image
+                                src={heroImage}
+                                alt={curso.nombre}
+                                fill
+                                sizes="(min-width: 1536px) 1440px, 100vw"
+                                className="object-cover"
+                                priority
+                            />
+                        </div>
+                        <div className="absolute inset-x-0 bottom-0 hidden h-2/3 bg-gradient-to-t from-black/50 to-transparent lg:block" aria-hidden="true" />
+                    </>
                 ) : (
                     /* Elegant fallback - earth tones with side margins */
                     <div className="w-full h-full relative bg-earth-800">

@@ -36,7 +36,7 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
 
     if (images.length === 1) {
         return (
-            <div className="relative w-full aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] rounded-2xl overflow-hidden shadow-lg my-8 group bg-black/90">
+            <div className="relative w-full aspect-[4/3] md:aspect-[16/9] lg:aspect-[16/9] rounded-2xl overflow-hidden shadow-lg my-8 group bg-black/90">
                 {/* Fondo difuminado ambiental */}
                 <div className="absolute inset-0 w-full h-full scale-110">
                     <Image
@@ -66,7 +66,7 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
             <div className="overflow-hidden rounded-2xl shadow-lg border border-earth-100/20" ref={emblaRef}>
                 <div className="flex">
                     {images.map((img, index) => (
-                        <div className="flex-[0_0_100%] min-w-0 relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] bg-black/90 overflow-hidden" key={index}>
+                        <div className="flex-[0_0_100%] min-w-0 relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[16/9] bg-black/90 overflow-hidden" key={index}>
                             {/* Fondo difuminado ambiental */}
                             <div className="absolute inset-0 w-full h-full scale-110">
                                 <Image
