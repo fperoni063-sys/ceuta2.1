@@ -14,7 +14,7 @@ import { UploadComprobante } from '@/components/payment/UploadComprobante';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { CompleteProfileForm } from '@/components/cursos/CompleteProfileForm';
 import { CountdownTimer } from '@/components/ui/CountdownTimer';
-import { calcularDescuento } from '@/lib/utils/discountUtils';
+import { calcularDescuento, aplicarCodigo, normalizarCodigo } from '@/lib/utils/discountUtils';
 
 
 interface EnrollmentModalProps {
@@ -266,6 +266,7 @@ interface PaymentMethodProps {
     coursePrice: number | null;
     onNext: (method?: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal') => void;
     onBack: () => void;
+    courseId: number;
     courseName?: string;
     cantidadCuotas?: number;
     descuento_porcentaje?: number | null;
@@ -287,6 +288,7 @@ function Step3PaymentMethod({
     coursePrice,
     onNext,
     onBack,
+    courseId,
     courseName,
     cantidadCuotas = 1,
     descuento_porcentaje,
@@ -324,7 +326,8 @@ function Step3PaymentMethod({
     }, []);
 
     const validateDiscount = async () => {
-        if (!formData.codigoDescuento.trim()) return;
+        const codigo = normalizarCodigo(formData.codigoDescuento);
+        if (!codigo || discountApplied || isValidating) return;
 
         setIsValidating(true);
         setDiscountError('');
@@ -335,8 +338,8 @@ function Step3PaymentMethod({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    codigo: formData.codigoDescuento,
-                    curso_id: null, // Could add course-specific validation
+                    codigo,
+                    curso_id: courseId,
                 }),
             });
 
@@ -344,11 +347,10 @@ function Step3PaymentMethod({
 
             if (result.valid) {
                 setDiscountApplied(true);
+                setFormData(prev => ({ ...prev, codigoDescuento: codigo }));
                 // Apply discount
-                if (coursePrice && result.tipo === 'porcentaje') {
-                    setFinalPrice(coursePrice * (1 - result.valor / 100));
-                } else if (coursePrice && result.tipo === 'monto') {
-                    setFinalPrice(Math.max(0, coursePrice - result.valor));
+                if (coursePrice) {
+                    setFinalPrice(aplicarCodigo(coursePrice, result.tipo, result.valor));
                 }
             } else {
                 setDiscountError(result.message || 'Código inválido');
@@ -359,6 +361,14 @@ function Step3PaymentMethod({
             setIsValidating(false);
         }
     };
+
+    // Si el enlace traía el código, o si vuelve de otro paso, queda aplicado solo.
+    useEffect(() => {
+        if (formData.codigoDescuento) validateDiscount();
+    }, []);
+
+    // Curso que se vende con código y no con descuento a la vista: la caja arranca abierta.
+    const ventaConCodigo = !descuento_porcentaje && !!descuento_fecha_fin && new Date(descuento_fecha_fin) > new Date();
 
     const handleMethodSelect = (method: 'transferencia' | 'mercadopago' | 'efectivo' | 'dlocal') => {
         setFormData(prev => ({ ...prev, metodoPago: method }));
@@ -567,7 +577,7 @@ function Step3PaymentMethod({
                                 <CountdownTimer
                                     targetDate={descuento_fecha_fin}
                                     variant="subtle"
-                                    label="Oferta válida por:"
+                                    label={descuento_porcentaje ? 'Oferta válida por:' : 'Tu código vale por:'}
                                     className="border-green-100 dark:border-green-900/30 bg-green-50/50"
                                 />
                             </div>
@@ -578,6 +588,16 @@ function Step3PaymentMethod({
                             <p className="text-gray-400 line-through text-sm mb-1">
                                 {formatearPrecio(cantidadCuotas > 1
                                     ? Math.round((coursePrice || 0) / cantidadCuotas)
+                                    : coursePrice
+                                )}
+                            </p>
+                        )}
+
+                        {/* Precio de lista tachado cuando rebajó un código */}
+                        {discountApplied && coursePrice && (
+                            <p className="text-gray-400 line-through text-sm mb-1">
+                                {formatearPrecio(cantidadCuotas > 1
+                                    ? Math.round(coursePrice / cantidadCuotas)
                                     : coursePrice
                                 )}
                             </p>
@@ -613,18 +633,46 @@ function Step3PaymentMethod({
                                 {descuento_cupos_totales - (descuento_cupos_usados || 0)} cupos disponibles
                             </p>
                         )}
-
-                        {/* Precio con código aplicado */}
-                        {discountApplied && (
-                            <div className="mt-2 p-2 bg-green-50 rounded border border-green-100 animate-in fade-in">
-                                <p className="text-sm font-bold text-green-700">
-                                    ✓ Código aplicado: {formatearPrecio(getPaymentDisplayInfo().amount)}
-                                </p>
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
+
+            {/* Código de descuento. Va antes de los métodos de pago porque tocar un
+                método ya avanza de paso: abajo, se veía recién cuando era tarde. */}
+            <details className="group" open={ventaConCodigo || !!formData.codigoDescuento}>
+                <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground flex items-center gap-1 justify-center">
+                    💡 ¿Tenés código de descuento?
+                    <span className="text-xs group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div className="mt-3 flex gap-2">
+                    <Input
+                        type="text"
+                        value={formData.codigoDescuento}
+                        onChange={(e) => {
+                            setFormData({ ...formData, codigoDescuento: e.target.value.toUpperCase() });
+                            setDiscountApplied(false);
+                            setDiscountError('');
+                        }}
+                        onBlur={validateDiscount}
+                        placeholder="Escribí tu código"
+                        disabled={discountApplied}
+                    />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={validateDiscount}
+                        disabled={isValidating || discountApplied || !formData.codigoDescuento}
+                    >
+                        {isValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Aplicar'}
+                    </Button>
+                </div>
+                {discountError && <p className="text-red-500 text-xs mt-1">{discountError}</p>}
+                {discountApplied && (
+                    <p className="text-green-700 text-xs mt-1">
+                        ✓ Código aplicado: el curso queda en {formatearPrecio(finalPrice)}
+                    </p>
+                )}
+            </details>
 
             {/* Payment Method - PRIMERO para móvil */}
             <div className="space-y-3">
@@ -727,39 +775,6 @@ function Step3PaymentMethod({
                     )}
                 </div>
             </div>
-
-            {/* Código de descuento - COLAPSABLE */}
-            {tipoPago === 'total' && (
-                <details className="mt-3 group">
-                    <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground flex items-center gap-1 justify-center">
-                        💡 ¿Tenés código de descuento?
-                        <span className="text-xs group-open:rotate-180 transition-transform">▼</span>
-                    </summary>
-                    <div className="mt-3 flex gap-2">
-                        <Input
-                            type="text"
-                            value={formData.codigoDescuento}
-                            onChange={(e) => {
-                                setFormData({ ...formData, codigoDescuento: e.target.value.toUpperCase() });
-                                setDiscountApplied(false);
-                                setDiscountError('');
-                            }}
-                            placeholder="CODIGO2024"
-                            disabled={discountApplied}
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={validateDiscount}
-                            disabled={isValidating || discountApplied || !formData.codigoDescuento}
-                        >
-                            {isValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Aplicar'}
-                        </Button>
-                    </div>
-                    {discountError && <p className="text-red-500 text-xs mt-1">{discountError}</p>}
-                    {discountApplied && <p className="text-green-700 text-xs mt-1">✓ Código aplicado</p>}
-                </details>
-            )}
 
             {/* Información Importante - Box Azul */}
             <div className="bg-blue-50/50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-lg p-3 text-left mt-4">
@@ -1379,23 +1394,33 @@ export function EnrollmentModal({
     // Lifted state for final price (after discount)
     const [finalPrice, setFinalPrice] = useState<number | null>(coursePrice);
 
+    const precioSinCodigo = () => {
+        if (!coursePrice) return null;
+        return calcularDescuento({
+            precioOriginal: coursePrice,
+            descuentoPorcentaje: descuento_porcentaje || null,
+            cuposTotales: descuento_cupos_totales || null,
+            cuposUsados: descuento_cupos_usados || 0,
+            etiqueta: descuento_etiqueta || null,
+            fechaFin: descuento_fecha_fin || null,
+        }).precioFinal;
+    };
+
     // Update finalPrice when coursePrice changes (initial load)
     // FIX: Apply automatic discount calculation on init
     useEffect(() => {
-        if (coursePrice) {
-            const descuento = calcularDescuento({
-                precioOriginal: coursePrice,
-                descuentoPorcentaje: descuento_porcentaje || null,
-                cuposTotales: descuento_cupos_totales || null,
-                cuposUsados: descuento_cupos_usados || 0,
-                etiqueta: descuento_etiqueta || null,
-                fechaFin: descuento_fecha_fin || null,
-            });
-            setFinalPrice(descuento.precioFinal);
-        } else {
-            setFinalPrice(null);
-        }
+        setFinalPrice(precioSinCodigo());
     }, [coursePrice, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin]);
+
+    // El enlace puede traer el código (/cursos/monte-comestible?codigo=MONTE20):
+    // así, el que entra desde WhatsApp o desde el chat de Zoom no tiene que escribirlo.
+    useEffect(() => {
+        if (!isOpen) return;
+        const codigo = new URLSearchParams(window.location.search).get('codigo');
+        if (codigo) {
+            setFormData(prev => prev.codigoDescuento ? prev : { ...prev, codigoDescuento: normalizarCodigo(codigo) });
+        }
+    }, [isOpen]);
 
     const handleClose = () => {
         // Reset state when closing
@@ -1404,6 +1429,8 @@ export function EnrollmentModal({
         setEnrollmentId(undefined);
         setToken(null);
         setTipoPago('total');
+        // El código se vuelve a validar al reabrir: el precio no puede quedar rebajado.
+        setFinalPrice(precioSinCodigo());
         onClose();
     };
 
@@ -1554,6 +1581,7 @@ export function EnrollmentModal({
                         courseName={courseName}
                         onNext={handleStep2Next}
                         onBack={() => setStep(1)}
+                        courseId={courseId}
                         cantidadCuotas={cantidadCuotas}
                         descuento_porcentaje={descuento_porcentaje}
                         descuento_cupos_totales={descuento_cupos_totales}

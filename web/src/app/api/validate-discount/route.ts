@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
+import { normalizarCodigo } from '@/lib/utils/discountUtils';
 
 export async function POST(request: NextRequest) {
     try {
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
 
         // Call the RPC function to validate the discount
         const { data, error } = await supabase.rpc('validate_discount_code', {
-            p_codigo: codigo.toUpperCase(),
+            p_code: normalizarCodigo(String(codigo)),
             p_curso_id: curso_id || null,
         });
 
@@ -29,20 +30,20 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // The RPC returns the discount info if valid
-        if (data && data.length > 0) {
-            const discount = data[0];
+        // La función SIEMPRE devuelve una fila: si el código sirve lo dice `valid`,
+        // no el hecho de que haya datos.
+        const discount = data?.[0];
+        if (discount?.valid) {
             return NextResponse.json({
                 valid: true,
                 tipo: discount.tipo,
                 valor: discount.valor,
-                nombre: discount.nombre,
             });
         }
 
         return NextResponse.json({
             valid: false,
-            message: 'Código inválido o expirado',
+            message: discount?.error_message || 'Código inválido o expirado',
         });
     } catch (error) {
         console.error('Discount validation error:', error);

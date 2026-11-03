@@ -118,7 +118,7 @@ export function CourseSidebarClient() {
                 <CountdownTimer
                     targetDate={curso.descuento_fecha_fin}
                     variant="subtle"
-                    label="Tiempo restante del descuento:"
+                    label={curso.descuento_porcentaje ? 'Tiempo restante del descuento:' : 'Tu código de descuento vence en:'}
                     className="mb-2 border-amber-100 bg-amber-50/50 dark:border-amber-900/30 dark:bg-amber-950/20"
                 />
 

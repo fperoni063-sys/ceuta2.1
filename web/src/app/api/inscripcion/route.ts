@@ -9,6 +9,7 @@ import {
 import { generateAccessToken, getTokenExpiry, generateMagicLink } from '@/lib/utils/tokens';
 import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
+import { aplicarCodigo, normalizarCodigo } from '@/lib/utils/discountUtils';
 
 export async function POST(request: NextRequest) {
     try {
@@ -50,6 +51,25 @@ export async function POST(request: NextRequest) {
 
         const cursoNombre = curso?.nombre || `Curso #${curso_id}`;
 
+        // Un código válido congela el precio en `precio_pagado`. Sin esto, el portal
+        // del alumno (Mi inscripción) vuelve a mostrar el precio de lista, porque el
+        // descuento por código no está cargado en el curso.
+        let precioPagado: number | null = null;
+        if (codigo_descuento && curso?.precio) {
+            const { data: validacion } = await supabase.rpc('validate_discount_code', {
+                p_code: normalizarCodigo(String(codigo_descuento)),
+                p_curso_id: curso_id,
+            });
+            const descuento = validacion?.[0];
+            if (descuento?.valid) {
+                precioPagado = aplicarCodigo(curso.precio, descuento.tipo, descuento.valor);
+            }
+        }
+        const conCodigo = precioPagado !== null ? { precio_pagado: precioPagado } : {};
+        // Si tocó un método de pago apenas escribió el código, el monto del navegador
+        // puede venir sin rebajar: acá manda el del código, salvo que deje una seña.
+        const montoPago = precioPagado !== null && tipo_pago !== 'seña' ? precioPagado : (monto_pago || null);
+
         let data: { id: number } | null = null;
         let accessToken: string | undefined;
         let isNewEnrollment = false;
@@ -83,7 +103,8 @@ export async function POST(request: NextRequest) {
                     metodo_pago: metodo_pago || null,
                     codigo_descuento: codigo_descuento || null,
                     tipo_pago: tipo_pago || 'total',
-                    monto_pago: monto_pago || null,
+                    monto_pago: montoPago,
+                    ...conCodigo,
                     estado: 'pago_pendiente',
                     updated_at: new Date().toISOString(),
                 })
@@ -124,7 +145,8 @@ export async function POST(request: NextRequest) {
                     metodo_pago: metodo_pago || null,
                     codigo_descuento: codigo_descuento || null,
                     tipo_pago: tipo_pago || 'total',
-                    monto_pago: monto_pago || null,
+                    monto_pago: montoPago,
+                    ...conCodigo,
                     estado: 'pago_pendiente',
                     // Nuevos campos para sistema de recordatorio
                     access_token: accessToken,

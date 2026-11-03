@@ -97,6 +97,28 @@ export function calcularDescuento(config: DiscountConfig): DiscountResult {
 }
 
 // =====================================================
+// Códigos de descuento
+// =====================================================
+
+/**
+ * Los códigos se dictan en una charla y se escriben de oído: "monte 20" tiene
+ * que valer igual que MONTE20.
+ */
+export function normalizarCodigo(codigo: string): string {
+    return codigo.replace(/\s+/g, '').toUpperCase();
+}
+
+/**
+ * Precio final con un código ya validado. Mismo cálculo en el modal y en el
+ * backend, para que lo que ve la persona sea lo que queda guardado.
+ */
+export function aplicarCodigo(precio: number, tipo: string | null, valor: number | null): number {
+    if (tipo === 'porcentaje') return Math.round(precio * (1 - Number(valor) / 100));
+    if (tipo === 'monto') return Math.max(0, precio - Number(valor));
+    return precio;
+}
+
+// =====================================================
 // Formatting Functions
 // =====================================================
 
