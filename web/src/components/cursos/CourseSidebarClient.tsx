@@ -91,7 +91,6 @@ export function CourseSidebarClient() {
 
             {/* Price */}
             <div className="text-center mb-6 pb-6 border-b border-earth-900/10 dark:border-white/10">
-                <p className="text-sm text-muted-foreground mb-1">Inversión</p>
                 {precioActual ? (
                     <PriceDisplay
                         precioOriginal={precioActual}
