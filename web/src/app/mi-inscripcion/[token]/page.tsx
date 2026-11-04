@@ -21,6 +21,7 @@ interface ApiResponse {
         estado: 'contacto' | 'pago_pendiente' | 'pago_a_verificar' | 'verificado' | 'cancelado' | 'primer_contacto' | 'segundo_contacto';
         metodo_pago: string;
         fecha_inscripcion: string;
+        precio_pagado?: number | null;
         curso: {
             id: number;
             nombre: string;

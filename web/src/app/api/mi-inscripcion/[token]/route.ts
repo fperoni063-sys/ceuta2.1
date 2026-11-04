@@ -111,6 +111,7 @@ export async function GET(
             estado: inscripcion.estado,
             metodo_pago: inscripcion.metodo_pago,
             fecha_inscripcion: inscripcion.created_at,
+            precio_pagado: inscripcion.precio_pagado,
             curso: inscripcion.cursos,
         }
     });
