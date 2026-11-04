@@ -55,6 +55,8 @@ export interface CourseEnrollContextValue {
     /** Precio por cuota, o null si el curso es de pago único. */
     precioCuota: number | null;
     tieneDescuento: boolean;
+    /** Código válido que trajo el enlace. Ya está descontado en precioFinal. */
+    codigoAplicado: string | null;
     moneda: 'UYU' | 'ARS';
 
     openModal: (origen: string) => void;

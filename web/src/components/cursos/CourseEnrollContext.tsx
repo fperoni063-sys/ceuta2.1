@@ -3,7 +3,8 @@
 import { useCallback, useMemo, useState, useRef, ReactNode } from 'react';
 import { EnrollmentModal } from '@/components/cursos/EnrollmentModal';
 import { CourseStickyCta } from '@/components/cursos/CourseStickyCta';
-import { calcularDescuento } from '@/lib/utils/discountUtils';
+import { useCodigoDelEnlace } from '@/components/cursos/useCodigoDelEnlace';
+import { aplicarCodigo, calcularDescuento } from '@/lib/utils/discountUtils';
 import {
     CourseEnrollContext,
     CourseEnrollContextValue,
@@ -58,6 +59,8 @@ export function CourseEnrollProvider({
 
     const moneda: 'UYU' | 'ARS' = curso.es_curso_argentina ? 'ARS' : 'UYU';
 
+    const codigoDelEnlace = useCodigoDelEnlace(curso.id);
+
     // Mismo cálculo que usa PriceDisplay, para que barra y sidebar no puedan divergir.
     // Ojo: calcularDescuento apaga el descuento si está vencido O si no quedan cupos.
     const { precioFinal, precioCuota, tieneDescuento } = useMemo(() => {
@@ -72,18 +75,25 @@ export function CourseEnrollProvider({
             etiqueta: descuentoEtiqueta ?? null,
             fechaFin: curso.descuento_fecha_fin ?? null,
         });
+        // Igual que el modal: el código se aplica sobre el precio de lista y
+        // reemplaza al descuento automático. Al modal le sigue llegando la lista.
+        const conCodigo = codigoDelEnlace
+            ? aplicarCodigo(precioActual, codigoDelEnlace.tipo, codigoDelEnlace.valor)
+            : null;
+        const final = conCodigo ?? d.precioFinal;
         const cuotas = curso.cantidad_cuotas > 1
-            ? Math.round(d.precioFinal / curso.cantidad_cuotas)
+            ? Math.round(final / curso.cantidad_cuotas)
             : null;
         return {
-            precioFinal: d.precioFinal,
+            precioFinal: final,
             precioCuota: cuotas,
-            tieneDescuento: d.tieneDescuento,
+            tieneDescuento: conCodigo !== null || d.tieneDescuento,
         };
     }, [
         precioActual,
         descuentoPorcentaje,
         descuentoEtiqueta,
+        codigoDelEnlace,
         curso.descuento_cupos_totales,
         curso.descuento_cupos_usados,
         curso.descuento_fecha_fin,
@@ -114,6 +124,7 @@ export function CourseEnrollProvider({
         precioFinal,
         precioCuota,
         tieneDescuento,
+        codigoAplicado: codigoDelEnlace?.codigo ?? null,
         moneda,
         openModal,
         closeModal,
@@ -122,7 +133,7 @@ export function CourseEnrollProvider({
         anchorNode,
     }), [
         curso, esHibridoConOnline, modalidadEfectiva, precioActual, descuentoPorcentaje,
-        descuentoEtiqueta, precioFinal, precioCuota, tieneDescuento, moneda,
+        descuentoEtiqueta, precioFinal, precioCuota, tieneDescuento, codigoDelEnlace, moneda,
         openModal, closeModal, isModalOpen, anchorRef, anchorNode,
     ]);
 

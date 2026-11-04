@@ -3,7 +3,7 @@
 import { Calendar, Clock, MapPin, Phone, Monitor, Users2 } from 'lucide-react';
 import { EnrollButton } from '@/components/cursos/EnrollButton';
 import { PriceDisplay } from '@/components/cursos/PriceDisplay';
-import { formatearFechaLarga } from '@/lib/utils/discountUtils';
+import { formatearFechaLarga, formatearPrecio } from '@/lib/utils/discountUtils';
 import { CountdownTimer } from '@/components/ui/CountdownTimer';
 import { PaymentTerms } from '@/components/cursos/PaymentTerms';
 import { useCourseEnroll } from '@/components/cursos/courseEnrollStore';
@@ -26,6 +26,7 @@ export function CourseSidebarClient() {
         precioFinal,
         descuentoPorcentaje,
         descuentoEtiqueta,
+        codigoAplicado,
         moneda,
     } = useCourseEnroll();
 
@@ -91,7 +92,20 @@ export function CourseSidebarClient() {
 
             {/* Price */}
             <div className="text-center mb-6 pb-6 border-b border-earth-900/10 dark:border-white/10">
-                {precioActual ? (
+                {codigoAplicado && precioActual ? (
+                    // Viene con el código en el enlace: ve el precio que va a pagar.
+                    <div className="flex flex-col items-center text-center">
+                        <span className="text-gray-400 line-through text-sm">
+                            {formatearPrecio(precioActual, moneda)}
+                        </span>
+                        <span className="font-heading font-bold text-3xl text-green-700">
+                            {formatearPrecio(precioFinal, moneda)}
+                        </span>
+                        <span className="text-xs text-green-600 font-medium mt-1">
+                            Con tu código {codigoAplicado}
+                        </span>
+                    </div>
+                ) : precioActual ? (
                     <PriceDisplay
                         precioOriginal={precioActual}
                         cantidadCuotas={curso.cantidad_cuotas}
