@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
         destination: "/cursos/monte-comestible",
         permanent: false,
       },
+      // El Jardines largo (12.600, inicio el 9/9) se ocultó el 17/11: va al curso de un mes.
+      {
+        source: "/cursos/jardines-ecologicos-full",
+        destination: "/cursos/jardin-de-mariposas",
+        permanent: false,
+      },
     ];
   },
   images: {
