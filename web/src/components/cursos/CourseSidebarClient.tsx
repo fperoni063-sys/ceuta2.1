@@ -28,6 +28,7 @@ export function CourseSidebarClient() {
         descuentoEtiqueta,
         codigoAplicado,
         moneda,
+        precioDeOpcion,
     } = useCourseEnroll();
 
     const whatsappNumber = '59898910715';
@@ -48,7 +49,7 @@ export function CourseSidebarClient() {
             {/* Selector de Modalidad (solo para híbridos con opción online) */}
             {esHibridoConOnline && (
                 <div className="mb-6 pb-6 border-b border-earth-900/10 dark:border-white/10">
-                    <p className="text-sm text-muted-foreground mb-3">Elegí tu modalidad:</p>
+                    <p className="text-sm text-muted-foreground mb-3">Elegí cómo lo hacés:</p>
                     <div className="grid grid-cols-2 gap-2" role="group" aria-label="Modalidad del curso">
                         <button
                             type="button"
@@ -64,9 +65,12 @@ export function CourseSidebarClient() {
                                 aria-hidden="true"
                             />
                             <span className={`block text-sm font-medium ${modalidad === 'hibrido' ? 'text-green-700' : 'text-foreground'}`}>
-                                Híbrido
+                                Completo
                             </span>
-                            <span className="block text-xs text-muted-foreground">Con prácticas presenciales</span>
+                            <span className="block text-xs text-muted-foreground">Con la práctica presencial</span>
+                            {precioDeOpcion.hibrido !== null && (
+                                <span className="block text-sm font-semibold text-foreground mt-1">{formatearPrecio(precioDeOpcion.hibrido, moneda)}</span>
+                            )}
                         </button>
                         <button
                             type="button"
@@ -82,9 +86,12 @@ export function CourseSidebarClient() {
                                 aria-hidden="true"
                             />
                             <span className={`block text-sm font-medium ${modalidad === 'online' ? 'text-green-700' : 'text-foreground'}`}>
-                                100% Online
+                                Solo online
                             </span>
-                            <span className="block text-xs text-muted-foreground">Sin presenciales</span>
+                            <span className="block text-xs text-muted-foreground">Las clases, sin la práctica</span>
+                            {precioDeOpcion.online !== null && (
+                                <span className="block text-sm font-semibold text-foreground mt-1">{formatearPrecio(precioDeOpcion.online, moneda)}</span>
+                            )}
                         </button>
                     </div>
                 </div>

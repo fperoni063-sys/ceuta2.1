@@ -5,6 +5,13 @@ import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
 import { calcularDescuento, extraerConfigDescuento, formatearPrecio } from '@/lib/utils/discountUtils';
 import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
+import {
+    modalidadValida,
+    normalizarModalidad,
+    normalizarOrigen,
+    notaDeOrigen,
+    precioConDescuentoDelCurso,
+} from '@/lib/utils/modalidadInscripcion';
 
 /**
  * Pre-inscripción: Guarda solo los datos de contacto iniciales (Paso 1)
@@ -17,7 +24,7 @@ import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { curso_id, nombre, email, telefono, event_id } = body;
+        const { curso_id, nombre, email, telefono, event_id, modalidad_seleccionada, origen } = body;
 
         // Validate required fields
         if (!curso_id || !nombre || !email || !telefono) {
@@ -32,7 +39,7 @@ export async function POST(request: NextRequest) {
         // Get course data for email template
         const { data: curso } = await supabase
             .from('cursos')
-            .select('nombre, precio, fecha_inicio, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin, url_web_vieja')
+            .select('nombre, precio, fecha_inicio, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin, url_web_vieja, modalidad, permite_online, precio_online, descuento_online_porcentaje, descuento_online_etiqueta')
             .eq('id', curso_id)
             .single();
 
@@ -41,7 +48,13 @@ export async function POST(request: NextRequest) {
         // Calcular precio con descuento para el email
         let precioParaMostrar = formatearPrecio(curso?.precio || 0);
 
-        if (curso) {
+        // Opción elegida en la tarjeta (con práctica o solo online), si el curso ofrece las dos.
+        const modalidad = curso ? modalidadValida(curso, normalizarModalidad(modalidad_seleccionada)) : null;
+        const nota = notaDeOrigen(normalizarOrigen(origen));
+
+        if (curso && modalidad === 'online') {
+            precioParaMostrar = formatearPrecio(precioConDescuentoDelCurso(curso, modalidad));
+        } else if (curso) {
             const configDescuento = extraerConfigDescuento(curso);
             const resultadoDescuento = calcularDescuento(configDescuento);
             precioParaMostrar = formatearPrecio(resultadoDescuento.precioFinal);
@@ -87,6 +100,8 @@ export async function POST(request: NextRequest) {
                 nombre,
                 email,
                 telefono,
+                ...(modalidad ? { modalidad_seleccionada: modalidad } : {}),
+                ...(nota ? { notas: nota } : {}),
                 estado: 'contacto', // Estado inicial para solo contacto
                 access_token: accessToken,
                 token_expires_at: tokenExpiry.toISOString(),

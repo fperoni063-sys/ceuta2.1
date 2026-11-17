@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 
 interface CourseVideoProps {
     videoUrl: string;
@@ -29,38 +31,62 @@ function parseVideoUrl(url: string) {
     return null;
 }
 
+/**
+ * Cuadro de inicio para un video de Cloudinary: el segundo 1 como imagen.
+ * Sin esto, en el celular el reproductor queda negro hasta que se toca.
+ */
+function posterDeCloudinary(url: string): string | undefined {
+    if (!url.includes('res.cloudinary.com') || !url.includes('/video/upload/')) return undefined;
+    return url.replace('/video/upload/', '/video/upload/so_1/').replace(/\.(mp4|webm|mov)(\?.*)?$/i, '.jpg');
+}
+
 export function CourseVideo({ videoUrl, className = '' }: CourseVideoProps) {
     const videoData = parseVideoUrl(videoUrl);
 
+    // Los videos grabados con el celular son verticales. En un cuadro de 16:9
+    // quedaban como una franja finita en el medio, con dos bandas negras.
+    // Si el nombre dice "vertical" arranca así; si no, se ajusta al cargar.
+    const [vertical, setVertical] = useState(() => /vertical/i.test(videoUrl));
+
     if (!videoData) return null;
+
+    if (videoData.type === 'native' && videoData.url) {
+        return (
+            <div className={`w-full ${vertical ? 'max-w-[min(100%,calc(70vh*9/16))]' : 'max-w-4xl'} mx-auto ${className}`}>
+                <div
+                    className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-100"
+                    style={{ aspectRatio: vertical ? '9/16' : '16/9' }}
+                >
+                    <video
+                        controls
+                        className="absolute inset-0 w-full h-full object-contain"
+                        src={videoData.url}
+                        poster={posterDeCloudinary(videoData.url)}
+                        controlsList="nodownload"
+                        playsInline
+                        preload="metadata"
+                        onLoadedMetadata={(e) => {
+                            const v = e.currentTarget;
+                            if (v.videoWidth && v.videoHeight) setVertical(v.videoHeight > v.videoWidth);
+                        }}
+                    />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`w-full max-w-4xl mx-auto ${className}`}>
             <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-100" style={{ aspectRatio: '16/9' }}>
-                {videoData.type === 'youtube' || videoData.type === 'vimeo' ? (
-                    <iframe
-                        src={videoData.embedUrl}
-                        className="absolute inset-0 w-full h-full"
-                        allowFullScreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        title="Video promocional del curso"
-                        style={{ border: 0 }}
-                    />
-                ) : (
-                    <video 
-                        controls 
-                        className="absolute inset-0 w-full h-full object-contain"
-                        src={videoData.url}
-                        controlsList="nodownload"
-                        playsInline
-                    />
-                )}
+                <iframe
+                    src={videoData.embedUrl}
+                    className="absolute inset-0 w-full h-full"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    title="Video promocional del curso"
+                    style={{ border: 0 }}
+                />
             </div>
-            {videoData.type === 'native' && (
-                <p className="text-xs text-center text-gray-400 mt-2">
-                    Si el video no se reproduce correctamente, prueba usar un navegador diferente o avisa a la administración.
-                </p>
-            )}
         </div>
     );
 }

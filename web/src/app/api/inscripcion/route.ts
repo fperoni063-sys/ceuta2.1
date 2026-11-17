@@ -10,6 +10,14 @@ import { generateAccessToken, getTokenExpiry, generateMagicLink } from '@/lib/ut
 import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
 import { aplicarCodigo, normalizarCodigo } from '@/lib/utils/discountUtils';
+import {
+    modalidadValida,
+    normalizarModalidad,
+    normalizarOrigen,
+    notaDeOrigen,
+    precioConDescuentoDelCurso,
+    precioDeLista,
+} from '@/lib/utils/modalidadInscripcion';
 
 export async function POST(request: NextRequest) {
     try {
@@ -30,6 +38,8 @@ export async function POST(request: NextRequest) {
             codigo_descuento,
             tipo_pago,
             monto_pago,
+            modalidad_seleccionada,
+            origen,
         } = body;
 
         // Validate required fields
@@ -45,7 +55,7 @@ export async function POST(request: NextRequest) {
         // Get course data for notifications
         const { data: curso } = await supabase
             .from('cursos')
-            .select('nombre, precio, fecha_inicio')
+            .select('nombre, precio, fecha_inicio, modalidad, permite_online, precio_online, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin, descuento_online_porcentaje, descuento_online_etiqueta')
             .eq('id', curso_id)
             .single();
 
@@ -54,17 +64,28 @@ export async function POST(request: NextRequest) {
         // Un código válido congela el precio en `precio_pagado`. Sin esto, el portal
         // del alumno (Mi inscripción) vuelve a mostrar el precio de lista, porque el
         // descuento por código no está cargado en el curso.
+        // La opción elegida (con práctica o solo online) cambia el precio de lista.
+        // Sin esto, el código se aplicaba siempre sobre el precio del curso completo.
+        const modalidad = curso ? modalidadValida(curso, normalizarModalidad(modalidad_seleccionada)) : null;
+        const precioBase = curso ? precioDeLista(curso, modalidad) : null;
         let precioPagado: number | null = null;
-        if (codigo_descuento && curso?.precio) {
+        if (codigo_descuento && precioBase) {
             const { data: validacion } = await supabase.rpc('validate_discount_code', {
                 p_code: normalizarCodigo(String(codigo_descuento)),
                 p_curso_id: curso_id,
             });
             const descuento = validacion?.[0];
             if (descuento?.valid) {
-                precioPagado = aplicarCodigo(curso.precio, descuento.tipo, descuento.valor);
+                precioPagado = aplicarCodigo(precioBase, descuento.tipo, descuento.valor);
             }
         }
+        // Solo online sin código: también se congela, para que Mi inscripción no
+        // muestre el precio del curso completo.
+        if (precioPagado === null && modalidad === 'online' && curso) {
+            precioPagado = precioConDescuentoDelCurso(curso, modalidad);
+        }
+        const conModalidad = modalidad ? { modalidad_seleccionada: modalidad } : {};
+        const nota = notaDeOrigen(normalizarOrigen(origen));
         const conCodigo = precioPagado !== null ? { precio_pagado: precioPagado } : {};
         // Si tocó un método de pago apenas escribió el código, el monto del navegador
         // puede venir sin rebajar: acá manda el del código, salvo que deje una seña.
@@ -79,7 +100,7 @@ export async function POST(request: NextRequest) {
         // ============================================================
         const { data: existingEnrollment } = await supabase
             .from('inscriptos')
-            .select('id, access_token')
+            .select('id, access_token, notas')
             .eq('email', email)
             .eq('curso_id', curso_id)
             .single();
@@ -105,6 +126,8 @@ export async function POST(request: NextRequest) {
                     tipo_pago: tipo_pago || 'total',
                     monto_pago: montoPago,
                     ...conCodigo,
+                    ...conModalidad,
+                    ...(nota && existingEnrollment && !existingEnrollment.notas ? { notas: nota } : {}),
                     estado: 'pago_pendiente',
                     updated_at: new Date().toISOString(),
                 })
@@ -147,6 +170,8 @@ export async function POST(request: NextRequest) {
                     tipo_pago: tipo_pago || 'total',
                     monto_pago: montoPago,
                     ...conCodigo,
+                    ...conModalidad,
+                    ...(nota ? { notas: nota } : {}),
                     estado: 'pago_pendiente',
                     // Nuevos campos para sistema de recordatorio
                     access_token: accessToken,

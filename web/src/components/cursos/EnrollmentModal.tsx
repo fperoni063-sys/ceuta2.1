@@ -23,6 +23,8 @@ interface EnrollmentModalProps {
     courseId: number;
     courseName: string;
     coursePrice: number | null;
+    /** Opción elegida en la tarjeta, solo si el curso ofrece las dos. Se guarda en la inscripción. */
+    modalidad?: 'hibrido' | 'online' | null;
     linkMercadoPago?: string | null;
     cantidadCuotas?: number;
     dlocalHabilitado?: boolean;
@@ -1359,6 +1361,7 @@ export function EnrollmentModal({
     courseId,
     courseName,
     coursePrice,
+    modalidad = null,
     linkMercadoPago,
     cantidadCuotas,
     dlocalHabilitado,
@@ -1370,6 +1373,9 @@ export function EnrollmentModal({
     descuento_etiqueta,
     descuento_fecha_fin,
 }: EnrollmentModalProps) {
+    // De dónde viene (?origen=charla, whatsapp...): se guarda con la inscripción.
+    const origenDelEnlace = () =>
+        typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('origen');
     const { track } = useAnalytics();
     const [step, setStep] = useState<Step>(1);
     const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
@@ -1455,6 +1461,8 @@ export function EnrollmentModal({
                     nombre: formData.nombre,
                     email: formData.email,
                     telefono: formData.telefono,
+                    modalidad_seleccionada: modalidad,
+                    origen: origenDelEnlace(),
                     event_id: metaEventId, // For server-side CAPI deduplication
                 }),
             });
@@ -1520,6 +1528,8 @@ export function EnrollmentModal({
                     recibir_novedades: formData.recibirNovedades,
                     metodo_pago: selectedMethod,
                     codigo_descuento: formData.codigoDescuento || null,
+                    modalidad_seleccionada: modalidad,
+                    origen: origenDelEnlace(),
                     tipo_pago: tipoPago,
                     // Use finalPrice if available and paying total, otherwise seña amount or fallback to coursePrice
                     monto_pago: amountToPay,

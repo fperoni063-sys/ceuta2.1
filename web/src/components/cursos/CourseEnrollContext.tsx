@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState, useRef, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef, ReactNode } from 'react';
 import { EnrollmentModal } from '@/components/cursos/EnrollmentModal';
 import { CourseStickyCta } from '@/components/cursos/CourseStickyCta';
 import { useCodigoDelEnlace } from '@/components/cursos/useCodigoDelEnlace';
@@ -60,6 +60,34 @@ export function CourseEnrollProvider({
     const moneda: 'UYU' | 'ARS' = curso.es_curso_argentina ? 'ARS' : 'UYU';
 
     const codigoDelEnlace = useCodigoDelEnlace(curso.id);
+
+    // El enlace puede traer la opción elegida (?opcion=online): sirve para mandarle
+    // a alguien del interior la página ya con "Solo online" marcado.
+    useEffect(() => {
+        if (!esHibridoConOnline) return;
+        const opcion = new URLSearchParams(window.location.search).get('opcion');
+        if (opcion === 'online' || opcion === 'zoom') setModalidad('online');
+    }, [esHibridoConOnline]);
+
+    // Precio final de cada opción, para mostrarlo en los dos botones del selector.
+    // Mismo cálculo que el precio principal: descuento automático, o el código del enlace.
+    const precioDeOpcion = useMemo(() => {
+        const calcular = (m: Modalidad): number | null => {
+            const online = m === 'online';
+            const lista = online ? (curso.precio_online ?? curso.precio) : curso.precio;
+            if (lista === null || lista === undefined) return null;
+            if (codigoDelEnlace) return aplicarCodigo(lista, codigoDelEnlace.tipo, codigoDelEnlace.valor);
+            return calcularDescuento({
+                precioOriginal: lista,
+                descuentoPorcentaje: (online ? curso.descuento_online_porcentaje : curso.descuento_porcentaje) ?? null,
+                cuposTotales: curso.descuento_cupos_totales ?? null,
+                cuposUsados: curso.descuento_cupos_usados ?? 0,
+                etiqueta: (online ? curso.descuento_online_etiqueta : curso.descuento_etiqueta) ?? null,
+                fechaFin: curso.descuento_fecha_fin ?? null,
+            }).precioFinal;
+        };
+        return { hibrido: calcular('hibrido'), online: calcular('online') };
+    }, [curso, codigoDelEnlace]);
 
     // Mismo cálculo que usa PriceDisplay, para que barra y sidebar no puedan divergir.
     // Ojo: calcularDescuento apaga el descuento si está vencido O si no quedan cupos.
@@ -125,6 +153,7 @@ export function CourseEnrollProvider({
         precioCuota,
         tieneDescuento,
         codigoAplicado: codigoDelEnlace?.codigo ?? null,
+        precioDeOpcion,
         moneda,
         openModal,
         closeModal,
@@ -132,7 +161,7 @@ export function CourseEnrollProvider({
         anchorRef,
         anchorNode,
     }), [
-        curso, esHibridoConOnline, modalidadEfectiva, precioActual, descuentoPorcentaje,
+        curso, esHibridoConOnline, modalidadEfectiva, precioActual, descuentoPorcentaje, precioDeOpcion,
         descuentoEtiqueta, precioFinal, precioCuota, tieneDescuento, codigoDelEnlace, moneda,
         openModal, closeModal, isModalOpen, anchorRef, anchorNode,
     ]);
@@ -151,6 +180,7 @@ export function CourseEnrollProvider({
                 courseId={curso.id}
                 courseName={curso.nombre}
                 coursePrice={precioActual}
+                modalidad={esHibridoConOnline ? modalidadEfectiva : null}
                 linkMercadoPago={curso.link_mercado_pago}
                 cantidadCuotas={curso.cantidad_cuotas}
                 descuento_porcentaje={descuentoPorcentaje}

@@ -57,6 +57,8 @@ export interface CourseEnrollContextValue {
     tieneDescuento: boolean;
     /** Código válido que trajo el enlace. Ya está descontado en precioFinal. */
     codigoAplicado: string | null;
+    /** Precio final de cada opción del selector (con práctica / solo online). */
+    precioDeOpcion: { hibrido: number | null; online: number | null };
     moneda: 'UYU' | 'ARS';
 
     openModal: (origen: string) => void;
