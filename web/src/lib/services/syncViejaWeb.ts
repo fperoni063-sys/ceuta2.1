@@ -132,6 +132,23 @@ export function esRechazoSilenciosoHtml(html: string): boolean {
     return !confirmoForm;
 }
 
+/**
+ * La web vieja no tiene forma de editar una inscripción. Cuando alguien rehace la
+ * reserva con otro número, se le manda una inscripción nueva con el número bueno
+ * (Karen trabaja con la web vieja y necesita ese número). La primera queda ahí.
+ *
+ * Va sin el id a propósito: la cédula de relleno sale del correo y del número
+ * nuevo, así no repite la del primer envío (`00` + id), que la web vieja
+ * descartaría en silencio si es del mismo día.
+ */
+export async function sincronizarCorreccion(
+    inscripto: Omit<InscriptoSync, 'id'>,
+    urlVieja: string | null | undefined
+) {
+    console.log(`[SYNC-VIEJA] Corrección de datos: va una inscripción nueva para ${inscripto.nombre}`);
+    return sincronizarPreinscripcion({ ...inscripto, id: null }, urlVieja);
+}
+
 export async function sincronizarPreinscripcion(
     inscripto: InscriptoSync,
     urlVieja: string | null | undefined

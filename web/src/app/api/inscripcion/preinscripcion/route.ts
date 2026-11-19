@@ -4,7 +4,8 @@ import { generateAccessToken, getTokenExpiry } from '@/lib/utils/tokens';
 import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
 import { calcularDescuento, extraerConfigDescuento, formatearPrecio } from '@/lib/utils/discountUtils';
-import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
+import { sincronizarCorreccion, sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
+import { cambioElTelefono } from '@/lib/utils/rehacerInscripcion';
 import {
     modalidadValida,
     normalizarModalidad,
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
         // Check if email is already registered for this course
         const { data: existing } = await supabase
             .from('inscriptos')
-            .select('id, estado, access_token')
+            .select('id, estado, access_token, telefono, nombre')
             .eq('curso_id', curso_id)
             .eq('email', email)
             .single();
@@ -81,6 +82,26 @@ export async function POST(request: NextRequest) {
         // If already exists, return the existing ID with token for cookie
         if (existing) {
             console.log('📋 Pre-inscripción existente encontrada:', existing.id);
+
+            // Rehacer la reserva con el mismo correo es como se corrige un número o un
+            // nombre mal cargado (lo indica el pasante de WhatsApp). Se corrige acá, en
+            // el paso 1, porque mucha gente no sigue hasta el paso del pago.
+            const corrigeTelefono = cambioElTelefono(existing.telefono, telefono);
+            const nombreNuevo = String(nombre).trim();
+            const corrigeNombre = nombreNuevo !== '' && nombreNuevo !== String(existing.nombre ?? '').trim();
+            if (corrigeTelefono || corrigeNombre) {
+                const { error: errorCorreccion } = await supabase
+                    .from('inscriptos')
+                    .update({ nombre, telefono, updated_at: new Date().toISOString() })
+                    .eq('id', existing.id);
+                if (errorCorreccion) {
+                    console.error('⚠️ No se pudo corregir la pre-inscripción existente:', errorCorreccion);
+                } else if (corrigeTelefono && curso?.url_web_vieja) {
+                    // La web vieja no se puede editar: va una inscripción nueva con el número bueno.
+                    await sincronizarCorreccion({ nombre, email, telefono }, curso.url_web_vieja);
+                }
+            }
+
             return NextResponse.json({
                 success: true,
                 message: 'Pre-inscripción existente',

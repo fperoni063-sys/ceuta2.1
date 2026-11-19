@@ -10,7 +10,7 @@ import { generateAccessToken, getTokenExpiry, generateMagicLink } from '@/lib/ut
 import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
 import { aplicarCodigo, normalizarCodigo } from '@/lib/utils/discountUtils';
-import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
+import { sincronizarCorreccion, sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
 import {
     modalidadValida,
     normalizarModalidad,
@@ -19,6 +19,14 @@ import {
     precioConDescuentoDelCurso,
     precioDeLista,
 } from '@/lib/utils/modalidadInscripcion';
+import {
+    cambioElTelefono,
+    estadoAlRehacer,
+    perfilQueVino,
+    precioPagadoAlRehacer,
+} from '@/lib/utils/rehacerInscripcion';
+
+const CAMPOS_FILA_ANTERIOR = 'id, access_token, notas, telefono, estado, modalidad_seleccionada';
 
 export async function POST(request: NextRequest) {
     try {
@@ -101,7 +109,7 @@ export async function POST(request: NextRequest) {
         // ============================================================
         const { data: existingEnrollment } = await supabase
             .from('inscriptos')
-            .select('id, access_token, notas')
+            .select(CAMPOS_FILA_ANTERIOR)
             .eq('email', email)
             .eq('curso_id', curso_id)
             .single();
@@ -111,25 +119,35 @@ export async function POST(request: NextRequest) {
             const targetId = existingEnrollment?.id || enrollment_id;
             accessToken = existingEnrollment?.access_token;
 
+            // Cómo estaba la reserva antes de pisarla: hace falta para no bajarle el
+            // estado, no dejarle un precio viejo y saber si corrigió el número.
+            let filaAnterior = existingEnrollment;
+            if (!filaAnterior) {
+                const { data: porId } = await supabase
+                    .from('inscriptos')
+                    .select(CAMPOS_FILA_ANTERIOR)
+                    .eq('id', targetId)
+                    .single();
+                filaAnterior = porId ?? null;
+            }
+
             const { data: updateResult, error } = await supabase
                 .from('inscriptos')
                 .update({
                     nombre,
                     telefono,
-                    cedula: cedula || null,
-                    edad: edad || null,
-                    departamento: departamento || null,
-                    direccion: direccion || null,
-                    como_se_entero: como_se_entero || null,
+                    // El paso 2 no manda la cédula ni el resto del perfil: si llegan vacíos,
+                    // no se borra lo que la persona ya había cargado.
+                    ...perfilQueVino({ cedula, edad, departamento, direccion, como_se_entero }),
                     recibir_novedades: recibir_novedades || false,
                     metodo_pago: metodo_pago || null,
                     codigo_descuento: codigo_descuento || null,
                     tipo_pago: tipo_pago || 'total',
                     monto_pago: montoPago,
-                    ...conCodigo,
+                    ...precioPagadoAlRehacer(precioPagado, filaAnterior?.modalidad_seleccionada, modalidad),
                     ...conModalidad,
                     ...(nota && existingEnrollment && !existingEnrollment.notas ? { notas: nota } : {}),
-                    estado: 'pago_pendiente',
+                    estado: estadoAlRehacer(filaAnterior?.estado),
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', targetId)
@@ -146,6 +164,11 @@ export async function POST(request: NextRequest) {
             data = { id: updateResult.id };
             accessToken = updateResult.access_token;
             console.log('📝 Updated existing enrollment:', { id: data.id, email, curso: cursoNombre });
+
+            // Rehízo la reserva con otro número: que llegue también a la web vieja.
+            if (curso?.url_web_vieja && filaAnterior && cambioElTelefono(filaAnterior.telefono, telefono)) {
+                await sincronizarCorreccion({ nombre, email, telefono, cedula: cedula || null }, curso.url_web_vieja);
+            }
         } else {
             // INSERT new enrollment
             isNewEnrollment = true;
