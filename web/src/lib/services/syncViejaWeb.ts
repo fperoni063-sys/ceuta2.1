@@ -75,7 +75,67 @@ async function leerIdDeclarado(urlVieja: string): Promise<string | null> {
     }
 }
 
-export async function sincronizarPreinscripcion(inscripto: { nombre: string; email: string; telefono?: string }, urlVieja: string | null | undefined) {
+export interface InscriptoSync {
+    id?: number | string | null;
+    nombre: string;
+    email: string;
+    telefono?: string;
+    cedula?: string | null;
+}
+
+/**
+ * Construye el campo `ci` para el formulario PHP de la web vieja.
+ *
+ * El formulario de ceuta.org.uy descarta en silencio (respondiendo HTTP 200)
+ * cualquier envío que repita `(id_curso, ci, fecha)` en el mismo día. Hasta el
+ * 19/11/2026 mandábamos siempre `'00000000'`, así que solo entraba la primera
+ * persona del día por curso y las siguientes se perdían sin dar error.
+ *
+ * Con un identificador determinístico con prefijo `00` (ninguna cédula real
+ * uruguaya empieza con `00`):
+ *   - dos personas distintas el mismo día ya no colisionan,
+ *   - un reintento de la misma persona el mismo día sigue siendo idempotente.
+ */
+export function construirCiSync(
+    inscripto: Pick<InscriptoSync, 'id' | 'cedula' | 'email' | 'telefono'>
+): string {
+    const cedulaReal = inscripto.cedula?.trim();
+    if (cedulaReal) return cedulaReal;
+
+    const idDigitos = inscripto.id != null ? String(inscripto.id).replace(/\D/g, '') : '';
+    if (idDigitos && Number(idDigitos) > 0) {
+        return idDigitos.length >= 8 ? idDigitos : idDigitos.padStart(8, '0');
+    }
+
+    const semilla = `${inscripto.email.trim().toLowerCase()}|${(inscripto.telefono || '').replace(/\D/g, '')}`;
+    let hash = 2166136261;
+    for (let i = 0; i < semilla.length; i++) {
+        hash ^= semilla.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    const sufijo = ((hash >>> 0) % 999999) + 1;
+    return `00${String(sufijo).padStart(6, '0')}`;
+}
+
+/**
+ * Detecta el rechazo silencioso por duplicado `(id_curso, ci, fecha)` en PHP:
+ * devuelve HTTP 200 con `window.location = ".../inscripto"`, pero sin marcar el
+ * formulario como enviado (`btn-inscripcion activo` / `#form display: block`).
+ */
+export function esRechazoSilenciosoHtml(html: string): boolean {
+    if (!html) return false;
+    const redirigeInscripto = /window\.location\s*=\s*["'][^"']*\/inscripto["']/i.test(html);
+    if (!redirigeInscripto) return false;
+    const confirmoForm =
+        /id=["']form["'][^>]*display\s*:\s*block/i.test(html) ||
+        /class=["'][^"']*btn-inscripcion[^"']*\bactivo\b/i.test(html);
+    return !confirmoForm;
+}
+
+export async function sincronizarPreinscripcion(
+    inscripto: InscriptoSync,
+    urlVieja: string | null | undefined
+) {
     if (!urlVieja) return { success: false, reason: 'No URL provided' };
 
     console.log(`[SYNC-VIEJA] Iniciando sincronización para ${inscripto.nombre} a ${urlVieja}`);
@@ -103,12 +163,13 @@ export async function sincronizarPreinscripcion(inscripto: { nombre: string; ema
             return { success: false, reason: 'No se pudo determinar el id del curso' };
         }
 
+        const ciSync = construirCiSync(inscripto);
         const formData = new URLSearchParams();
-        formData.append('nombre', inscripto.nombre);
-        formData.append('ci', '00000000'); // Genérico porque aún no lo tenemos (Paso 1)
+        formData.append('nombre', inscripto.nombre.trim());
+        formData.append('ci', ciSync);
         formData.append('edad', '99'); // Genérico
-        formData.append('cel', inscripto.telefono || '090000000');
-        formData.append('correo', inscripto.email);
+        formData.append('cel', (inscripto.telefono || '090000000').trim());
+        formData.append('correo', inscripto.email.trim());
         formData.append('dpto', '10'); // 10 = Montevideo
         formData.append('dir', '-'); // Genérico
         formData.append('en_curso', '4'); // 4 = Otro
@@ -136,8 +197,16 @@ export async function sincronizarPreinscripcion(inscripto: { nombre: string; ema
         clearTimeout(timeoutId);
 
         if (response.ok) {
-            console.log(`[SYNC-VIEJA] ✅ ${inscripto.nombre} sincronizado al curso viejo ${idCurso} (según ${fuente}). Status: ${response.status}`);
-            return { success: true, idCurso };
+            const responseHtml = await response.text().catch(() => '');
+            if (esRechazoSilenciosoHtml(responseHtml)) {
+                console.warn(
+                    `[SYNC-VIEJA] ⚠️ Posible rechazo silencioso/duplicado en web vieja para ${inscripto.nombre} ` +
+                    `(curso viejo ${idCurso}, ci ${ciSync}). Status: ${response.status}`
+                );
+                return { success: false, reason: 'Posible duplicado o rechazo silencioso en web vieja', idCurso, ci: ciSync };
+            }
+            console.log(`[SYNC-VIEJA] ✅ ${inscripto.nombre} sincronizado al curso viejo ${idCurso} (según ${fuente}, ci ${ciSync}). Status: ${response.status}`);
+            return { success: true, idCurso, ci: ciSync };
         } else {
             console.warn(`[SYNC-VIEJA] ⚠️ Servidor respondió con error: ${response.status}`);
             return { success: false, status: response.status };

@@ -10,6 +10,7 @@ import { generateAccessToken, getTokenExpiry, generateMagicLink } from '@/lib/ut
 import { sendEmail, scheduleEmailSequence } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
 import { aplicarCodigo, normalizarCodigo } from '@/lib/utils/discountUtils';
+import { sincronizarPreinscripcion } from '@/lib/services/syncViejaWeb';
 import {
     modalidadValida,
     normalizarModalidad,
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
         // Get course data for notifications
         const { data: curso } = await supabase
             .from('cursos')
-            .select('nombre, precio, fecha_inicio, modalidad, permite_online, precio_online, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin, descuento_online_porcentaje, descuento_online_etiqueta')
+            .select('nombre, precio, fecha_inicio, url_web_vieja, modalidad, permite_online, precio_online, descuento_porcentaje, descuento_cupos_totales, descuento_cupos_usados, descuento_etiqueta, descuento_fecha_fin, descuento_online_porcentaje, descuento_online_etiqueta')
             .eq('id', curso_id)
             .single();
 
@@ -265,6 +266,12 @@ export async function POST(request: NextRequest) {
             // Programar secuencia de emails de seguimiento (SOLO si no pasó por preinscripcion)
             if (isNewEnrollment) {
                 await scheduleEmailSequence(data.id);
+                if (curso?.url_web_vieja) {
+                    await sincronizarPreinscripcion(
+                        { id: data.id, nombre, email, telefono, cedula: cedula || null },
+                        curso.url_web_vieja
+                    );
+                }
             }
         }
 

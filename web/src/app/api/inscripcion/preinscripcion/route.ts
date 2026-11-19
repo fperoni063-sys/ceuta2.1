@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
         // ============================================================
         if (curso?.url_web_vieja) {
             // Hacemos await pero es seguro porque tiene un AbortController de 4s
-            await sincronizarPreinscripcion({ nombre, email, telefono }, curso.url_web_vieja);
+            await sincronizarPreinscripcion({ id: data.id, nombre, email, telefono }, curso.url_web_vieja);
         }
 
         // ============================================================

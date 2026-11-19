@@ -1,4 +1,9 @@
-import { extraerIdCursoViejo, idCursoDeclaradoEnHtml } from '@/lib/services/syncViejaWeb';
+import {
+    construirCiSync,
+    esRechazoSilenciosoHtml,
+    extraerIdCursoViejo,
+    idCursoDeclaradoEnHtml,
+} from '@/lib/services/syncViejaWeb';
 
 const BASE = 'https://www.ceuta.org.uy';
 
@@ -63,6 +68,53 @@ describe('extraerIdCursoViejo', () => {
 
         it('no confunde otro input que contenga el texto id_curso', () => {
             expect(idCursoDeclaradoEnHtml(`<input name="nombre_id_curso_x" value="7">`)).toBeNull();
+        });
+    });
+
+    // Regresión 19/11/2026: ceuta.org.uy descarta en silencio (HTTP 200) cualquier
+    // envío con el mismo (id_curso, ci, fecha). Mandar siempre '00000000' hacía que
+    // solo entrara la primera persona del día por curso.
+    describe('construirCiSync', () => {
+        it('usa la cédula real cuando existe', () => {
+            expect(construirCiSync({ id: 301, cedula: ' 39583485 ', email: 'a@b.uy', telefono: '099' })).toBe('39583485');
+        });
+
+        it('usa el id de Supabase rellenado con ceros para que dos personas del mismo día no colisionen', () => {
+            const ci1 = construirCiSync({ id: 301, email: 'a@b.uy', telefono: '099111111' });
+            const ci2 = construirCiSync({ id: 302, email: 'b@b.uy', telefono: '099222222' });
+            expect(ci1).toBe('00000301');
+            expect(ci2).toBe('00000302');
+            expect(ci1).not.toBe(ci2);
+        });
+
+        it('sin id ni cédula genera un 00xxxxxx determinístico y distinto de 00000000', () => {
+            const ciA = construirCiSync({ email: 'Carmen@Test.uy', telefono: '099 571 846' });
+            const ciARetry = construirCiSync({ email: 'carmen@test.uy ', telefono: '099571846' });
+            const ciB = construirCiSync({ email: 'karina@test.uy', telefono: '098636478' });
+            expect(ciA).toMatch(/^00\d{6}$/);
+            expect(ciA).not.toBe('00000000');
+            expect(ciA).toBe(ciARetry);
+            expect(ciA).not.toBe(ciB);
+        });
+    });
+
+    describe('esRechazoSilenciosoHtml', () => {
+        it('detecta el 200 engañoso cuando PHP redirige a /inscripto sin abrir el form', () => {
+            const htmlRechazo = `
+                <script>window.location = "cursos/calendario/209/-jardines/inscripto"</script>
+                <a class="btn-inscripcion ">PREINSCRIBIRME</a>
+                <div class="col col-100" id="form" ></div>
+            `;
+            expect(esRechazoSilenciosoHtml(htmlRechazo)).toBe(true);
+        });
+
+        it('no marca como rechazo un alta real que muestra activo y display: block', () => {
+            const htmlOk = `
+                <script>window.location = "cursos/calendario/209/-jardines/inscripto"</script>
+                <a class="btn-inscripcion  activo ">PREINSCRIBIRME</a>
+                <div class="col col-100" id="form"  style="display: block" ></div>
+            `;
+            expect(esRechazoSilenciosoHtml(htmlOk)).toBe(false);
         });
     });
 });
