@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { trackEvent } from '@/app/actions/analytics';
@@ -26,7 +26,7 @@ export function useAnalytics() {
     });
 
     // Track Hook
-    const track = async (eventName: string, data?: {
+    const track = useCallback(async (eventName: string, data?: {
         category?: string;
         courseId?: number;
         metadata?: Record<string, any>;
@@ -50,7 +50,7 @@ export function useAnalytics() {
                 campaign: utm.campaign
             }
         });
-    };
+    }, [pathname, searchParams]);
 
     return { track, sessionId };
 }

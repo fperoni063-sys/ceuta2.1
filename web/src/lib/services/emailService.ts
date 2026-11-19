@@ -183,6 +183,17 @@ export async function sendEmail(
 export async function scheduleEmailSequence(inscriptoId: number): Promise<void> {
     const supabase = createAdminClient();
 
+    const { data: inscripto } = await supabase
+        .from('inscriptos')
+        .select('cursos (fecha_inicio)')
+        .eq('id', inscriptoId)
+        .single();
+
+    const cursosRel = inscripto?.cursos;
+    const fechaInicioStr = Array.isArray(cursosRel)
+        ? cursosRel[0]?.fecha_inicio
+        : (cursosRel as unknown as { fecha_inicio?: string | null } | null)?.fecha_inicio;
+
     const { data: templates } = await supabase
         .from('email_templates')
         .select('nombre, horas_despues')
@@ -193,14 +204,36 @@ export async function scheduleEmailSequence(inscriptoId: number): Promise<void> 
     if (!templates) return;
 
     const now = new Date();
+    let limitePrevioInicio: Date | null = null;
+    if (fechaInicioStr) {
+        const m = String(fechaInicioStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) {
+            // Víspera del inicio a las 11:00 UTC (08:00 UY), antes del cron diario de las 12:00 UTC
+            const diaAnterior = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) - 1, 11, 0, 0));
+            if (diaAnterior > now) {
+                limitePrevioInicio = diaAnterior;
+            }
+        }
+    }
+
+    const diasAgendados = new Set<string>();
 
     for (const template of templates) {
         if (template.horas_despues === 0) {
             continue;
         }
 
-        const enviarEn = new Date(now);
+        let enviarEn = new Date(now);
         enviarEn.setHours(enviarEn.getHours() + template.horas_despues);
+        if (limitePrevioInicio && enviarEn > limitePrevioInicio) {
+            enviarEn = new Date(limitePrevioInicio);
+        }
+
+        const diaClave = enviarEn.toISOString().slice(0, 10);
+        if (diasAgendados.has(diaClave)) {
+            continue;
+        }
+        diasAgendados.add(diaClave);
 
         await supabase.from('scheduled_emails').insert({
             inscripto_id: inscriptoId,

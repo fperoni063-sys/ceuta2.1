@@ -29,4 +29,21 @@ describe('/api/mi-inscripcion/[token]', () => {
     it('el que reservó sin código ve el precio del curso', async () => {
         expect(await lo_que_ve({ ...reserva, precio_pagado: null })).toMatchObject({ finalPrice: 5000, hasDiscount: false });
     });
+
+    it('el que reservó solo online sin precio_pagado guardado igual ve el precio online', async () => {
+        const jardines = {
+            id: 108,
+            nombre: 'Jardines biodiversos: tu jardín de mariposas',
+            precio: 4000,
+            precio_online: 3500,
+            permite_online: true,
+            modalidad: 'hibrido',
+            cantidad_cuotas: 1,
+        };
+        expect(await lo_que_ve({ ...reserva, cursos: jardines, modalidad_seleccionada: 'online', precio_pagado: null })).toMatchObject({
+            finalPrice: 3500,
+            originalPrice: 4000,
+            hasDiscount: true,
+        });
+    });
 });

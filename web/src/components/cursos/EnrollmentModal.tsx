@@ -1382,17 +1382,19 @@ export function EnrollmentModal({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const wasOpenRef = useRef(false);
+    const stepRef = useRef(step);
+    stepRef.current = step;
 
     // Track Modal Open/Close solo cuando cambia de estado real
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !wasOpenRef.current) {
             wasOpenRef.current = true;
             track('enrollment_modal_open', { courseId });
-        } else if (wasOpenRef.current) {
+        } else if (!isOpen && wasOpenRef.current) {
             wasOpenRef.current = false;
-            track('enrollment_modal_close', { courseId, metadata: { lastStep: step } });
+            track('enrollment_modal_close', { courseId, metadata: { lastStep: stepRef.current } });
         }
-    }, [isOpen, courseId, step, track]);
+    }, [isOpen, courseId, track]);
 
     const [enrollmentId, setEnrollmentId] = useState<number | undefined>(undefined);
     const [token, setToken] = useState<string | null>(null);

@@ -51,9 +51,12 @@ export async function POST(request: NextRequest) {
         // Opción elegida en la tarjeta (con práctica o solo online), si el curso ofrece las dos.
         const modalidad = curso ? modalidadValida(curso, normalizarModalidad(modalidad_seleccionada)) : null;
         const nota = notaDeOrigen(normalizarOrigen(origen));
+        const precioOnlineCongelado = curso && modalidad === 'online'
+            ? precioConDescuentoDelCurso(curso, modalidad)
+            : null;
 
-        if (curso && modalidad === 'online') {
-            precioParaMostrar = formatearPrecio(precioConDescuentoDelCurso(curso, modalidad));
+        if (precioOnlineCongelado !== null) {
+            precioParaMostrar = formatearPrecio(precioOnlineCongelado);
         } else if (curso) {
             const configDescuento = extraerConfigDescuento(curso);
             const resultadoDescuento = calcularDescuento(configDescuento);
@@ -101,6 +104,7 @@ export async function POST(request: NextRequest) {
                 email,
                 telefono,
                 ...(modalidad ? { modalidad_seleccionada: modalidad } : {}),
+                ...(precioOnlineCongelado !== null ? { precio_pagado: precioOnlineCongelado } : {}),
                 ...(nota ? { notas: nota } : {}),
                 estado: 'contacto', // Estado inicial para solo contacto
                 access_token: accessToken,

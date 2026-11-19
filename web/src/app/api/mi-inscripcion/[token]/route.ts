@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
+import { precioConDescuentoDelCurso, type CursoConModalidades } from '@/lib/utils/modalidadInscripcion';
 
 export async function GET(
     request: NextRequest,
@@ -32,6 +33,7 @@ export async function GET(
             token_expires_at,
             precio_pagado,
             descuento_aplicado,
+            modalidad_seleccionada,
             cursos:curso_id (
                 id,
                 nombre,
@@ -58,6 +60,7 @@ export async function GET(
                 descuento_online_porcentaje,
                 descuento_online_etiqueta,
                 descuento_fecha_fin,
+                permite_online,
                 precio_online,
                 es_curso_argentina,
                 dlocal_habilitado
@@ -101,6 +104,13 @@ export async function GET(
         })
         .eq('id', inscripcion.id);
 
+    const cursoRel = Array.isArray(inscripcion.cursos) ? inscripcion.cursos[0] : inscripcion.cursos;
+    const precioPagadoEfectivo =
+        inscripcion.precio_pagado ??
+        (inscripcion.modalidad_seleccionada === 'online' && cursoRel && cursoRel.precio_online != null
+            ? precioConDescuentoDelCurso(cursoRel as CursoConModalidades, 'online')
+            : null);
+
     return NextResponse.json({
         success: true,
         data: {
@@ -111,7 +121,8 @@ export async function GET(
             estado: inscripcion.estado,
             metodo_pago: inscripcion.metodo_pago,
             fecha_inscripcion: inscripcion.created_at,
-            precio_pagado: inscripcion.precio_pagado,
+            precio_pagado: precioPagadoEfectivo,
+            modalidad_seleccionada: inscripcion.modalidad_seleccionada ?? null,
             curso: inscripcion.cursos,
         }
     });

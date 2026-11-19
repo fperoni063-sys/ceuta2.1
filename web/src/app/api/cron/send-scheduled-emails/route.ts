@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { sendEmail, STOP_REMINDER_STATES } from '@/lib/services/emailService';
 import { processTemplate } from '@/lib/utils/templateProcessor';
+import { normalizarModalidad, precioConDescuentoDelCurso, type CursoConModalidades } from '@/lib/utils/modalidadInscripcion';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -14,10 +15,11 @@ interface Inscripto {
     telefono: string;
     access_token: string | null;
     estado: string;
-    cursos: {
+    modalidad_seleccionada?: string | null;
+    precio_pagado?: number | null;
+    cursos: (CursoConModalidades & {
         nombre: string;
-        precio: number | null;
-    } | null;
+    }) | null;
 }
 
 interface ScheduledEmail {
@@ -59,9 +61,21 @@ export async function GET(request: NextRequest) {
                 telefono,
                 access_token,
                 estado,
+                modalidad_seleccionada,
+                precio_pagado,
                 cursos (
                     nombre,
-                    precio
+                    precio,
+                    modalidad,
+                    permite_online,
+                    precio_online,
+                    descuento_porcentaje,
+                    descuento_cupos_totales,
+                    descuento_cupos_usados,
+                    descuento_etiqueta,
+                    descuento_fecha_fin,
+                    descuento_online_porcentaje,
+                    descuento_online_etiqueta
                 )
             )
         `)
@@ -132,6 +146,14 @@ export async function GET(request: NextRequest) {
         }
 
         // Preparar contexto
+        const cursoData = inscripto.cursos;
+        const modalidad = normalizarModalidad(inscripto.modalidad_seleccionada);
+        const precioCalculado =
+            inscripto.precio_pagado ??
+            (modalidad === 'online' && cursoData
+                ? precioConDescuentoDelCurso(cursoData, 'online')
+                : cursoData?.precio);
+
         const context = {
             inscripto: {
                 id: inscripto.id,
@@ -141,8 +163,8 @@ export async function GET(request: NextRequest) {
                 access_token: inscripto.access_token || '',
             },
             curso: {
-                nombre: inscripto.cursos?.nombre || 'Curso CEUTA',
-                precio: inscripto.cursos?.precio ?? undefined,
+                nombre: cursoData?.nombre || 'Curso CEUTA',
+                precio: precioCalculado ?? undefined,
             },
         };
 
