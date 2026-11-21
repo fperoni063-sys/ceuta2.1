@@ -24,14 +24,14 @@ export interface ViveroUruguay {
 const LISTA: ViveroUruguay[] = [
   {
     nombre: "Psamófila",
-    zona: "Pan de Azúcar / Piriápolis (pedidos por WhatsApp)",
+    zona: "Pinares / La Laguna (Ave del Paraíso y Ballena)",
     departamento: "Maldonado",
     grupoFiltro: "Maldonado",
     especialidad:
       "Semillas y plantines de flora nativa. Paisajismo y diseño biodiverso. Talleres de valorización, reproducción y uso ornamental de flora nativa. Visitas guiadas en la naturaleza y proyectos de paisajismo.",
     especies:
       "Semillas todo el año (mburucuyá Passiflora caerulea, tasí Araujia sericifera, sen del campo Senna corymbosa, mariposera blanca Austroeupatorium inulifolium, Verbena bonariensis, Solidago chilensis y mariposera rosa Campuloclinum macrocephalum); plantines a pedido en febrero–marzo.",
-    mapaUrl: null,
+    mapaUrl: "https://www.google.com/maps/search/?api=1&query=-34.907646,-54.991001",
     instagram: "@psamofila",
     web: "https://psamofila.com",
     telefono: "+598 99 652 559",
