@@ -1,7 +1,11 @@
 'use client';
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
+
+// Páginas que traen su propio botón de WhatsApp, con su mensaje.
+const CON_BOTON_PROPIO = ["/tu-jardin-de-mariposas"];
 
 interface WhatsAppButtonProps {
     /** Custom message to pre-load. If not provided, uses a default greeting. */
@@ -20,6 +24,9 @@ export function WhatsAppButton({ message, phoneNumber }: WhatsAppButtonProps = {
     const preloadedMessage = encodeURIComponent(message || defaultMessage);
 
     const whatsappUrl = `https://wa.me/${cleanNumber}?text=${preloadedMessage}`;
+
+    const pathname = usePathname();
+    if (pathname && CON_BOTON_PROPIO.some((p) => pathname.startsWith(p))) return null;
 
     return (
         <div className="fixed bottom-6 right-6 z-50 group ceuta-floating-offset">
