@@ -12,6 +12,8 @@ export interface ViveroUruguay {
   departamento: "Maldonado" | "Canelones" | "Montevideo" | "Rocha" | "Colonia";
   grupoFiltro: GrupoVivero;
   especialidad: string;
+  especies?: string;
+  mapaUrl?: string | null;
   instagram: string | null;
   web: string | null;
   telefono: string | null;
@@ -22,11 +24,14 @@ export interface ViveroUruguay {
 const LISTA: ViveroUruguay[] = [
   {
     nombre: "Psamófila",
-    zona: "Pan de Azúcar",
+    zona: "Pan de Azúcar / Piriápolis (pedidos por WhatsApp)",
     departamento: "Maldonado",
     grupoFiltro: "Maldonado",
     especialidad:
-      "Semillas y plantines de flora nativa y silvestre, herbáceas florales, gramíneas y vegetación de dunas costeras; diseño biodiverso",
+      "Semillas y plantines de flora nativa. Paisajismo y diseño biodiverso. Talleres de valorización, reproducción y uso ornamental de flora nativa. Visitas guiadas en la naturaleza y proyectos de paisajismo.",
+    especies:
+      "Semillas todo el año (mburucuyá Passiflora caerulea, tasí Araujia sericifera, sen del campo Senna corymbosa, mariposera blanca Austroeupatorium inulifolium, Verbena bonariensis, Solidago chilensis y mariposera rosa Campuloclinum macrocephalum); plantines a pedido en febrero–marzo.",
+    mapaUrl: null,
     instagram: "@psamofila",
     web: "https://psamofila.com",
     telefono: "+598 99 652 559",
@@ -50,6 +55,8 @@ const LISTA: ViveroUruguay[] = [
     grupoFiltro: "Maldonado",
     especialidad:
       "Árboles, arbustos, chircas y herbáceas nativas; refugio de flora y fauna con visitas guiadas",
+    especies:
+      "En stock para mariposas: mariposera blanca (Austroeupatorium inulifolium), mariposera rosa (Campuloclinum macrocephalum), mburucuyá (Passiflora caerulea), plumerillo negro (Oxypetalum solanoides), canario rojo (Dicliptera squarrosa), Verbena bonariensis, Petunia axillaris, Solidago chilensis y Hatschbachiella tweediana.",
     instagram: "@ninarupa.uy",
     web: "https://www.ninarupa.uy",
     telefono: "+598 94 665 748",
@@ -89,6 +96,46 @@ const LISTA: ViveroUruguay[] = [
     instagram: "@viveroloscerezos_piriapolis",
     web: "https://www.viveroloscerezos.uy",
     telefono: "+598 99 330 849",
+    verificado: true,
+  },
+  {
+    nombre: "Monte Nativo",
+    zona: "Ruta 12 km 6",
+    departamento: "Maldonado",
+    grupoFiltro: "Maldonado",
+    especialidad:
+      "Árboles, arbustos, ornamentales y frutales nativos de Uruguay (habilitado por INIA para guayabo del país)",
+    instagram: null,
+    web: "http://www.montenativo.com",
+    telefono: "+598 99 263 039",
+    verificado: true,
+  },
+  {
+    nombre: "Vivero Las Chircas",
+    zona: "San Carlos / El Edén (visitas y pedidos por WhatsApp)",
+    departamento: "Maldonado",
+    grupoFiltro: "Maldonado",
+    especialidad:
+      "Producción y valorización de flora nativa uruguaya: herbáceas perennes, margaritas nativas, chircas y arbustos",
+    mapaUrl: null,
+    instagram: "@laschircas",
+    web: null,
+    telefono: "+598 91 401 454",
+    verificado: true,
+  },
+  {
+    nombre: "Vivero Entreverde",
+    zona: "San Carlos (Camino de los Ceibos)",
+    departamento: "Maldonado",
+    grupoFiltro: "Maldonado",
+    especialidad:
+      "Vivero propio con amplio catálogo de flora nativa uruguaya y paisajismo en Maldonado y Punta del Este",
+    especies:
+      "Catálogo con mariposera blanca (Austroeupatorium inulifolium), mariposera rosa (Campuloclinum macrocephalum), Hatschbachiella tweediana, Verbena bonariensis, Petunia axillaris, Solidago chilensis, marcela (Achyrocline satureioides) y gramíneas nativas.",
+    mapaUrl: "https://www.google.com/maps?q=Entreverde+Landscapes,+Maldonado,+Uruguay",
+    instagram: "@entreverde.uy",
+    web: "https://entreverde.vercel.app",
+    telefono: "+598 95 552 485",
     verificado: true,
   },
   {
@@ -173,18 +220,6 @@ const LISTA: ViveroUruguay[] = [
     instagram: null,
     web: "https://jardinbotanico.montevideo.gub.uy",
     telefono: "1950 7840",
-    verificado: true,
-  },
-  {
-    nombre: "Monte Nativo",
-    zona: "La Blanqueada (Jaime Cibils 2862) y distribución en Maldonado",
-    departamento: "Montevideo",
-    grupoFiltro: "Montevideo",
-    especialidad:
-      "Árboles, arbustos, ornamentales y frutales nativos de Uruguay (habilitado por INIA para guayabo del país)",
-    instagram: null,
-    web: "http://www.montenativo.com",
-    telefono: "+598 99 263 039",
     verificado: true,
   },
   {
@@ -278,11 +313,13 @@ const ESPECIALISTAS_EN_NATIVAS = new Set([
   "Niñarupa Parque y Vivero Nativo",
   "Vivero Guaviyú",
   "Vivero Laguna del Chajá",
+  "Monte Nativo",
+  "Vivero Las Chircas",
+  "Vivero Entreverde",
   "Vivero del Parque Roosevelt",
   "Vivero Pachamama",
   "Vivero Parati",
   "Vivero del Jardín Botánico de Montevideo",
-  "Monte Nativo",
   "Vivero Palán Palán",
   "Vivero Las Cina Cinas",
   "Vivero de Sotobosque",

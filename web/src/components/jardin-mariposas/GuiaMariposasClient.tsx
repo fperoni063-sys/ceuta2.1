@@ -271,7 +271,11 @@ function FichaMariposa({ m, n }: { m: MariposaEspecie; n: number }) {
 }
 
 function TarjetaVivero({ v }: { v: ViveroUruguay }) {
-  const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${v.nombre} ${v.zona} ${v.departamento} Uruguay`)}`;
+  const mapa =
+    v.mapaUrl === null
+      ? null
+      : v.mapaUrl ??
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${v.nombre} ${v.zona} ${v.departamento} Uruguay`)}`;
   const tel = v.telefono ? `tel:${v.telefono.replace(/[^\d+]/g, "").replace(/^(\d{8})$/, "+598$1")}` : null;
   return (
     <li className="rounded-2xl border border-[#ddd3c3] bg-white p-4">
@@ -289,6 +293,9 @@ function TarjetaVivero({ v }: { v: ViveroUruguay }) {
         )}
       </div>
       <p className="mt-2 text-[13.5px] leading-snug text-[#3d372f]">{v.especialidad}</p>
+      {v.especies && (
+        <p className="mt-2 rounded-xl bg-[#f6f1e7] px-3 py-2 text-[12.5px] leading-snug text-[#1f3a2c]">{v.especies}</p>
+      )}
       <div className="mt-3 flex flex-wrap gap-2 text-[13px]">
         {v.instagram && (
           <a
@@ -318,14 +325,16 @@ function TarjetaVivero({ v }: { v: ViveroUruguay }) {
             <Phone className="h-3.5 w-3.5" /> {v.telefono}
           </a>
         )}
-        <a
-          href={mapa}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 rounded-full border border-[#ddd3c3] px-2.5 py-1 text-[#1e1b16] hover:bg-[#fbf8f2]"
-        >
-          <MapPin className="h-3.5 w-3.5" /> Cómo llegar
-        </a>
+        {mapa && (
+          <a
+            href={mapa}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 rounded-full border border-[#ddd3c3] px-2.5 py-1 text-[#1e1b16] hover:bg-[#fbf8f2]"
+          >
+            <MapPin className="h-3.5 w-3.5" /> Cómo llegar
+          </a>
+        )}
       </div>
     </li>
   );
