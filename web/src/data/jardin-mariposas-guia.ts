@@ -36,7 +36,47 @@ export const FOTOS = {
   jardinNativas: `${IMG}/v1794928293/ceuta/cursos/galeria/jardin-de-mariposas-g03-jardin-nativas.jpg`,
   canteroPractica: `${IMG}/v1794928300/ceuta/cursos/galeria/jardin-de-mariposas-g05-cantero-practica.jpg`,
   og: `${IMG}/c_fill,g_auto,w_1200,h_630,q_auto,f_jpg/v1795267196/ceuta/tu-jardin-mariposas/og-mariposas-vuelo.jpg`,
+  // Especies: licencias libres para uso comercial, comprobadas en la fuente el 21/11/2026 (FOTOS_ESPECIES_PARA_CLAUDE.md).
+  espejito: `${IMG}/v1795273684/ceuta/tu-jardin-mariposas/especies/espejito.jpg`,
+  banderaArgentina: `${IMG}/v1795273688/ceuta/tu-jardin-mariposas/especies/bandera-argentina.jpg`,
+  banderaArgentinaOrugas: `${IMG}/v1795273691/ceuta/tu-jardin-mariposas/especies/bandera-argentina-orugas.jpg`,
+  bordeDeOro: `${IMG}/v1795273693/ceuta/tu-jardin-mariposas/especies/borde-de-oro.jpg`,
+  limoncito: `${IMG}/v1795273696/ceuta/tu-jardin-mariposas/especies/limoncito.jpg`,
+  ochenta: `${IMG}/v1795273698/ceuta/tu-jardin-mariposas/especies/ochenta.jpg`,
+  perezosa: `${IMG}/v1795273701/ceuta/tu-jardin-mariposas/especies/perezosa.jpg`,
+  asclepiaRoja: `${IMG}/v1795273704/ceuta/tu-jardin-mariposas/especies/asclepia-roja.jpg`,
+  yerbaDeLaVibora: `${IMG}/v1795273707/ceuta/tu-jardin-mariposas/especies/yerba-de-la-vibora.jpg`,
 } as const;
+
+/** Foto con su crédito: las de licencia libre llevan autor, licencia y enlace a la fuente. */
+export interface FotoConCredito {
+  url: string;
+  alt: string;
+  credito?: string;
+  fuente?: string;
+}
+
+/** «Esta no, esta sí»: la asclepia que se vende para la monarca y la nativa que hay que pedir. */
+export const ASCLEPIAS: Record<"no" | "si", FotoConCredito & { nombre: string; cientifico: string; nota: string }> = {
+  no: {
+    url: FOTOS.asclepiaRoja,
+    alt: "Asclepia roja y amarilla (Asclepias curassavica), la exótica que se vende para la monarca",
+    credito: "Foto: James St. John · CC BY 2.0 (Wikimedia Commons)",
+    fuente: "https://commons.wikimedia.org/wiki/File:Asclepias_curassavica_(bloodflower)_1_(26056089288).jpg",
+    nombre: "Asclepia roja y naranja",
+    cientifico: "Asclepias curassavica",
+    nota: "Exótica. No pierde las hojas en invierno y confunde a la monarca.",
+  },
+  si: {
+    url: FOTOS.yerbaDeLaVibora,
+    alt: "Yerba de la víbora (Asclepias mellodora), la nativa de flor blanca",
+    credito: "Foto: Candela Castro · CC BY 4.0 (iNaturalist)",
+    fuente: "https://www.inaturalist.org/observations/140923292",
+    nombre: "Yerba de la víbora",
+    cientifico: "Asclepias mellodora",
+    nota: "Nativa, de flor blanca. Pierde las hojas en invierno, como tiene que ser.",
+  },
+};
 
 /** Achica una foto de Cloudinary (formato y calidad automáticos) para no gastar datos en el celular. */
 export function cld(url: string, w: number, h?: number): string {
@@ -221,7 +261,9 @@ export interface MariposaEspecie {
   nectar: string[];
   /** lo que dijo Candelaria de ella, textual */
   cita: { texto: string; minuto: string };
-  foto?: { url: string; alt: string; credito?: string };
+  foto?: FotoConCredito;
+  /** su oruga, en chiquito sobre la foto: el que la reconoce no la fumiga */
+  oruga?: FotoConCredito;
   /** colores de las alas, para la ficha cuando no hay foto */
   colores: [string, string, string];
 }
@@ -242,6 +284,7 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
       minuto: "1:03:48",
     },
     foto: { url: FOTOS.monarcaVerbena, alt: "Mariposa monarca sobre flores violetas de verbena" },
+    oruga: { url: FOTOS.orugaMonarca, alt: "Oruga de monarca, con rayas negras, amarillas y blancas" },
     colores: ["#d9661c", "#1d1a17", "#f4e2c4"],
   },
   espejito: {
@@ -257,6 +300,12 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
       texto: "Una oruga de mariposa espejito solamente puede comer pasiflora. Si la ponemos arriba de rosales, se va a morir de hambre.",
       minuto: "44:34",
     },
+    foto: {
+      url: FOTOS.espejito,
+      alt: "Mariposa espejito con las alas abiertas sobre una flor",
+      credito: "Foto: André Koehne · CC BY-SA 4.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Dione_vanillae_in_Caetit%C3%A9.jpg",
+    },
     colores: ["#e2681a", "#2b1a10", "#e9eef0"],
   },
   perezosa: {
@@ -268,6 +317,12 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
     cita: {
       texto: "Si tengo poco espacio, poca posibilidad de poner otras cosas, es con esta: me sirve para traer todas las mariposas y a su vez es hospedera de una.",
       minuto: "54:50",
+    },
+    foto: {
+      url: FOTOS.perezosa,
+      alt: "Dos mariposas perezosas comunes sobre flores",
+      credito: "Foto: Cláudio Dias Timm · CC BY-SA 2.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Actinote_pellenea.jpg",
     },
     colores: ["#c8762a", "#2b221b", "#f0d99a"],
   },
@@ -285,6 +340,18 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
       texto: "Ver este racimo rojo en una coronilla es el mayor premio que podemos recibir en un jardín.",
       minuto: "42:52",
     },
+    foto: {
+      url: FOTOS.banderaArgentina,
+      alt: "Mariposa bandera argentina, celeste perlado, posada entre hojas",
+      credito: "Foto: CHUCAO · CC BY-SA 3.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Morpho_epistrophus_argentinus.JPG",
+    },
+    oruga: {
+      url: FOTOS.banderaArgentinaOrugas,
+      alt: "Racimo rojo de orugas de bandera argentina sobre una coronilla, en Rocha",
+      credito: "Oruga: Kristof Zyskowski y Yulia Bereshpolova · CC BY 2.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Morpho_epistrophus_argentinus_(day-roost_cluster_of_gregarious_larvae)_2.jpg",
+    },
     colores: ["#cfe6f2", "#6aa3bf", "#2b3d4f"],
   },
   limoncito: {
@@ -296,6 +363,12 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
     cita: {
       texto: "El sen del campo tiene una floración amarilla, un amarillo oro bien estridente, en verano y en otoño, y es hospedera de la mariposa limoncito y azufrada.",
       minuto: "55:06",
+    },
+    foto: {
+      url: FOTOS.limoncito,
+      alt: "Mariposa azufrada amarilla libando en flores rojas",
+      credito: "Foto: Charles J. Sharp · CC BY-SA 4.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Cloudless_sulphur_(Phoebis_sennae_sennae)_male_underside.JPG",
     },
     colores: ["#f0cf22", "#4b6a3a", "#fff3b0"],
   },
@@ -329,6 +402,12 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
       texto: "El tala es un árbol emblemático, hospedero múltiple: del zafiro del talar, de la mariposa picuda, de la ochenta.",
       minuto: "50:44",
     },
+    foto: {
+      url: FOTOS.ochenta,
+      alt: "Mariposa ochenta, con el número dibujado en el ala",
+      credito: "Foto: Cecilia Fer Díaz · CC BY 4.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Diaethria_candrena_621612352.jpg",
+    },
     colores: ["#1d4e89", "#c3403a", "#f4f3ee"],
   },
   bordeDeOro: {
@@ -340,6 +419,12 @@ export const MARIPOSAS: Record<MariposaId, MariposaEspecie> = {
     cita: {
       texto: "La borde de oro y la viuda del monte están vinculadas estrictamente al género de las aristoloquias.",
       minuto: "1:05:27",
+    },
+    foto: {
+      url: FOTOS.bordeDeOro,
+      alt: "Mariposa borde de oro, negra con una banda dorada, con las alas abiertas",
+      credito: "Foto: Charles J. Sharp · CC BY-SA 4.0 (Wikimedia Commons)",
+      fuente: "https://commons.wikimedia.org/wiki/File:Gold_rim_swallowtail_(Battus_polydamas_polydamas).jpg",
     },
     colores: ["#1f2421", "#e2b528", "#4a5946"],
   },

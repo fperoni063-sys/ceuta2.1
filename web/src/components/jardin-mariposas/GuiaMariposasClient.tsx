@@ -22,11 +22,13 @@ import {
   TreePine,
   Waves,
   Sun,
+  X,
 } from "lucide-react";
 import { trackEvent } from "@/app/actions/analytics";
 import { MomentoPlayer } from "@/components/jardin-mariposas/MomentoPlayer";
 import { TarjetaCompartir } from "@/components/jardin-mariposas/TarjetaCompartir";
 import {
+  ASCLEPIAS,
   CURSO,
   ESPACIOS,
   ESTADOS,
@@ -45,6 +47,7 @@ import {
   type EspacioId,
   type EstadoActualId,
   type FaseInscripcion,
+  type FotoConCredito,
   type MariposaEspecie,
   type ResultadoGuia,
   type ZonaId,
@@ -168,26 +171,63 @@ function Opcion({
   );
 }
 
+/** Autor, licencia y enlace a la fuente de las fotos libres (lo pide la licencia). */
+function Creditos({ fotos, className = "" }: { fotos: (FotoConCredito | undefined)[]; className?: string }) {
+  const con = fotos.filter((f): f is FotoConCredito => Boolean(f?.credito));
+  if (!con.length) return null;
+  return (
+    <p className={`text-[10.5px] leading-snug text-[#8a8174] ${className}`}>
+      {con.map((f, i) => (
+        <span key={f.url}>
+          {i > 0 && <br />}
+          {f.fuente ? (
+            <a href={f.fuente} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">
+              {f.credito}
+            </a>
+          ) : (
+            f.credito
+          )}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 function FichaMariposa({ m, n }: { m: MariposaEspecie; n: number }) {
   return (
     <article className="flex w-[82%] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-[#ddd3c3] bg-white sm:w-auto">
       {m.foto ? (
-        <div className="relative aspect-[4/3] bg-[#e7dfd0]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={cld(m.foto.url, 640, 480)}
-            alt={m.foto.alt}
-            loading="lazy"
-            decoding="async"
-            width={640}
-            height={480}
-            className="h-full w-full object-cover"
-          />
-          {m.foto.credito && (
-            <span className="absolute bottom-2 left-2 rounded bg-black/55 px-2 py-0.5 text-[11px] text-white">
-              {m.foto.credito}
-            </span>
-          )}
+        <div>
+          <div className="relative aspect-[4/3] bg-[#e7dfd0]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={cld(m.foto.url, 640, 480)}
+              alt={m.foto.alt}
+              loading="lazy"
+              decoding="async"
+              width={640}
+              height={480}
+              className="h-full w-full object-cover"
+            />
+            {m.oruga && (
+              <figure className="absolute bottom-2.5 right-2.5 w-[34%] overflow-hidden rounded-xl border-2 border-white shadow-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={cld(m.oruga.url, 240, 240)}
+                  alt={m.oruga.alt}
+                  loading="lazy"
+                  decoding="async"
+                  width={240}
+                  height={240}
+                  className="aspect-square w-full object-cover"
+                />
+                <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center font-mono text-[9.5px] uppercase tracking-[0.12em] text-white">
+                  su oruga
+                </figcaption>
+              </figure>
+            )}
+          </div>
+          <Creditos fotos={[m.foto, m.oruga]} className="px-4 pt-2" />
         </div>
       ) : (
         <div
@@ -709,6 +749,41 @@ export function GuiaMariposasClient() {
                     la víbora, la nativa de flor blanca. Y la Lantana camara también es exótica.
                   </p>
                 </div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {(["no", "si"] as const).map((k) => {
+                  const a = ASCLEPIAS[k];
+                  return (
+                    <figure key={k} className="overflow-hidden rounded-2xl border border-[#ddd3c3] bg-white">
+                      <div className="relative aspect-square bg-[#e7dfd0]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={cld(a.url, 420, 420)}
+                          alt={a.alt}
+                          loading="lazy"
+                          decoding="async"
+                          width={420}
+                          height={420}
+                          className="h-full w-full object-cover"
+                        />
+                        <span
+                          className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12.5px] font-bold text-white shadow ${
+                            k === "no" ? "bg-[#b0322a]" : "bg-[#1f7a45]"
+                          }`}
+                        >
+                          {k === "no" ? <X className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                          {k === "no" ? "Esta no" : "Esta sí"}
+                        </span>
+                      </div>
+                      <figcaption className="p-3">
+                        <p className="text-[15px] font-semibold leading-tight">{a.nombre}</p>
+                        <p className="font-serif text-[13px] italic text-[#6b6357]">{a.cientifico}</p>
+                        <p className="mt-1 text-[13px] leading-snug text-[#3d372f]">{a.nota}</p>
+                        <Creditos fotos={[a]} className="mt-1.5" />
+                      </figcaption>
+                    </figure>
+                  );
+                })}
               </div>
               <div className="mt-4">
                 <MomentoPlayer momento={MOMENTOS["planta-de-la-monarca"]} compacto onEvento={onVideo} />
