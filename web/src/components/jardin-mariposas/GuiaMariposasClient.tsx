@@ -459,6 +459,12 @@ export function GuiaMariposasClient() {
               <strong className="font-semibold text-[#1e1b16]">Candelaria Domínguez</strong> en su charla: qué mariposas,
               qué plantas y dónde conseguirlas.
             </p>
+            {origen?.includes("monarca") && !resultado && (
+              <p className="mt-3 max-w-xl rounded-xl border border-[#e8c9b8] bg-[#fbefe8] px-3.5 py-2.5 text-[14.5px] leading-snug text-[#7c3518]">
+                ¿Venís por la planta de la monarca? En tu plan está el fragmento entero de la charla y qué nativa pedir en
+                el vivero.
+              </p>
+            )}
 
             {/* Preguntas o resumen */}
             <div ref={quizRef} className="mt-6 scroll-mt-24">
@@ -808,7 +814,9 @@ export function GuiaMariposasClient() {
                   className={`font-mono text-[11px] uppercase tracking-[0.14em] ${p.destacado ? "text-[#b0502a]" : "text-[#e9d9a8]"}`}
                 >
                   {p.titulo}
-                  {p.destacado && resultado ? " · el que te sugerimos" : ""}
+                  {p.destacado && resultado && (resultado.zona.practicaCerca || resultado.zona.id === "interior")
+                    ? " · el que te sugerimos"
+                    : ""}
                 </p>
                 <p className="mt-1 font-serif text-[34px] font-bold">{precio(p.monto)}</p>
                 <p className={`mt-1 text-[14.5px] leading-snug ${p.destacado ? "text-[#3d372f]" : "text-white/80"}`}>{p.detalle}</p>
