@@ -54,6 +54,7 @@ import {
 } from "@/data/jardin-mariposas-guia";
 import { GRABACION_CHARLA_URL, MOMENTOS, type MomentoId } from "@/data/jardin-mariposas-momentos";
 import { GRUPOS_VIVEROS, VIVEROS_URUGUAY, type GrupoVivero, type ViveroUruguay } from "@/data/jardin-mariposas-viveros";
+import { sitioDeOrigen } from "@/lib/utils/sitioDeOrigen";
 
 /* ------------------------------------------------------------------ medición */
 
@@ -74,6 +75,7 @@ function registrar(nombre: string, origen: string | null, metadata: Record<strin
     void trackEvent(nombre, {
       category: "guia_mariposas",
       pagePath: "/tu-jardin-de-mariposas",
+      referrer: sitioDeOrigen(),
       metadata: { origen, ...metadata },
       utm: { source: origen, medium: "guia", campaign: "jardines-nov-2026" },
     }).catch(() => undefined);

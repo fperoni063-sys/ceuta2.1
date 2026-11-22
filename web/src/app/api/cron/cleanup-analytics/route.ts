@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Purgar eventos de más de 30 días de antigüedad
-    const result = await purgeOldAnalyticsEvents(30);
+    // Purgar eventos de más de 90 días de antigüedad (antes se bajan a la compu con el respaldo local)
+    const result = await purgeOldAnalyticsEvents(90);
 
     if (!result.success) {
         return NextResponse.json(

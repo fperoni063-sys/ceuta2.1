@@ -86,14 +86,14 @@ export default function AnalyticsPage() {
     }, [loadData]);
 
     const handlePurgeOld = async () => {
-        if (!confirm('¿Deseas eliminar permanentemente los eventos de analítica de más de 30 días? Esto liberará espacio en Supabase.')) {
+        if (!confirm('¿Deseas eliminar permanentemente los eventos de analítica de más de 90 días? Esto liberará espacio en Supabase.')) {
             return;
         }
 
         setPurging(true);
         setPurgeMessage(null);
         try {
-            const res = await purgeOldAnalyticsEvents(30);
+            const res = await purgeOldAnalyticsEvents(90);
             if (res.success) {
                 setPurgeMessage(`✓ Se eliminaron ${res.deletedCount ?? 0} registros antiguos`);
                 loadData();
@@ -146,7 +146,7 @@ export default function AnalyticsPage() {
                         onClick={handlePurgeOld}
                         disabled={purging}
                         className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                        title="Eliminar eventos con más de 30 días de antigüedad para no llenar Supabase"
+                        title="Eliminar eventos con más de 90 días de antigüedad para no llenar Supabase"
                     >
                         {purging ? (
                             <>
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
                         ) : (
                             <>
                                 <Trash2 className="w-4 h-4 mr-1.5" />
-                                Limpiar &gt; 30 días
+                                Limpiar &gt; 90 días
                             </>
                         )}
                     </Button>

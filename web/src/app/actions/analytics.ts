@@ -3,6 +3,33 @@
 import { createAdminClient } from '@/lib/supabase/server';
 import { cookies, headers } from 'next/headers';
 
+// Los eventos de analítica se borran recién pasados estos días. Antes, la compu de Franco
+// los baja a la carpeta "Ceuta trafico web" (tarea "Ceuta Respaldo Trafico Web").
+const DIAS_MINIMOS_ANALYTICS = 90;
+
+function tipoDeDispositivo(userAgent: string): 'celular' | 'tablet' | 'compu' {
+    if (/iPad|Tablet/i.test(userAgent) || (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent))) return 'tablet';
+    if (/Mobi|iPhone|Android/i.test(userAgent)) return 'celular';
+    return 'compu';
+}
+
+// Navegador interno de una app, cuando se abre un enlace desde Instagram o Facebook.
+function appDelNavegador(userAgent: string): 'instagram' | 'facebook' | undefined {
+    if (/Instagram/i.test(userAgent)) return 'instagram';
+    if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(userAgent)) return 'facebook';
+    return undefined;
+}
+
+// Solo un sitio (https://l.instagram.com), nunca una dirección completa.
+function limpiarSitio(referrer?: string | null): string | null {
+    if (!referrer) return null;
+    return /^https?:\/\/[^\s/?#]{1,100}$/i.test(referrer) ? referrer : null;
+}
+
+function recortar(texto?: string | null): string | null {
+    return texto ? String(texto).slice(0, 100) : null;
+}
+
 /**
  * Tracks a user event for internal analytics.
  */
@@ -13,6 +40,7 @@ export async function trackEvent(
         pagePath?: string;
         courseId?: number;
         metadata?: Record<string, unknown>;
+        referrer?: string | null;
         utm?: {
             source?: string | null;
             medium?: string | null;
@@ -38,16 +66,22 @@ export async function trackEvent(
 
         const supabase = createAdminClient();
 
+        const app = appDelNavegador(userAgent);
         const eventData = {
             session_id: sessionId,
             event_name: eventName,
             event_category: options?.category || 'general',
             page_path: options?.pagePath,
             course_id: options?.courseId,
-            metadata: options?.metadata || {},
-            utm_source: options?.utm?.source,
-            utm_medium: options?.utm?.medium,
-            utm_campaign: options?.utm?.campaign,
+            metadata: {
+                dispositivo: tipoDeDispositivo(userAgent),
+                ...(app ? { app } : {}),
+                ...(options?.metadata || {}),
+            },
+            utm_source: recortar(options?.utm?.source),
+            utm_medium: recortar(options?.utm?.medium),
+            utm_campaign: recortar(options?.utm?.campaign),
+            referrer: limpiarSitio(options?.referrer),
         };
 
         await supabase.from('analytics_events').insert(eventData);
@@ -188,14 +222,18 @@ export async function getDailyStats(startDateStr?: string, endDateStr?: string) 
 }
 
 /**
- * Elimina los eventos de analytics con más de `daysToKeep` días de antigüedad (default: 30 días).
- * Mantiene la base de datos dentro del límite gratuito de Supabase.
+ * Elimina los eventos de analytics con más de `daysToKeep` días de antigüedad (default y mínimo: 90 días).
+ * Mantiene la base de datos dentro del límite gratuito de Supabase. Nunca borra nada más nuevo que
+ * DIAS_MINIMOS_ANALYTICS, así el respaldo de la compu de Franco siempre llega antes.
  */
-export async function purgeOldAnalyticsEvents(daysToKeep: number = 30): Promise<{ success: boolean; deletedCount?: number; error?: string }> {
+export async function purgeOldAnalyticsEvents(daysToKeep: number = DIAS_MINIMOS_ANALYTICS): Promise<{ success: boolean; deletedCount?: number; error?: string }> {
     try {
+        const dias = Number.isFinite(daysToKeep)
+            ? Math.max(DIAS_MINIMOS_ANALYTICS, Math.floor(daysToKeep))
+            : DIAS_MINIMOS_ANALYTICS;
         const supabase = createAdminClient();
         const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+        cutoffDate.setDate(cutoffDate.getDate() - dias);
         const cutoffIso = cutoffDate.toISOString();
 
         // Eliminar eventos con created_at menor a la fecha límite

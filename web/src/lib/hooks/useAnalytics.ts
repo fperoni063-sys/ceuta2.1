@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { trackEvent } from '@/app/actions/analytics';
+import { sitioDeOrigen } from '@/lib/utils/sitioDeOrigen';
 import Cookies from 'js-cookie';
 
 const SESSION_COOKIE_NAME = 'ceuta_analytics_sid';
@@ -35,8 +36,10 @@ export function useAnalytics() {
         // Note: Ideally useSearchParams only works for client navigation updates.
         // For persistent UTMs, we might check sessionStorage or cookies if we stored them.
         // For simplicity, we just grab current URL params.
+        // Los enlaces de Ceuta marcan el origen con ?origen= (whatsapp, instagram, vivero_x...):
+        // si no hay utm_source, se usa ese origen para saber de dónde vino la visita.
         const utm = {
-            source: searchParams.get('utm_source'),
+            source: searchParams.get('utm_source') || searchParams.get('origen'),
             medium: searchParams.get('utm_medium'),
             campaign: searchParams.get('utm_campaign'),
         };
@@ -44,6 +47,7 @@ export function useAnalytics() {
         await trackEvent(eventName, {
             ...data,
             pagePath: pathname,
+            referrer: sitioDeOrigen(),
             utm: {
                 source: utm.source,
                 medium: utm.medium,
