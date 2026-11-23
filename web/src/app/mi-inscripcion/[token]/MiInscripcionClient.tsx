@@ -218,7 +218,7 @@ export function MiInscripcionClient({ data, token }: Props) {
                 body: JSON.stringify({
                     curso_id: data.curso.id,
                     inscripto_id: data.id,
-                    amount: valorCuota, // Cobrar solo una cuota
+                    amount: getDisplayInfo().amount,
                     payer_name: data.nombre,
                     payer_email: data.email,
                 }),
@@ -850,16 +850,16 @@ export function MiInscripcionClient({ data, token }: Props) {
                                         {/* MONTO A PAGAR */}
                                         <div className="bg-white dark:bg-violet-900/30 border border-violet-200 dark:border-violet-500/20 rounded-xl p-4 sm:p-5 text-center shadow-sm">
                                             <p className="text-xs uppercase tracking-wider text-violet-600 dark:text-violet-400 font-semibold mb-2">
-                                                {cantidadCuotas > 1 ? `Primera cuota (1 de ${cantidadCuotas})` : 'Total a pagar'}
+                                                {getDisplayInfo().label}
                                             </p>
                                             <div className="flex items-center justify-center gap-2 sm:gap-3">
                                                 <span className="text-2xl sm:text-4xl font-bold text-earth-900 dark:text-white">
-                                                    ${valorCuota.toLocaleString('es-UY')} UYU
+                                                    ${getDisplayInfo().amount.toLocaleString('es-UY')} UYU
                                                 </span>
                                             </div>
-                                            {cantidadCuotas > 1 && (
+                                            {getDisplayInfo().subtitle && (
                                                 <p className="text-xs text-violet-600/70 dark:text-violet-400/70 mt-1.5">
-                                                    Total del curso: ${priceInfo.finalPrice.toLocaleString('es-UY')} UYU
+                                                    {getDisplayInfo().subtitle}
                                                 </p>
                                             )}
                                         </div>

@@ -93,6 +93,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Determine currency and country based on course config
+        const currency = curso.es_curso_argentina ? 'ARS' : 'UYU';
+        const country = 'AR'; // Forzado a AR para habilitar Rapipago/Pago Fácil y tarjetas locales de Argentina
+
         // ============================================================
         // 5. CHECK FOR EXISTING PENDING PAYMENT (idempotency)
         // ============================================================
@@ -101,6 +105,8 @@ export async function POST(request: NextRequest) {
             .select('id, dlocal_payment_id, redirect_url, status')
             .eq('inscripto_id', inscripto_id)
             .eq('status', 'PENDING')
+            .eq('amount', amount)
+            .eq('currency', currency)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -121,10 +127,6 @@ export async function POST(request: NextRequest) {
         // ============================================================
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ceuta-cursos.vercel.app';
         const orderId = generateOrderId(inscripto_id);
-
-        // Determine currency and country based on course config
-        const currency = curso.es_curso_argentina ? 'ARS' : 'UYU';
-        const country = 'AR'; // Forzado a AR para habilitar Rapipago/Pago Fácil y tarjetas locales de Argentina
 
         console.log(`[dLocal] Creating ${currency} payment for course ${curso.id} (Argentina: ${!!curso.es_curso_argentina})`);
 
